@@ -5,12 +5,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, useSlots } from 'vue'
 
 const props = defineProps<{
-  code: string
+  code?: string
+  id?: string
 }>()
 
+const slots = useSlots()
 const mermaidRef = ref<HTMLElement>()
 
 onMounted(async () => {
@@ -40,15 +42,46 @@ onMounted(async () => {
       }
     })
     
-    if (mermaidRef.value) {
+    let mermaidCode = ''
+    
+    // 优先从slot中获取代码（新方式）
+    if (slots.default) {
+      const slotContent = slots.default()
+      if (slotContent && slotContent.length > 0) {
+        // 从slot内容中提取文本
+        const textContent = slotContent.map(node => {
+          if (typeof node.children === 'string') {
+            return node.children
+          }
+          return ''
+        }).join('')
+        mermaidCode = textContent.trim()
+      }
+    }
+    
+    // 如果slot中没有内容，则使用props.code（向后兼容）
+    if (!mermaidCode && props.code) {
+      mermaidCode = props.code
+    }
+    
+    // 如果指定了id，尝试从script标签中获取
+    if (!mermaidCode && props.id) {
+      const scriptElement = document.getElementById(props.id)
+      if (scriptElement && scriptElement.textContent) {
+        mermaidCode = scriptElement.textContent.trim()
+      }
+    }
+    
+    if (mermaidCode && mermaidRef.value) {
       const id = `mermaid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-      const { svg } = await mermaid.default.render(id, props.code)
+      const { svg } = await mermaid.default.render(id, mermaidCode)
       mermaidRef.value.innerHTML = svg
     }
   } catch (error) {
     console.error('Mermaid渲染失败:', error)
     if (mermaidRef.value) {
-      mermaidRef.value.innerHTML = `<pre class="mermaid-error">${props.code}</pre>`
+      const errorCode = props.code || 'Mermaid渲染失败'
+      mermaidRef.value.innerHTML = `<pre class="mermaid-error">${errorCode}</pre>`
     }
   }
 })

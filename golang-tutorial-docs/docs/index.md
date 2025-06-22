@@ -58,7 +58,8 @@ footer:
 
 ### 🔄 三阶段学习体系
 
-<MermaidDiagram code="graph LR
+<script type="text/plain" id="learning-system-diagram">
+graph LR
     A[基础语法] --> B[进阶特性] --> C[项目实战]
     A --> A1[变量类型]
     A --> A2[控制流程]
@@ -68,7 +69,10 @@ footer:
     B --> B3[系统编程]
     C --> C1[CLI工具]
     C --> C2[Web服务]
-    C --> C3[完整应用]" />
+    C --> C3[完整应用]
+</script>
+
+<MermaidDiagram id="learning-system-diagram" />
 
 ### 💻 实践驱动学习
 

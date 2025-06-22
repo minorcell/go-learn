@@ -15,7 +15,8 @@
 
 ## 🏛️ 系统架构
 
-<MermaidDiagram code="graph TB
+<script type="text/plain" id="system-architecture">
+graph TB
     subgraph 表示层
         A[用户界面 UI]
         B[命令解析器 CommandParser]
@@ -45,7 +46,10 @@
     style D fill:#f3e5f5
     style E fill:#f3e5f5
     style F fill:#e8f5e8
-    style G fill:#e8f5e8" />
+    style G fill:#e8f5e8
+</script>
+
+<MermaidDiagram id="system-architecture" />
 
 ## 📦 模块设计
 
