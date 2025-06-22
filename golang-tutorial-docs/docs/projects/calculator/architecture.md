@@ -39,13 +39,13 @@
     D --> F
     E --> G
     
-    classDef ui fill:#e1f5fe
-    classDef business fill:#f3e5f5
-    classDef data fill:#e8f5e8
-    
-    class A,B ui
-    class C,D,E business
-    class F,G data" />
+    style A fill:#e1f5fe
+    style B fill:#e1f5fe
+    style C fill:#f3e5f5
+    style D fill:#f3e5f5
+    style E fill:#f3e5f5
+    style F fill:#e8f5e8
+    style G fill:#e8f5e8" />
 
 ## 📦 模块设计
 

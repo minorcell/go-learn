@@ -539,8 +539,8 @@ Factor     := Number | '(' Expression ')' | ('-' | '+') Factor
     A[parseExpression] --> B[parseTerm]
     B --> C[parseFactor]
     
-    A --> D[处理 + -]
-    B --> E[处理 * /]
+    A --> D[处理加减运算]
+    B --> E[处理乘除运算]
     C --> F[处理数字和括号]
     
     style A fill:#ffcdd2
