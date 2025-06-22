@@ -1,0 +1,25 @@
+{
+  "name": "golang-tutorial-docs",
+  "version": "1.0.0",
+  "description": "Go语言交互式学习教程",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs",
+    "generate": "node scripts/generate-docs.js"
+  },
+  "keywords": [
+    "golang",
+    "tutorial",
+    "programming",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "vitepress": "^1.0.0-rc.44",
+    "vue": "^3.4.19"
+  }
+}
