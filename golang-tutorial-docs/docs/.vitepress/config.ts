@@ -106,7 +106,7 @@ export default defineConfig({
 
         footer: {
             message: '基于 <a href="https://vitepress.dev">VitePress</a> 构建的Go语言学习平台',
-            copyright: `Copyright © 2024 <a href="https://github.com/minorcell/go-learn">Go学习指南</a>`
+            copyright: `Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
         },
 
         editLink: {

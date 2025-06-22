@@ -35,4 +35,5 @@ features:
 
 footer:
   message: 基于 VitePress 构建的Go语言学习平台
-  copyright: Copyright © 2025 Go学习指南
+  copyright: Copyright © 2025 mCell
+---
