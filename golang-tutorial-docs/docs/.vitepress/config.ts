@@ -43,7 +43,6 @@ export default defineConfig({
                     items: [
                         { text: 'Go语言简介', link: '/guide/introduction' },
                         { text: '环境搭建', link: '/guide/setup' },
-                        { text: '学习路线', link: '/guide/roadmap' }
                     ]
                 }
             ],
@@ -84,7 +83,16 @@ export default defineConfig({
                     text: '💻 实战项目',
                     items: [
                         { text: '项目概览', link: '/projects/' },
-                        { text: '计算器', link: '/projects/calculator/' },
+                        {
+                            text: '📱 计算器项目',
+                            collapsed: false,
+                            items: [
+                                { text: '项目概述', link: '/projects/calculator/' },
+                                { text: '产品设计', link: '/projects/calculator/product-design' },
+                                { text: '架构设计', link: '/projects/calculator/architecture' },
+                                { text: '代码实现', link: '/projects/calculator/implementation' }
+                            ]
+                        },
                         { text: 'TODO CLI', link: '/projects/todo-cli/' },
                         { text: 'Web服务器', link: '/projects/web-server/' }
                     ]
