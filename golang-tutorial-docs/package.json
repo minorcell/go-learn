@@ -19,6 +19,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.19",
+    "mermaid": "^11.7.0",
     "vitepress": "^1.0.0-rc.44",
     "vue": "^3.4.19"
   }

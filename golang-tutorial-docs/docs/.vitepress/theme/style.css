@@ -114,6 +114,7 @@
 .VPSidebarItem.is-active>.item>.link {
     background: var(--vp-c-brand-softer);
     border-radius: 6px;
+    padding: 1px 6px;
 }
 
 /* ====== 代码块美化 ====== */
