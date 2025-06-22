@@ -15,42 +15,6 @@
 
 ## 🏛️ 系统架构
 
-<script type="text/plain" id="system-architecture">
-graph TB
-    subgraph 表示层
-        A[用户界面 UI]
-        B[命令解析器 CommandParser]
-    end
-    
-    subgraph 业务逻辑层
-        C[计算引擎 Calculator]
-        D[表达式解析器 ExpressionParser]
-        E[历史管理器 HistoryManager]
-    end
-    
-    subgraph 数据层
-        F[内存存储 Memory]
-        G[历史记录 History]
-    end
-    
-    A --> B
-    B --> C
-    C --> D
-    C --> E
-    D --> F
-    E --> G
-    
-    style A fill:#e1f5fe
-    style B fill:#e1f5fe
-    style C fill:#f3e5f5
-    style D fill:#f3e5f5
-    style E fill:#f3e5f5
-    style F fill:#e8f5e8
-    style G fill:#e8f5e8
-</script>
-
-<MermaidDiagram id="system-architecture" />
-
 ## 📦 模块设计
 
 ### 1. 用户界面层 (UI Layer)
@@ -191,57 +155,9 @@ func (h *HistoryManager) GetLast(n int) []HistoryEntry
 
 ### 计算流程
 
-<MermaidDiagram code="sequenceDiagram
-    participant U as 用户
-    participant UI as 用户界面
-    participant CP as 命令解析器
-    participant C as 计算引擎
-    participant EP as 表达式解析器
-    participant HM as 历史管理器
-    
-    U->>UI: 输入表达式
-    UI->>CP: 解析命令
-    CP->>UI: 返回命令对象
-    
-    Note over UI,C: 计算命令流程
-    UI->>C: 调用Calculate()
-    C->>EP: 解析表达式
-    EP->>EP: 词法分析
-    EP->>EP: 语法分析
-    EP->>EP: 计算求值
-    EP->>C: 返回结果
-    C->>HM: 保存到历史
-    C->>UI: 返回结果
-    UI->>U: 显示结果
-    
-    Note over UI,HM: 历史命令流程
-    UI->>C: 调用GetHistory()
-    C->>HM: 获取历史记录
-    HM->>C: 返回历史列表
-    C->>UI: 返回历史
-    UI->>U: 显示历史" />
-
 ### 表达式解析算法
 
 采用递归下降解析器 (Recursive Descent Parser) 实现：
-
-<MermaidDiagram code="graph TD
-    A[表达式 Expression] --> B[项 Term]
-    A --> C[+ / - 运算符]
-    A --> D[项 Term]
-    
-    B --> E[因子 Factor]
-    B --> F[* / / 运算符]
-    B --> G[因子 Factor]
-    
-    E --> H[数字 Number]
-    E --> I[括号表达式]
-    
-    I --> J[括号表达式内容]
-    
-    style A fill:#ffcdd2
-    style B fill:#f8bbd9
-    style E fill:#e1bee7" />
 
 #### 语法规则 (BNF)
 ```
