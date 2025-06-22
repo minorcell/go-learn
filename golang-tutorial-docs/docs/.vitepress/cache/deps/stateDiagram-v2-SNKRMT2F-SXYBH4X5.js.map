@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../../../../node_modules/mermaid/dist/chunks/mermaid.core/stateDiagram-v2-SNKRMT2F.mjs"],
-  "sourcesContent": ["import {\n  StateDB,\n  stateDiagram_default,\n  stateRenderer_v3_unified_default,\n  styles_default\n} from \"./chunk-GOYUR5SG.mjs\";\nimport \"./chunk-HPOVUXKZ.mjs\";\nimport \"./chunk-BRE4QBWZ.mjs\";\nimport \"./chunk-AEN23PCK.mjs\";\nimport \"./chunk-NUTPFWZB.mjs\";\nimport \"./chunk-DS2CGKN3.mjs\";\nimport \"./chunk-YL523NDC.mjs\";\nimport \"./chunk-7N6UNFX7.mjs\";\nimport \"./chunk-F7MYA6JM.mjs\";\nimport {\n  __name\n} from \"./chunk-BMRFU3JQ.mjs\";\n\n// src/diagrams/state/stateDiagram-v2.ts\nvar diagram = {\n  parser: stateDiagram_default,\n  get db() {\n    return new StateDB(2);\n  },\n  renderer: stateRenderer_v3_unified_default,\n  styles: styles_default,\n  init: /* @__PURE__ */ __name((cnf) => {\n    if (!cnf.state) {\n      cnf.state = {};\n    }\n    cnf.state.arrowMarkerAbsolute = cnf.arrowMarkerAbsolute;\n  }, \"init\")\n};\nexport {\n  diagram\n};\n"],
-  "mappings": ";;;;;;;;;;;;;;;;;;;;;;AAmBA,IAAI,UAAU;AAAA,EACZ,QAAQ;AAAA,EACR,IAAI,KAAK;AACP,WAAO,IAAI,QAAQ,CAAC;AAAA,EACtB;AAAA,EACA,UAAU;AAAA,EACV,QAAQ;AAAA,EACR,MAAsB,OAAO,CAAC,QAAQ;AACpC,QAAI,CAAC,IAAI,OAAO;AACd,UAAI,QAAQ,CAAC;AAAA,IACf;AACA,QAAI,MAAM,sBAAsB,IAAI;AAAA,EACtC,GAAG,MAAM;AACX;",
-  "names": []
-}
