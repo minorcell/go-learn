@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: 开始学习
-      link: /guide/introduction
+      link: /guide/
     - theme: alt
       text: 查看教程
       link: /basics/
