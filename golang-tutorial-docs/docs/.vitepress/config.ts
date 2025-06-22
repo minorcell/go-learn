@@ -23,23 +23,22 @@ export default defineConfig({
         siteTitle: 'Go学习指南',
 
         nav: [
-            { text: '🏠 首页', link: '/' },
-            { text: '📖 学习指南', link: '/guide/' },
+            { text: '首页', link: '/' },
+            { text: '学习指南', link: '/guide/' },
             {
-                text: '📚 教程',
+                text: '教程',
                 items: [
                     { text: '基础语法', link: '/basics/' },
                     { text: '进阶内容', link: '/advanced/' },
                     { text: '实战项目', link: '/projects/' }
                 ]
             },
-            { text: '💻 GitHub', link: 'https://github.com/minorcell/go-learn' }
         ],
 
         sidebar: {
             '/guide/': [
                 {
-                    text: '🎯 学习指南',
+                    text: '学习指南',
                     items: [
                         { text: 'Go语言简介', link: '/guide/introduction' },
                         { text: '环境搭建', link: '/guide/setup' },
@@ -49,7 +48,7 @@ export default defineConfig({
 
             '/basics/': [
                 {
-                    text: '📚 基础语法',
+                    text: '基础语法',
                     items: [
                         { text: '概览', link: '/basics/' },
                         { text: '变量和类型', link: '/basics/variables-types' },
@@ -65,7 +64,7 @@ export default defineConfig({
 
             '/advanced/': [
                 {
-                    text: '🚀 进阶内容',
+                    text: '进阶内容',
                     items: [
                         { text: '概览', link: '/advanced/' },
                         { text: '包管理', link: '/advanced/packages' },
@@ -80,11 +79,11 @@ export default defineConfig({
 
             '/projects/': [
                 {
-                    text: '💻 实战项目',
+                    text: '实战项目',
                     items: [
                         { text: '项目概览', link: '/projects/' },
                         {
-                            text: '📱 计算器项目',
+                            text: '计算器项目',
                             collapsed: false,
                             items: [
                                 { text: '项目概述', link: '/projects/calculator/' },
