@@ -1,0 +1,282 @@
+/**
+ * Go语言学习指南 - 自定义主题样式
+ * 基于Go语言官方配色方案 (#00ADD8)
+ */
+
+/* ====== CSS变量定义 ====== */
+:root {
+    /* Go语言品牌色 */
+    --go-primary: #00ADD8;
+    --go-primary-light: #00D9FF;
+    --go-primary-dark: #0099CC;
+    --go-secondary: #5DC9E2;
+    --go-accent: #CE3262;
+
+    /* VitePress品牌色覆盖 */
+    --vp-c-brand-1: var(--go-primary);
+    --vp-c-brand-2: var(--go-primary);
+    --vp-c-brand-3: var(--go-primary);
+    --vp-c-brand-soft: rgba(0, 173, 216, 0.14);
+    --vp-c-brand-softer: rgba(0, 173, 216, 0.07);
+    --vp-c-brand-softest: rgba(0, 173, 216, 0.04);
+
+    /* 自定义渐变 */
+    --go-gradient: linear-gradient(135deg, var(--go-primary) 0%, var(--go-secondary) 100%);
+    --go-gradient-hover: linear-gradient(135deg, var(--go-primary-dark) 0%, var(--go-primary) 100%);
+}
+
+/* 深色模式变量 */
+.dark {
+    --vp-c-brand-1: var(--go-primary-light);
+    --vp-c-brand-2: var(--go-primary);
+    --vp-c-brand-3: var(--go-primary-dark);
+    --vp-c-brand-soft: rgba(0, 217, 255, 0.16);
+    --vp-c-brand-softer: rgba(0, 217, 255, 0.08);
+    --vp-c-brand-softest: rgba(0, 217, 255, 0.04);
+}
+
+/* ====== 首页Hero区域美化 ====== */
+.VPHero .name {
+    background: var(--go-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.VPHero .text {
+    color: var(--vp-c-text-1);
+}
+
+.VPHero .tagline {
+    color: var(--vp-c-text-2);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Hero按钮样式 */
+.VPButton.brand {
+    background: var(--go-gradient) !important;
+    border: none !important;
+    transition: all 0.3s ease;
+}
+
+.VPButton.brand:hover {
+    background: var(--go-gradient-hover) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 173, 216, 0.3);
+}
+
+.VPButton.alt {
+    border-color: var(--go-primary) !important;
+    color: var(--go-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.VPButton.alt:hover {
+    background: var(--go-primary) !important;
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+/* ====== 特性卡片美化 ====== */
+.VPFeature {
+    transition: all 0.3s ease;
+    border: 1px solid var(--vp-c-border);
+}
+
+.VPFeature:hover {
+    border-color: var(--go-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 173, 216, 0.15);
+}
+
+.VPFeature .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* ====== 导航栏美化 ====== */
+.VPNavBar {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.dark .VPNavBar {
+    background: rgba(26, 26, 26, 0.9);
+}
+
+/* ====== 侧边栏美化 ====== */
+.VPSidebarItem.level-0>.item>.link {
+    font-weight: 600;
+    color: var(--go-primary);
+}
+
+.VPSidebarItem.is-active>.item>.link {
+    background: var(--vp-c-brand-softer);
+    border-radius: 6px;
+}
+
+/* ====== 代码块美化 ====== */
+.vp-code-group .tabs {
+    background: var(--vp-c-bg-soft);
+}
+
+.vp-code-group .tabs input:checked+label {
+    background: var(--go-primary);
+    color: white;
+}
+
+/* 代码块复制按钮 */
+.vp-copy-code-button {
+    background: var(--go-primary);
+    border-radius: 4px;
+}
+
+.vp-copy-code-button:hover {
+    background: var(--go-primary-dark);
+}
+
+/* ====== 内容区域美化 ====== */
+.vp-doc h1 {
+    border-bottom: 2px solid var(--go-primary);
+    padding-bottom: 0.5rem;
+}
+
+.vp-doc h2 {
+    border-bottom: 1px solid var(--vp-c-border);
+    padding-bottom: 0.3rem;
+}
+
+/* 链接样式 */
+.vp-doc a {
+    color: var(--go-primary);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.vp-doc a:hover {
+    border-bottom-color: var(--go-primary);
+}
+
+/* ====== 自定义容器 ====== */
+.custom-block.tip {
+    border-left-color: var(--go-primary);
+}
+
+.custom-block.tip .custom-block-title {
+    color: var(--go-primary);
+}
+
+.custom-block.warning {
+    border-left-color: #f39c12;
+}
+
+.custom-block.danger {
+    border-left-color: #e74c3c;
+}
+
+/* ====== 响应式设计 ====== */
+@media (max-width: 768px) {
+    .VPHero .name {
+        font-size: 2rem;
+    }
+
+    .VPHero .text {
+        font-size: 1.2rem;
+    }
+
+    .VPFeature {
+        margin-bottom: 1rem;
+    }
+}
+
+/* ====== 动画效果 ====== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.VPFeature {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.VPFeature:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.VPFeature:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.VPFeature:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+.VPFeature:nth-child(5) {
+    animation-delay: 0.4s;
+}
+
+.VPFeature:nth-child(6) {
+    animation-delay: 0.5s;
+}
+
+/* ====== 学习进度指示器 ====== */
+.progress-indicator {
+    width: 100%;
+    height: 4px;
+    background: var(--vp-c-bg-soft);
+    border-radius: 2px;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--go-gradient);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* ====== 页面底部导航美化 ====== */
+.pager-link {
+    border: 1px solid var(--vp-c-border);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.pager-link:hover {
+    border-color: var(--go-primary);
+    box-shadow: 0 4px 12px rgba(0, 173, 216, 0.15);
+}
+
+.pager-link.next .title,
+.pager-link.prev .title {
+    color: var(--go-primary);
+}
+
+/* ====== 滚动条美化 ====== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--vp-c-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--go-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--go-primary-dark);
+}

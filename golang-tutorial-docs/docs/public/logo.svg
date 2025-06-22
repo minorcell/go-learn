@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Go语言蓝色背景圆形 -->
+  <circle cx="32" cy="32" r="30" fill="#00ADD8" stroke="#ffffff" stroke-width="2"/>
+  
+  <!-- Go字母G -->
+  <path d="M20 32C20 25.4 25.4 20 32 20C36.4 20 40.2 22.4 42.4 26H38C36.4 24.8 34.3 24 32 24C27.6 24 24 27.6 24 32C24 36.4 27.6 40 32 40C34.3 40 36.4 39.2 38 38H42.4C40.2 41.6 36.4 44 32 44C25.4 44 20 38.6 20 32Z" fill="white"/>
+  
+  <!-- Go字母o (右侧小圆) -->
+  <circle cx="46" cy="32" r="6" fill="white"/>
+  <circle cx="46" cy="32" r="3" fill="#00ADD8"/>
+  
+  <!-- 装饰性代码符号 -->
+  <text x="32" y="52" font-family="monospace" font-size="8" fill="#00ADD8" text-anchor="middle">{}</text>
+</svg> 
