@@ -281,3 +281,44 @@
 ::-webkit-scrollbar-thumb:hover {
     background: var(--go-primary-dark);
 }
+
+/* ====== Mermaid图表样式 ====== */
+.mermaid-container {
+    text-align: center;
+    margin: 2rem 0;
+    padding: 1rem;
+    background: var(--vp-c-bg-soft);
+    border-radius: 8px;
+    border: 1px solid var(--vp-c-border);
+}
+
+.mermaid {
+    margin: 0 auto;
+}
+
+/* Mermaid图表在深色模式下的调整 */
+.dark .mermaid-container {
+    background: var(--vp-c-bg-alt);
+}
+
+/* 自定义Mermaid节点颜色 */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon {
+    fill: var(--go-primary) !important;
+    stroke: var(--go-primary-dark) !important;
+}
+
+.mermaid .node .label {
+    color: white !important;
+    font-weight: 500;
+}
+
+.mermaid .edgePath .path {
+    stroke: var(--go-primary) !important;
+    stroke-width: 2px;
+}
+
+.mermaid .arrowheadPath {
+    fill: var(--go-primary) !important;
+}

@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 # 忽略vitepress的catch文件
-catch*
+*catch*
