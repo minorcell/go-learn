@@ -1,24 +1,27 @@
+---
+title: 函数
+description: 学习Go语言的函数定义、参数传递、返回值和高级特性
+---
+
 # 函数
 
-函数是组织代码的基本单位，让程序更加模块化和可重用。Go语言的函数设计简洁而强大。
+函数是组织代码的基本单位，让程序更加模块化和可重用。Go语言的函数设计简洁而强大，支持多返回值、命名返回值、变参等特性。
 
 ## 本章内容
 
-- 函数的定义和调用
-- 参数传递和返回值
-- 匿名函数和闭包
-- 变参函数和递归
-- 函数作为值传递
+- 函数的定义和调用方式
+- 参数传递：值传递vs指针传递
+- 多返回值和命名返回值
+- 高级特性：匿名函数、闭包、递归
+- 函数作为"一等公民"的应用
 
 ## 基本函数
 
-### 函数定义和调用
+### 函数定义语法
+
+Go语言函数的基本语法为：`func 函数名(参数列表) (返回值列表) { 函数体 }`
 
 ```go
-package main
-
-import "fmt"
-
 // 无参数无返回值
 func sayHello() {
     fmt.Println("Hello, World!")
@@ -41,16 +44,25 @@ func divide(a, b float64) (float64, error) {
     }
     return a / b, nil
 }
+```
 
+**函数特点**：
+- 函数名首字母大写表示导出（public），小写表示私有（private）
+- 参数类型写在参数名后面
+- 多个相同类型参数可以简写：`func add(a, b int)`
+- 支持多返回值，这是Go的特色功能
+
+### 函数调用
+
+```go
 func main() {
-    // 调用函数
-    sayHello()
-    greet("Alice")
+    sayHello()                    // 调用无参函数
+    greet("Alice")               // 传递参数
     
-    sum := add(3, 5)
+    sum := add(3, 5)             // 接收单个返回值
     fmt.Printf("3 + 5 = %d\n", sum)
     
-    result, err := divide(10, 3)
+    result, err := divide(10, 3) // 接收多个返回值
     if err != nil {
         fmt.Printf("错误: %v\n", err)
     } else {
@@ -61,11 +73,9 @@ func main() {
 
 ### 命名返回值
 
+Go语言支持为返回值命名，让函数更加自文档化：
+
 ```go
-package main
-
-import "fmt"
-
 // 命名返回值
 func calculate(a, b int) (sum, product int) {
     sum = a + b
@@ -73,48 +83,39 @@ func calculate(a, b int) (sum, product int) {
     return // 自动返回命名的变量
 }
 
-// 更复杂的例子
+// 实用示例：分析学生成绩
 func analyzeScore(score int) (grade string, passed bool, message string) {
     switch {
     case score >= 90:
-        grade = "A"
-        passed = true
-        message = "优秀"
+        grade, passed, message = "A", true, "优秀"
     case score >= 80:
-        grade = "B"
-        passed = true
-        message = "良好"
+        grade, passed, message = "B", true, "良好"
     case score >= 60:
-        grade = "C"
-        passed = true
-        message = "及格"
+        grade, passed, message = "C", true, "及格"
     default:
-        grade = "F"
-        passed = false
-        message = "不及格"
+        grade, passed, message = "F", false, "不及格"
     }
     return
 }
-
-func main() {
-    sum, product := calculate(4, 5)
-    fmt.Printf("和: %d, 积: %d\n", sum, product)
-    
-    grade, passed, message := analyzeScore(85)
-    fmt.Printf("分数分析: %s等级, 通过: %t, 评价: %s\n", 
-        grade, passed, message)
-}
 ```
+
+**命名返回值的优势**：
+- 增强代码可读性，清楚表达函数的输出
+- 自动初始化为零值
+- 可以在函数体中直接赋值和修改
+- `return` 语句可以省略返回值
+
+::: tip 使用建议
+命名返回值适合返回值含义明确的函数，但不要滥用，简单函数直接返回即可。
+:::
 
 ## 参数传递
 
-### 值传递和指针传递
+理解Go语言的参数传递机制对编写高效代码很重要。
+
+### 值传递 vs 指针传递
 
 ```go
-package main
-
-import "fmt"
-
 // 值传递 - 不会修改原始值
 func modifyValue(x int) {
     x = x * 2
@@ -127,42 +128,60 @@ func modifyPointer(x *int) {
     fmt.Printf("函数内部 *x = %d\n", *x)
 }
 
-// 切片传递 - 引用类型
-func modifySlice(s []int) {
-    for i := range s {
-        s[i] = s[i] * 2
-    }
-    fmt.Printf("函数内部切片: %v\n", s)
-}
-
 func main() {
-    // 值传递示例
     a := 10
     fmt.Printf("修改前 a = %d\n", a)
     modifyValue(a)
-    fmt.Printf("修改后 a = %d\n", a) // 不变
+    fmt.Printf("修改后 a = %d\n", a)     // 值不变，仍为10
     
-    // 指针传递示例
-    b := 10
-    fmt.Printf("\n修改前 b = %d\n", b)
+    b := 10  
+    fmt.Printf("修改前 b = %d\n", b)
     modifyPointer(&b)
-    fmt.Printf("修改后 b = %d\n", b) // 改变了
-    
-    // 切片传递示例
-    slice := []int{1, 2, 3, 4}
-    fmt.Printf("\n修改前切片: %v\n", slice)
-    modifySlice(slice)
-    fmt.Printf("修改后切片: %v\n", slice) // 改变了
+    fmt.Printf("修改后 b = %d\n", b)     // 值改变，变为20
 }
 ```
 
-### 变参函数
+**参数传递规则**：
+- **基本类型**（int、float、bool、string）：值传递，不会修改原始值
+- **指针**：传递内存地址，可以修改原始值
+- **切片、映射、通道**：引用类型，传递引用，可以修改内容
+- **数组、结构体**：值传递，会复制整个数据
+
+### 引用类型的传递
 
 ```go
-package main
+// 切片传递 - 引用类型
+func modifySlice(s []int) {
+    for i := range s {
+        s[i] = s[i] * 2  // 会修改原始切片
+    }
+}
 
-import "fmt"
+// 映射传递 - 引用类型  
+func modifyMap(m map[string]int) {
+    m["new"] = 100       // 会修改原始映射
+}
 
+func main() {
+    slice := []int{1, 2, 3, 4}
+    fmt.Printf("修改前: %v\n", slice)
+    modifySlice(slice)
+    fmt.Printf("修改后: %v\n", slice)    // [2 4 6 8]
+    
+    m := make(map[string]int)
+    m["old"] = 50
+    modifyMap(m)
+    fmt.Printf("映射内容: %v\n", m)      // map[new:100 old:50]
+}
+```
+
+## 高级特性
+
+### 变参函数
+
+变参函数可以接受可变数量的参数：
+
+```go
 // 变参函数
 func sum(numbers ...int) int {
     total := 0
@@ -172,173 +191,122 @@ func sum(numbers ...int) int {
     return total
 }
 
-// 字符串格式化函数
-func formatMessage(template string, args ...interface{}) string {
-    return fmt.Sprintf(template, args...)
-}
-
-// 混合参数
-func processData(operation string, numbers ...int) (string, int) {
-    var result int
-    switch operation {
-    case "sum":
-        for _, num := range numbers {
-            result += num
-        }
-    case "product":
-        result = 1
-        for _, num := range numbers {
-            result *= num
-        }
-    case "max":
-        if len(numbers) > 0 {
-            result = numbers[0]
-            for _, num := range numbers {
-                if num > result {
-                    result = num
-                }
-            }
-        }
+// 混合参数（固定参数 + 变参）
+func formatMessage(prefix string, args ...interface{}) string {
+    message := prefix + ": "
+    for _, arg := range args {
+        message += fmt.Sprintf("%v ", arg)
     }
-    return operation, result
+    return message
 }
 
 func main() {
-    // 调用变参函数
-    fmt.Printf("sum() = %d\n", sum())
-    fmt.Printf("sum(1, 2, 3) = %d\n", sum(1, 2, 3))
-    fmt.Printf("sum(1, 2, 3, 4, 5) = %d\n", sum(1, 2, 3, 4, 5))
+    // 变参调用
+    fmt.Println(sum(1, 2, 3))           // 6
+    fmt.Println(sum(1, 2, 3, 4, 5))     // 15
     
-    // 传递切片
+    // 传递切片给变参函数
     numbers := []int{10, 20, 30}
-    fmt.Printf("sum(numbers...) = %d\n", sum(numbers...))
+    fmt.Println(sum(numbers...))        // 60，注意...语法
     
-    // 格式化消息
-    msg := formatMessage("Hello %s, you are %d years old", "Alice", 25)
-    fmt.Println(msg)
-    
-    // 混合参数
-    op, result := processData("sum", 1, 2, 3, 4, 5)
-    fmt.Printf("%s result: %d\n", op, result)
-    
-    op, result = processData("max", 15, 7, 23, 9, 12)
-    fmt.Printf("%s result: %d\n", op, result)
+    // 混合参数示例
+    msg := formatMessage("Info", "user", 123, true)
+    fmt.Println(msg)  // "Info: user 123 true "
 }
 ```
 
-## 匿名函数和闭包
+**变参函数特点**：
+- 变参必须是最后一个参数
+- 在函数内部，变参是切片类型
+- 调用时可以传递切片，使用 `...` 展开
 
-### 匿名函数
+### 函数作为值
+
+Go语言中，函数是"一等公民"，可以作为变量、参数和返回值：
 
 ```go
-package main
+// 定义函数类型
+type MathFunc func(int, int) int
 
-import "fmt"
-
+// 函数作为变量
 func main() {
-    // 定义并立即调用匿名函数
+    // 将函数赋值给变量
+    var operation MathFunc = add
+    result := operation(5, 3)  // 8
+    
+    // 函数作为参数
+    calculate(10, 5, add)      // 传递add函数
+    calculate(10, 5, multiply) // 传递multiply函数
+}
+
+func add(a, b int) int {
+    return a + b
+}
+
+func multiply(a, b int) int {
+    return a * b
+}
+
+// 高阶函数：接受函数作为参数
+func calculate(a, b int, op MathFunc) {
+    result := op(a, b)
+    fmt.Printf("计算结果: %d\n", result)
+}
+```
+
+### 匿名函数和闭包
+
+匿名函数可以访问外部作用域的变量，形成闭包：
+
+```go
+func main() {
+    // 匿名函数
     func() {
         fmt.Println("这是一个匿名函数")
     }()
     
-    // 带参数的匿名函数
-    func(name string) {
-        fmt.Printf("Hello, %s!\n", name)
-    }("Bob")
-    
-    // 将匿名函数赋值给变量
-    greet := func(name string) string {
-        return fmt.Sprintf("Hi, %s!", name)
+    // 闭包：捕获外部变量
+    counter := 0
+    increment := func() int {
+        counter++  // 访问外部变量
+        return counter
     }
     
-    message := greet("Charlie")
-    fmt.Println(message)
+    fmt.Println(increment())  // 1
+    fmt.Println(increment())  // 2
+    fmt.Println(increment())  // 3
     
-    // 匿名函数作为返回值
-    getMultiplier := func(factor int) func(int) int {
-        return func(x int) int {
-            return x * factor
+    // 函数工厂：返回闭包
+    makeMultiplier := func(factor int) func(int) int {
+        return func(n int) int {
+            return n * factor  // 捕获factor变量
         }
     }
     
-    double := getMultiplier(2)
-    triple := getMultiplier(3)
+    double := makeMultiplier(2)
+    triple := makeMultiplier(3)
     
-    fmt.Printf("double(5) = %d\n", double(5))
-    fmt.Printf("triple(5) = %d\n", triple(5))
+    fmt.Println(double(5))  // 10
+    fmt.Println(triple(5))  // 15
 }
 ```
 
-### 闭包
+**闭包的特点**：
+- 可以访问和修改外部作用域的变量
+- 外部变量的生命周期会延长
+- 常用于回调函数、事件处理等场景
+
+### 递归函数
+
+递归是函数调用自身的编程技巧：
 
 ```go
-package main
-
-import "fmt"
-
-// 计数器闭包
-func createCounter() func() int {
-    count := 0
-    return func() int {
-        count++
-        return count
-    }
-}
-
-// 累加器闭包
-func createAccumulator(initial int) func(int) int {
-    total := initial
-    return func(value int) int {
-        total += value
-        return total
-    }
-}
-
-// 配置闭包
-func createFormatter(prefix, suffix string) func(string) string {
-    return func(content string) string {
-        return prefix + content + suffix
-    }
-}
-
-func main() {
-    // 计数器示例
-    counter1 := createCounter()
-    counter2 := createCounter()
-    
-    fmt.Printf("counter1: %d\n", counter1()) // 1
-    fmt.Printf("counter1: %d\n", counter1()) // 2
-    fmt.Printf("counter2: %d\n", counter2()) // 1
-    fmt.Printf("counter1: %d\n", counter1()) // 3
-    
-    // 累加器示例
-    acc := createAccumulator(10)
-    fmt.Printf("acc(5) = %d\n", acc(5))   // 15
-    fmt.Printf("acc(3) = %d\n", acc(3))   // 18
-    fmt.Printf("acc(-2) = %d\n", acc(-2)) // 16
-    
-    // 格式化器示例
-    htmlFormatter := createFormatter("<p>", "</p>")
-    markdownFormatter := createFormatter("**", "**")
-    
-    fmt.Println(htmlFormatter("Hello, World!"))
-    fmt.Println(markdownFormatter("Bold Text"))
-}
-```
-
-## 递归函数
-
-```go
-package main
-
-import "fmt"
-
-// 阶乘
+// 计算阶乘
 func factorial(n int) int {
     if n <= 1 {
-        return 1
+        return 1  // 基础情况
     }
-    return n * factorial(n-1)
+    return n * factorial(n-1)  // 递归调用
 }
 
 // 斐波那契数列
@@ -349,380 +317,145 @@ func fibonacci(n int) int {
     return fibonacci(n-1) + fibonacci(n-2)
 }
 
-// 二分查找
-func binarySearch(arr []int, target, left, right int) int {
-    if left > right {
-        return -1 // 未找到
-    }
-    
-    mid := (left + right) / 2
-    if arr[mid] == target {
-        return mid
-    } else if arr[mid] > target {
-        return binarySearch(arr, target, left, mid-1)
-    } else {
-        return binarySearch(arr, target, mid+1, right)
-    }
-}
-
-// 计算目录大小（模拟）
-func calculateSize(path string, depth int) int {
-    // 模拟文件大小计算
-    indent := ""
-    for i := 0; i < depth; i++ {
-        indent += "  "
-    }
-    
-    if depth > 3 { // 模拟递归深度限制
-        fmt.Printf("%s%s (文件: 1KB)\n", indent, path)
-        return 1
-    }
-    
-    // 模拟目录包含子项
-    fmt.Printf("%s%s (目录)\n", indent, path)
-    size := 0
-    
-    // 模拟子目录和文件
-    for i := 1; i <= 2; i++ {
-        subPath := fmt.Sprintf("%s/item%d", path, i)
-        size += calculateSize(subPath, depth+1)
-    }
-    
+// 实用递归：计算目录大小
+func dirSize(path string) int64 {
+    var size int64
+    // 这里简化了文件系统操作的代码
+    // 实际应用中需要使用filepath.Walk等
     return size
-}
-
-func main() {
-    // 阶乘示例
-    fmt.Println("阶乘计算:")
-    for i := 1; i <= 6; i++ {
-        fmt.Printf("%d! = %d\n", i, factorial(i))
-    }
-    
-    // 斐波那契数列
-    fmt.Println("\n斐波那契数列:")
-    for i := 0; i < 10; i++ {
-        fmt.Printf("F(%d) = %d\n", i, fibonacci(i))
-    }
-    
-    // 二分查找
-    fmt.Println("\n二分查找:")
-    arr := []int{1, 3, 5, 7, 9, 11, 13, 15}
-    targets := []int{5, 8, 13, 16}
-    
-    for _, target := range targets {
-        index := binarySearch(arr, target, 0, len(arr)-1)
-        if index != -1 {
-            fmt.Printf("找到 %d 在索引 %d\n", target, index)
-        } else {
-            fmt.Printf("未找到 %d\n", target)
-        }
-    }
-    
-    // 目录大小计算
-    fmt.Println("\n目录结构:")
-    totalSize := calculateSize("/home/user", 0)
-    fmt.Printf("总大小: %dKB\n", totalSize)
 }
 ```
 
-## 函数作为值
+**递归使用要点**：
+- 必须有明确的终止条件（基础情况）
+- 每次递归都要向终止条件靠近
+- 注意栈溢出问题，深度过大时考虑改用循环
+
+## 实践示例：简单计算器
+
+让我们实现一个函数式的计算器来巩固所学知识：
 
 ```go
 package main
 
-import "fmt"
+import (
+    "fmt"
+    "math"
+)
 
-// 定义函数类型
-type MathOperation func(int, int) int
-type StringProcessor func(string) string
+// 定义运算函数类型
+type Operation func(float64, float64) (float64, error)
 
-// 基本数学运算函数
-func add(a, b int) int      { return a + b }
-func subtract(a, b int) int { return a - b }
-func multiply(a, b int) int { return a * b }
-func divide(a, b int) int   { return a / b }
+// 基本运算函数
+func add(a, b float64) (float64, error) {
+    return a + b, nil
+}
 
-// 字符串处理函数
-func toUpper(s string) string     { return fmt.Sprintf("UPPER: %s", s) }
-func toLower(s string) string     { return fmt.Sprintf("lower: %s", s) }
-func addQuotes(s string) string   { return fmt.Sprintf("\"%s\"", s) }
+func subtract(a, b float64) (float64, error) {
+    return a - b, nil
+}
 
-// 接受函数作为参数
-func calculate(a, b int, op MathOperation) int {
+func multiply(a, b float64) (float64, error) {
+    return a * b, nil
+}
+
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, fmt.Errorf("除数不能为零")
+    }
+    return a / b, nil
+}
+
+func power(a, b float64) (float64, error) {
+    return math.Pow(a, b), nil
+}
+
+// 计算器主函数
+func calculator(a, b float64, op Operation) (result float64, err error) {
     return op(a, b)
 }
 
-// 批量处理
-func processNumbers(numbers []int, operations []MathOperation) {
-    for i, op := range operations {
-        result := op(numbers[0], numbers[1])
-        fmt.Printf("运算 %d: %d\n", i+1, result)
+// 批量计算
+func batchCalculate(numbers []float64, op Operation) (results []float64, err error) {
+    if len(numbers) < 2 {
+        return nil, fmt.Errorf("至少需要两个数字")
     }
-}
-
-// 字符串处理管道
-func processString(input string, processors ...StringProcessor) string {
-    result := input
-    for _, processor := range processors {
-        result = processor(result)
+    
+    result := numbers[0]
+    for i := 1; i < len(numbers); i++ {
+        result, err = op(result, numbers[i])
+        if err != nil {
+            return nil, err
+        }
+        results = append(results, result)
     }
-    return result
-}
-
-// 返回函数
-func getOperation(opType string) MathOperation {
-    switch opType {
-    case "add":
-        return add
-    case "subtract":
-        return subtract
-    case "multiply":
-        return multiply
-    case "divide":
-        return divide
-    default:
-        return nil
-    }
+    return results, nil
 }
 
 func main() {
-    // 函数作为参数
-    fmt.Println("函数作为参数:")
-    fmt.Printf("add(10, 5) = %d\n", calculate(10, 5, add))
-    fmt.Printf("multiply(10, 5) = %d\n", calculate(10, 5, multiply))
-    
-    // 函数切片
-    fmt.Println("\n批量运算:")
-    operations := []MathOperation{add, subtract, multiply, divide}
-    processNumbers([]int{20, 4}, operations)
-    
-    // 字符串处理管道
-    fmt.Println("\n字符串处理管道:")
-    result := processString("hello world", toUpper, addQuotes)
-    fmt.Println("结果:", result)
-    
-    // 动态获取函数
-    fmt.Println("\n动态函数调用:")
-    opNames := []string{"add", "multiply", "divide"}
-    for _, opName := range opNames {
-        op := getOperation(opName)
-        if op != nil {
-            result := op(15, 3)
-            fmt.Printf("%s(15, 3) = %d\n", opName, result)
-        }
-    }
-    
-    // 函数映射
-    fmt.Println("\n函数映射:")
-    opMap := map[string]MathOperation{
+    // 运算映射表
+    operations := map[string]Operation{
         "+": add,
         "-": subtract,
         "*": multiply,
         "/": divide,
+        "^": power,
     }
     
-    expressions := []struct {
-        a, b int
-        op   string
-    }{
-        {8, 2, "+"},
-        {8, 2, "-"},
-        {8, 2, "*"},
-        {8, 2, "/"},
+    fmt.Println("🧮 函数式计算器")
+    
+    // 单次计算
+    result, err := calculator(10, 3, divide)
+    if err != nil {
+        fmt.Printf("错误: %v\n", err)
+    } else {
+        fmt.Printf("10 ÷ 3 = %.2f\n", result)
     }
     
-    for _, expr := range expressions {
-        if operation, exists := opMap[expr.op]; exists {
-            result := operation(expr.a, expr.b)
-            fmt.Printf("%d %s %d = %d\n", expr.a, expr.op, expr.b, result)
-        }
-    }
-}
-```
-
-## 实战练习
-
-### 学生管理系统（函数版）
-
-```go
-package main
-
-import "fmt"
-
-// 学生结构
-type Student struct {
-    Name  string
-    Score int
-}
-
-// 成绩统计
-type Statistics struct {
-    Average   float64
-    Max       int
-    Min       int
-    PassCount int
-    Total     int
-}
-
-// 函数类型定义
-type StudentFilter func(Student) bool
-type ScoreCalculator func([]Student) float64
-
-// 创建学生
-func createStudent(name string, score int) Student {
-    return Student{Name: name, Score: score}
-}
-
-// 添加学生
-func addStudent(students []Student, student Student) []Student {
-    return append(students, student)
-}
-
-// 过滤学生
-func filterStudents(students []Student, filter StudentFilter) []Student {
-    var result []Student
-    for _, student := range students {
-        if filter(student) {
-            result = append(result, student)
-        }
-    }
-    return result
-}
-
-// 计算统计信息
-func calculateStatistics(students []Student) Statistics {
-    if len(students) == 0 {
-        return Statistics{}
+    // 使用映射表计算
+    if op, exists := operations["*"]; exists {
+        result, _ := calculator(6, 7, op)
+        fmt.Printf("6 × 7 = %.0f\n", result)
     }
     
-    total := 0
-    max := students[0].Score
-    min := students[0].Score
-    passCount := 0
-    
-    for _, student := range students {
-        total += student.Score
-        if student.Score > max {
-            max = student.Score
-        }
-        if student.Score < min {
-            min = student.Score
-        }
-        if student.Score >= 60 {
-            passCount++
-        }
+    // 批量计算
+    numbers := []float64{100, 2, 5}
+    results, err := batchCalculate(numbers, divide)
+    if err != nil {
+        fmt.Printf("批量计算错误: %v\n", err)
+    } else {
+        fmt.Printf("连续除法 %v = %v\n", numbers, results)
     }
-    
-    return Statistics{
-        Average:   float64(total) / float64(len(students)),
-        Max:       max,
-        Min:       min,
-        PassCount: passCount,
-        Total:     len(students),
-    }
-}
-
-// 打印学生列表
-func printStudents(students []Student, title string) {
-    fmt.Printf("\n=== %s ===\n", title)
-    if len(students) == 0 {
-        fmt.Println("没有学生")
-        return
-    }
-    
-    for i, student := range students {
-        fmt.Printf("%d. %s: %d分\n", i+1, student.Name, student.Score)
-    }
-}
-
-// 打印统计信息
-func printStatistics(stats Statistics) {
-    fmt.Printf("\n=== 统计信息 ===\n")
-    fmt.Printf("总人数: %d\n", stats.Total)
-    fmt.Printf("平均分: %.1f\n", stats.Average)
-    fmt.Printf("最高分: %d\n", stats.Max)
-    fmt.Printf("最低分: %d\n", stats.Min)
-    fmt.Printf("及格人数: %d\n", stats.PassCount)
-    fmt.Printf("及格率: %.1f%%\n", 
-        float64(stats.PassCount)/float64(stats.Total)*100)
-}
-
-func main() {
-    // 创建学生数据
-    var students []Student
-    
-    studentData := []struct {
-        name  string
-        score int
-    }{
-        {"张三", 92},
-        {"李四", 78},
-        {"王五", 85},
-        {"赵六", 67},
-        {"钱七", 94},
-        {"孙八", 56},
-        {"周九", 88},
-    }
-    
-    // 添加学生
-    for _, data := range studentData {
-        student := createStudent(data.name, data.score)
-        students = addStudent(students, student)
-    }
-    
-    // 打印所有学生
-    printStudents(students, "所有学生")
-    
-    // 定义过滤器函数
-    excellentFilter := func(s Student) bool { return s.Score >= 90 }
-    passingFilter := func(s Student) bool { return s.Score >= 60 }
-    failingFilter := func(s Student) bool { return s.Score < 60 }
-    
-    // 过滤并显示不同类型的学生
-    excellent := filterStudents(students, excellentFilter)
-    printStudents(excellent, "优秀学生 (≥90分)")
-    
-    passing := filterStudents(students, passingFilter)
-    printStudents(passing, "及格学生 (≥60分)")
-    
-    failing := filterStudents(students, failingFilter)
-    printStudents(failing, "不及格学生 (<60分)")
-    
-    // 计算并显示统计信息
-    stats := calculateStatistics(students)
-    printStatistics(stats)
-    
-    // 特定范围查询
-    goodFilter := func(s Student) bool { 
-        return s.Score >= 80 && s.Score < 90 
-    }
-    good := filterStudents(students, goodFilter)
-    printStudents(good, "良好学生 (80-89分)")
 }
 ```
 
 ## 本章小结
 
-在这一章中，我们学习了：
+通过本章学习，你应该掌握：
 
-### 函数基础
-- **函数定义** - func 关键字，参数和返回值
-- **函数调用** - 参数传递，返回值接收
-- **命名返回值** - 简化返回语句
-
-### 参数传递
-- **值传递** - 基本类型的拷贝传递
-- **指针传递** - 通过指针修改原始值
-- **变参函数** - 接受可变数量的参数
+### 核心概念
+- **函数定义**：语法简洁，支持多返回值
+- **参数传递**：值传递vs指针传递，引用类型的特殊性
+- **命名返回值**：增强可读性，自动初始化
+- **变参函数**：灵活处理可变数量参数
 
 ### 高级特性
-- **匿名函数** - 函数字面量
-- **闭包** - 函数捕获外部变量
-- **递归** - 函数调用自身
-- **函数作为值** - 函数的一等公民地位
+- **函数作为值**：可以赋值给变量，作为参数传递
+- **匿名函数和闭包**：强大的编程工具
+- **递归**：解决特定问题的优雅方式
 
 ### 最佳实践
-- 函数名要见名知意
-- 保持函数功能单一
-- 适当使用命名返回值
-- 合理运用闭包和高阶函数
+1. **函数设计**：单一职责，参数不宜过多
+2. **返回值**：错误处理用多返回值，简单函数可用命名返回值
+3. **参数传递**：大型数据用指针或引用类型避免复制
+4. **函数命名**：动词开头，表达函数的行为
+
+### Go语言函数特色
+- 多返回值让错误处理更自然
+- 函数是一等公民，支持函数式编程
+- 简洁的语法，没有默认参数和重载
+- defer语句提供优雅的资源清理机制
+
+::: tip 练习建议
+尝试实现一个文本处理工具，包含多个处理函数（统计字符、转换大小写、查找替换等），练习函数的组织和调用。
+:::

@@ -13,8 +13,6 @@
 - **依赖倒置**：高层模块不依赖低层模块
 - **接口隔离**：使用小而专一的接口
 
-## 系统架构
-
 ## 模块设计
 
 ### 1. 用户界面层 (UI Layer)
@@ -357,16 +355,3 @@ func (c *Config) Save(filename string) error
 - **表达式缓存**：缓存复杂表达式的解析结果
 - **预编译**：对常用表达式进行预编译
 - **并发计算**：对独立子表达式并行计算
-
----
-
-## 下一步
-
-架构设计完成后，接下来将进行：
-
-1. **[代码实现](./implementation.md)** - 详细的代码实现和解析
-
-<div style="text-align: center; margin-top: 2rem;">
-  <a href="./index.html" style="display: inline-block; padding: 8px 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin: 0 8px;">← 项目概述</a>
-  <a href="./implementation.html" style="display: inline-block; padding: 8px 16px; background: #00ADD8; color: white; text-decoration: none; border-radius: 4px; margin: 0 8px;">代码实现 →</a>
-</div> 

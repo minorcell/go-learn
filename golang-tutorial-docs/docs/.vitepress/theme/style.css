@@ -467,6 +467,7 @@ div[class*="language-"]:hover {
 
 /* 表格发光效果 */
 .vp-doc table {
+    width: fit-content;
     box-shadow:
         0 2px 10px rgba(0, 0, 0, 0.1),
         0 0 15px rgba(0, 173, 216, 0.05);

@@ -1,260 +1,95 @@
+---
+title: 接口
+description: 学习Go语言的接口定义、隐式实现和最佳实践
+---
+
 # 接口
 
-接口是Go语言最重要的特性之一，它定义了方法的集合，实现了代码的解耦和多态。Go的接口是隐式实现的，非常灵活和强大。
+接口是Go语言最重要的特性之一，体现了Go的设计哲学"组合优于继承"。接口定义行为契约，实现代码解耦，是Go实现多态和抽象的核心机制。
 
 ## 本章内容
 
-- 接口的定义和实现
-- 隐式接口实现
+- 接口的定义和隐式实现
 - 接口组合和嵌入
 - 空接口和类型断言
-- 接口的最佳实践
+- 接口的设计原则和最佳实践
+- 实际应用场景和模式
 
-## 接口基础
+## 接口基础概念
+
+### 什么是接口
+
+接口是一组方法签名的集合，定义了对象应该具备的行为。Go语言的接口采用**隐式实现**，即只要类型实现了接口定义的所有方法，就自动实现了该接口。
+
+::: tip 接口特点
+- **隐式实现**：无需显式声明实现关系
+- **鸭子类型**：如果走起来像鸭子，叫起来像鸭子，那就是鸭子
+- **组合优于继承**：通过接口组合实现复杂功能
+- **解耦设计**：接口分离了"是什么"和"做什么"
+:::
 
 ### 接口定义和实现
 
 ```go
-package main
-
-import "fmt"
-
-// 定义 Shape 接口
-type Shape interface {
-    Area() float64
-    Perimeter() float64
+// 定义接口
+type Writer interface {
+    Write(data []byte) (int, error)
 }
 
-// 定义 Drawable 接口
-type Drawable interface {
-    Draw() string
+type Reader interface {
+    Read(data []byte) (int, error)
 }
 
-// 圆形结构体
-type Circle struct {
-    Radius float64
+// 文件类型
+type File struct {
+    name string
+    data []byte
 }
 
-// Circle 实现 Shape 接口
-func (c Circle) Area() float64 {
-    return 3.14159 * c.Radius * c.Radius
+// 隐式实现Writer接口
+func (f *File) Write(data []byte) (int, error) {
+    f.data = append(f.data, data...)
+    return len(data), nil
 }
 
-func (c Circle) Perimeter() float64 {
-    return 2 * 3.14159 * c.Radius
-}
-
-// Circle 实现 Drawable 接口
-func (c Circle) Draw() string {
-    return fmt.Sprintf("绘制一个半径为%.2f的圆形", c.Radius)
-}
-
-// 矩形结构体
-type Rectangle struct {
-    Width, Height float64
-}
-
-// Rectangle 实现 Shape 接口
-func (r Rectangle) Area() float64 {
-    return r.Width * r.Height
-}
-
-func (r Rectangle) Perimeter() float64 {
-    return 2 * (r.Width + r.Height)
-}
-
-// Rectangle 实现 Drawable 接口
-func (r Rectangle) Draw() string {
-    return fmt.Sprintf("绘制一个%.2f×%.2f的矩形", r.Width, r.Height)
-}
-
-// 使用接口的函数
-func printShapeInfo(s Shape) {
-    fmt.Printf("面积: %.2f\n", s.Area())
-    fmt.Printf("周长: %.2f\n", s.Perimeter())
-}
-
-func drawShape(d Drawable) {
-    fmt.Println(d.Draw())
-}
-
-// 计算总面积
-func calculateTotalArea(shapes []Shape) float64 {
-    total := 0.0
-    for _, shape := range shapes {
-        total += shape.Area()
+// 隐式实现Reader接口
+func (f *File) Read(data []byte) (int, error) {
+    if len(f.data) == 0 {
+        return 0, fmt.Errorf("no data to read")
     }
-    return total
-}
-
-func main() {
-    // 创建形状实例
-    circle := Circle{Radius: 5.0}
-    rectangle := Rectangle{Width: 10.0, Height: 6.0}
-    
-    // 使用接口
-    fmt.Println("=== 圆形信息 ===")
-    printShapeInfo(circle)
-    drawShape(circle)
-    
-    fmt.Println("\n=== 矩形信息 ===")
-    printShapeInfo(rectangle)
-    drawShape(rectangle)
-    
-    // 接口切片
-    shapes := []Shape{circle, rectangle}
-    
-    fmt.Printf("\n=== 总计算 ===\n")
-    fmt.Printf("总面积: %.2f\n", calculateTotalArea(shapes))
-    
-    // 遍历形状
-    fmt.Println("\n=== 所有形状 ===")
-    for i, shape := range shapes {
-        fmt.Printf("形状 %d:\n", i+1)
-        printShapeInfo(shape)
-        
-        // 类型断言查看具体类型
-        if drawable, ok := shape.(Drawable); ok {
-            drawShape(drawable)
-        }
-        fmt.Println()
-    }
+    n := copy(data, f.data)
+    return n, nil
 }
 ```
 
 ### 接口的多态性
 
+多态允许不同类型的对象对同一接口做出不同的响应：
+
 ```go
-package main
-
-import "fmt"
-
-// 动物接口
-type Animal interface {
-    Speak() string
-    Move() string
+type Shape interface {
+    Area() float64
 }
 
-// 宠物接口
-type Pet interface {
-    Animal
-    Name() string
-    Owner() string
+type Circle struct {
+    Radius float64
 }
 
-// 狗
-type Dog struct {
-    name  string
-    owner string
+func (c Circle) Area() float64 {
+    return 3.14159 * c.Radius * c.Radius
 }
 
-func (d Dog) Speak() string {
-    return "汪汪！"
+type Rectangle struct {
+    Width, Height float64
 }
 
-func (d Dog) Move() string {
-    return "跑跑跳跳"
+func (r Rectangle) Area() float64 {
+    return r.Width * r.Height
 }
 
-func (d Dog) Name() string {
-    return d.name
-}
-
-func (d Dog) Owner() string {
-    return d.owner
-}
-
-// 猫
-type Cat struct {
-    name  string
-    owner string
-}
-
-func (c Cat) Speak() string {
-    return "喵喵~"
-}
-
-func (c Cat) Move() string {
-    return "优雅地走着"
-}
-
-func (c Cat) Name() string {
-    return c.name
-}
-
-func (c Cat) Owner() string {
-    return c.owner
-}
-
-// 鸟
-type Bird struct {
-    species string
-}
-
-func (b Bird) Speak() string {
-    return "叽叽喳喳"
-}
-
-func (b Bird) Move() string {
-    return "在天空中飞翔"
-}
-
-// 动物园管理员
-type Zookeeper struct {
-    name string
-}
-
-// 管理员可以照顾任何动物
-func (z Zookeeper) CareFor(animal Animal) {
-    fmt.Printf("%s 正在照顾动物\n", z.name)
-    fmt.Printf("动物叫声: %s\n", animal.Speak())
-    fmt.Printf("动物行为: %s\n", animal.Move())
-}
-
-// 照顾宠物需要更多信息
-func (z Zookeeper) CarePet(pet Pet) {
-    fmt.Printf("%s 正在照顾宠物 %s (主人: %s)\n", z.name, pet.Name(), pet.Owner())
-    z.CareFor(pet) // 宠物也是动物
-}
-
-// 训练动物
-func trainAnimal(animal Animal) {
-    fmt.Printf("训练中... 动物发出: %s\n", animal.Speak())
-}
-
-func main() {
-    // 创建动物实例
-    dog := Dog{name: "旺财", owner: "张三"}
-    cat := Cat{name: "咪咪", owner: "李四"}
-    bird := Bird{species: "鹦鹉"}
-    
-    // 创建管理员
-    keeper := Zookeeper{name: "王管理员"}
-    
-    fmt.Println("=== 动物照顾 ===")
-    
-    // 多态：相同的方法，不同的行为
-    animals := []Animal{dog, cat, bird}
-    for _, animal := range animals {
-        keeper.CareFor(animal)
-        fmt.Println()
-    }
-    
-    fmt.Println("=== 宠物特殊照顾 ===")
-    
-    // 宠物需要特殊照顾
-    pets := []Pet{dog, cat}
-    for _, pet := range pets {
-        keeper.CarePet(pet)
-        fmt.Println()
-    }
-    
-    fmt.Println("=== 动物训练 ===")
-    
-    // 统一的训练接口
-    for _, animal := range animals {
-        trainAnimal(animal)
-    }
+// 多态函数：接受任何实现Shape的类型
+func printArea(s Shape) {
+    fmt.Printf("面积: %.2f\n", s.Area())
 }
 ```
 
@@ -262,25 +97,9 @@ func main() {
 
 ### 接口嵌入
 
+可以通过嵌入其他接口来组合更复杂的接口：
+
 ```go
-package main
-
-import "fmt"
-
-// 基础接口
-type Reader interface {
-    Read() string
-}
-
-type Writer interface {
-    Write(data string) error
-}
-
-type Closer interface {
-    Close() error
-}
-
-// 组合接口
 type ReadWriter interface {
     Reader
     Writer
@@ -292,874 +111,346 @@ type ReadWriteCloser interface {
     Closer
 }
 
-// 文件结构体
-type File struct {
-    name     string
-    content  string
-    isOpen   bool
-}
-
-// 实现所有接口方法
-func (f *File) Read() string {
-    if !f.isOpen {
-        return "文件未打开"
-    }
-    return f.content
-}
-
-func (f *File) Write(data string) error {
-    if !f.isOpen {
-        return fmt.Errorf("文件未打开")
-    }
-    f.content += data
-    return nil
-}
-
-func (f *File) Close() error {
-    if !f.isOpen {
-        return fmt.Errorf("文件已关闭")
-    }
-    f.isOpen = false
-    fmt.Printf("文件 %s 已关闭\n", f.name)
-    return nil
-}
-
-func (f *File) Open() error {
-    if f.isOpen {
-        return fmt.Errorf("文件已打开")
-    }
-    f.isOpen = true
-    fmt.Printf("文件 %s 已打开\n", f.name)
-    return nil
-}
-
-// 网络连接
-type NetworkConnection struct {
-    address string
-    buffer  string
-    active  bool
-}
-
-func (nc *NetworkConnection) Read() string {
-    if !nc.active {
-        return "连接未激活"
-    }
-    data := nc.buffer
-    nc.buffer = ""
-    return data
-}
-
-func (nc *NetworkConnection) Write(data string) error {
-    if !nc.active {
-        return fmt.Errorf("连接未激活")
-    }
-    nc.buffer += data
-    return nil
-}
-
-func (nc *NetworkConnection) Close() error {
-    if !nc.active {
-        return fmt.Errorf("连接已关闭")
-    }
-    nc.active = false
-    fmt.Printf("网络连接 %s 已关闭\n", nc.address)
-    return nil
-}
-
-func (nc *NetworkConnection) Connect() error {
-    if nc.active {
-        return fmt.Errorf("连接已激活")
-    }
-    nc.active = true
-    fmt.Printf("已连接到 %s\n", nc.address)
-    return nil
-}
-
-// 使用不同接口的函数
-func processReader(r Reader) {
-    fmt.Printf("读取数据: %s\n", r.Read())
-}
-
-func processWriter(w Writer) {
-    err := w.Write("Hello, World!")
-    if err != nil {
-        fmt.Printf("写入失败: %v\n", err)
-    } else {
-        fmt.Println("数据写入成功")
-    }
-}
-
-func processReadWriter(rw ReadWriter) {
-    fmt.Println("=== ReadWriter 操作 ===")
-    processWriter(rw)
-    processReader(rw)
-}
-
-func processReadWriteCloser(rwc ReadWriteCloser) {
-    fmt.Println("=== ReadWriteCloser 操作 ===")
-    processWriter(rwc)
-    processReader(rwc)
-    rwc.Close()
-}
-
-func main() {
-    // 创建文件
-    file := &File{name: "test.txt", content: "初始内容\n", isOpen: false}
-    file.Open()
-    
-    // 创建网络连接
-    conn := &NetworkConnection{address: "192.168.1.1:8080", active: false}
-    conn.Connect()
-    
-    fmt.Println("=== 基础接口测试 ===")
-    
-    // 测试单一接口
-    processReader(file)
-    processWriter(file)
-    processReader(file)
-    
-    fmt.Println("\n=== 组合接口测试 ===")
-    
-    // 测试组合接口
-    processReadWriter(file)
-    
-    fmt.Println("\n=== 完整接口测试 ===")
-    
-    // 测试完整接口
-    processReadWriteCloser(conn)
-    
-    // 重新打开文件测试
-    file.Open()
-    processReadWriteCloser(file)
+type Closer interface {
+    Close() error
 }
 ```
 
-### 接口设计模式
+### 接口设计原则
+
+| 原则 | 说明 | 示例 |
+|------|------|------|
+| **单一职责** | 接口应该专注于单一功能 | `Writer`只负责写入 |
+| **接口隔离** | 客户端不应依赖不需要的方法 | 分离`Reader`和`Writer` |
+| **小接口** | 倾向于定义小而专一的接口 | `error`只有一个方法 |
+| **组合优于继承** | 通过组合小接口构建大接口 | `ReadWriteCloser` |
+
+## 空接口和类型断言
+
+### 空接口 interface{}
+
+空接口可以接受任何类型的值：
+
+```go
+func printValue(v interface{}) {
+    fmt.Printf("值: %v, 类型: %T\n", v, v)
+}
+
+// 可以接受任何类型
+printValue(42)
+printValue("hello")
+printValue([]int{1, 2, 3})
+```
+
+### 类型断言
+
+用于从接口值中提取具体类型：
+
+```go
+func processValue(v interface{}) {
+    // 安全的类型断言
+    if str, ok := v.(string); ok {
+        fmt.Printf("字符串长度: %d\n", len(str))
+        return
+    }
+    
+    if num, ok := v.(int); ok {
+        fmt.Printf("数字的平方: %d\n", num*num)
+        return
+    }
+    
+    fmt.Println("未知类型")
+}
+
+// 类型开关
+func handleByType(v interface{}) {
+    switch value := v.(type) {
+    case string:
+        fmt.Printf("字符串: %s\n", value)
+    case int:
+        fmt.Printf("整数: %d\n", value)
+    case bool:
+        fmt.Printf("布尔值: %t\n", value)
+    default:
+        fmt.Printf("其他类型: %T\n", value)
+    }
+}
+```
+
+::: warning 类型断言注意事项
+- 使用两个返回值的形式避免panic
+- 类型开关更适合处理多种类型
+- 空接口虽然灵活，但失去了类型安全
+:::
+
+## 实战项目：任务管理系统
+
+让我们通过一个任务管理系统来演示接口的实际应用：
 
 ```go
 package main
 
 import (
     "fmt"
-    "strings"
+    "time"
 )
 
-// 策略模式 - 排序策略接口
-type SortStrategy interface {
-    Sort([]int) []int
-    Name() string
+// 定义核心接口
+type Task interface {
+    Execute() error
+    GetDescription() string
+    GetPriority() int
 }
 
-// 冒泡排序
-type BubbleSort struct{}
-
-func (bs BubbleSort) Sort(arr []int) []int {
-    result := make([]int, len(arr))
-    copy(result, arr)
-    
-    n := len(result)
-    for i := 0; i < n-1; i++ {
-        for j := 0; j < n-i-1; j++ {
-            if result[j] > result[j+1] {
-                result[j], result[j+1] = result[j+1], result[j]
-            }
-        }
-    }
-    return result
+type Validator interface {
+    Validate() error
 }
 
-func (bs BubbleSort) Name() string {
-    return "冒泡排序"
-}
-
-// 快速排序
-type QuickSort struct{}
-
-func (qs QuickSort) Sort(arr []int) []int {
-    if len(arr) <= 1 {
-        return arr
-    }
-    
-    result := make([]int, len(arr))
-    copy(result, arr)
-    qs.quickSort(result, 0, len(result)-1)
-    return result
-}
-
-func (qs QuickSort) quickSort(arr []int, low, high int) {
-    if low < high {
-        pi := qs.partition(arr, low, high)
-        qs.quickSort(arr, low, pi-1)
-        qs.quickSort(arr, pi+1, high)
-    }
-}
-
-func (qs QuickSort) partition(arr []int, low, high int) int {
-    pivot := arr[high]
-    i := low - 1
-    
-    for j := low; j < high; j++ {
-        if arr[j] < pivot {
-            i++
-            arr[i], arr[j] = arr[j], arr[i]
-        }
-    }
-    arr[i+1], arr[high] = arr[high], arr[i+1]
-    return i + 1
-}
-
-func (qs QuickSort) Name() string {
-    return "快速排序"
-}
-
-// 排序上下文
-type Sorter struct {
-    strategy SortStrategy
-}
-
-func (s *Sorter) SetStrategy(strategy SortStrategy) {
-    s.strategy = strategy
-}
-
-func (s *Sorter) Sort(arr []int) []int {
-    if s.strategy == nil {
-        return arr
-    }
-    return s.strategy.Sort(arr)
-}
-
-// 观察者模式
-type Observer interface {
-    Update(data interface{})
-    GetID() string
-}
-
-type Subject interface {
-    Attach(Observer)
-    Detach(Observer)
-    Notify(data interface{})
-}
-
-// 新闻订阅者
-type NewsSubscriber struct {
-    id   string
-    name string
-}
-
-func (ns *NewsSubscriber) Update(data interface{}) {
-    if news, ok := data.(string); ok {
-        fmt.Printf("[%s] %s 收到新闻: %s\n", ns.id, ns.name, news)
-    }
-}
-
-func (ns *NewsSubscriber) GetID() string {
-    return ns.id
-}
-
-// 新闻发布者
-type NewsPublisher struct {
-    observers []Observer
-    news      string
-}
-
-func (np *NewsPublisher) Attach(observer Observer) {
-    np.observers = append(np.observers, observer)
-}
-
-func (np *NewsPublisher) Detach(observer Observer) {
-    for i, obs := range np.observers {
-        if obs.GetID() == observer.GetID() {
-            np.observers = append(np.observers[:i], np.observers[i+1:]...)
-            break
-        }
-    }
-}
-
-func (np *NewsPublisher) Notify(data interface{}) {
-    for _, observer := range np.observers {
-        observer.Update(data)
-    }
-}
-
-func (np *NewsPublisher) PublishNews(news string) {
-    np.news = news
-    fmt.Printf("📰 发布新闻: %s\n", news)
-    np.Notify(news)
-}
-
-// 装饰器模式
 type Logger interface {
     Log(message string)
 }
 
-// 基础日志器
-type BasicLogger struct{}
-
-func (bl BasicLogger) Log(message string) {
-    fmt.Printf("LOG: %s\n", message)
+// 基础任务类型
+type BaseTask struct {
+    Description string
+    Priority    int
 }
 
-// 时间戳装饰器
-type TimestampDecorator struct {
+func (bt BaseTask) GetDescription() string {
+    return bt.Description
+}
+
+func (bt BaseTask) GetPriority() int {
+    return bt.Priority
+}
+
+// 邮件任务
+type EmailTask struct {
+    BaseTask
+    To      string
+    Subject string
+    Body    string
+}
+
+func (et EmailTask) Execute() error {
+    fmt.Printf("📧 发送邮件到 %s: %s\n", et.To, et.Subject)
+    time.Sleep(100 * time.Millisecond) // 模拟发送时间
+    return nil
+}
+
+func (et EmailTask) Validate() error {
+    if et.To == "" {
+        return fmt.Errorf("收件人不能为空")
+    }
+    if et.Subject == "" {
+        return fmt.Errorf("邮件主题不能为空")
+    }
+    return nil
+}
+
+// 文件任务
+type FileTask struct {
+    BaseTask
+    FilePath string
+    Action   string
+}
+
+func (ft FileTask) Execute() error {
+    fmt.Printf("📁 对文件 %s 执行 %s 操作\n", ft.FilePath, ft.Action)
+    time.Sleep(50 * time.Millisecond)
+    return nil
+}
+
+func (ft FileTask) Validate() error {
+    if ft.FilePath == "" {
+        return fmt.Errorf("文件路径不能为空")
+    }
+    return nil
+}
+
+// 控制台日志器
+type ConsoleLogger struct{}
+
+func (cl ConsoleLogger) Log(message string) {
+    fmt.Printf("[LOG] %s - %s\n", time.Now().Format("15:04:05"), message)
+}
+
+// 任务管理器
+type TaskManager struct {
+    tasks  []Task
     logger Logger
 }
 
-func (td TimestampDecorator) Log(message string) {
-    timestamped := fmt.Sprintf("[2023-12-07 10:30:45] %s", message)
-    td.logger.Log(timestamped)
-}
-
-// 级别装饰器
-type LevelDecorator struct {
-    logger Logger
-    level  string
-}
-
-func (ld LevelDecorator) Log(message string) {
-    leveled := fmt.Sprintf("[%s] %s", strings.ToUpper(ld.level), message)
-    ld.logger.Log(leveled)
-}
-
-func main() {
-    // 策略模式演示
-    fmt.Println("=== 策略模式 ===")
-    
-    data := []int{64, 34, 25, 12, 22, 11, 90}
-    fmt.Printf("原始数据: %v\n", data)
-    
-    sorter := &Sorter{}
-    
-    // 使用冒泡排序
-    sorter.SetStrategy(BubbleSort{})
-    result1 := sorter.Sort(data)
-    fmt.Printf("%s 结果: %v\n", sorter.strategy.Name(), result1)
-    
-    // 使用快速排序
-    sorter.SetStrategy(QuickSort{})
-    result2 := sorter.Sort(data)
-    fmt.Printf("%s 结果: %v\n", sorter.strategy.Name(), result2)
-    
-    // 观察者模式演示
-    fmt.Println("\n=== 观察者模式 ===")
-    
-    publisher := &NewsPublisher{}
-    
-    subscriber1 := &NewsSubscriber{id: "001", name: "张三"}
-    subscriber2 := &NewsSubscriber{id: "002", name: "李四"}
-    subscriber3 := &NewsSubscriber{id: "003", name: "王五"}
-    
-    publisher.Attach(subscriber1)
-    publisher.Attach(subscriber2)
-    publisher.Attach(subscriber3)
-    
-    publisher.PublishNews("Go 1.21 正式发布！")
-    
-    // 取消订阅
-    publisher.Detach(subscriber2)
-    fmt.Println("\n李四取消订阅")
-    
-    publisher.PublishNews("Go 语言教程更新了！")
-    
-    // 装饰器模式演示
-    fmt.Println("\n=== 装饰器模式 ===")
-    
-    // 基础日志
-    basicLogger := BasicLogger{}
-    basicLogger.Log("基础日志消息")
-    
-    // 添加时间戳
-    timestampLogger := TimestampDecorator{logger: basicLogger}
-    timestampLogger.Log("带时间戳的日志")
-    
-    // 添加级别
-    levelLogger := LevelDecorator{logger: basicLogger, level: "info"}
-    levelLogger.Log("带级别的日志")
-    
-    // 组合装饰器
-    compositeLogger := TimestampDecorator{
-        logger: LevelDecorator{
-            logger: basicLogger,
-            level:  "error",
-        },
-    }
-    compositeLogger.Log("组合装饰器日志")
-}
-```
-
-## 空接口和类型断言
-
-### 空接口的使用
-
-```go
-package main
-
-import "fmt"
-
-// 空接口可以持有任何类型的值
-func processAnyValue(value interface{}) {
-    fmt.Printf("接收到值: %v, 类型: %T\n", value, value)
-}
-
-// 类型断言
-func identifyType(value interface{}) {
-    switch v := value.(type) {
-    case int:
-        fmt.Printf("这是一个整数: %d\n", v)
-    case string:
-        fmt.Printf("这是一个字符串: %s\n", v)
-    case bool:
-        fmt.Printf("这是一个布尔值: %t\n", v)
-    case []int:
-        fmt.Printf("这是一个整数切片: %v\n", v)
-    case map[string]int:
-        fmt.Printf("这是一个字符串到整数的映射: %v\n", v)
-    case func():
-        fmt.Println("这是一个无参数无返回值的函数")
-        v() // 调用函数
-    default:
-        fmt.Printf("未知类型: %T, 值: %v\n", v, v)
+func NewTaskManager(logger Logger) *TaskManager {
+    return &TaskManager{
+        tasks:  make([]Task, 0),
+        logger: logger,
     }
 }
 
-// 安全的类型断言
-func safeTypeAssertion(value interface{}) {
-    // 使用 ok 模式进行安全断言
-    if str, ok := value.(string); ok {
-        fmt.Printf("字符串值: %s (长度: %d)\n", str, len(str))
-    } else {
-        fmt.Printf("不是字符串类型: %T\n", value)
-    }
-    
-    if num, ok := value.(int); ok {
-        fmt.Printf("整数值: %d (平方: %d)\n", num, num*num)
-    } else {
-        fmt.Printf("不是整数类型: %T\n", value)
-    }
-}
-
-// 通用容器
-type Container struct {
-    items []interface{}
-}
-
-func (c *Container) Add(item interface{}) {
-    c.items = append(c.items, item)
-}
-
-func (c *Container) Get(index int) interface{} {
-    if index < 0 || index >= len(c.items) {
-        return nil
-    }
-    return c.items[index]
-}
-
-func (c *Container) Size() int {
-    return len(c.items)
-}
-
-func (c *Container) ForEach(fn func(interface{})) {
-    for _, item := range c.items {
-        fn(item)
-    }
-}
-
-// JSON 风格的数据处理
-func processJSONLike(data interface{}) {
-    switch v := data.(type) {
-    case map[string]interface{}:
-        fmt.Println("处理对象:")
-        for key, value := range v {
-            fmt.Printf("  %s: ", key)
-            processJSONLike(value)
-        }
-    case []interface{}:
-        fmt.Println("处理数组:")
-        for i, item := range v {
-            fmt.Printf("  [%d]: ", i)
-            processJSONLike(item)
-        }
-    case string:
-        fmt.Printf("字符串: \"%s\"\n", v)
-    case float64:
-        fmt.Printf("数字: %.2f\n", v)
-    case bool:
-        fmt.Printf("布尔值: %t\n", v)
-    case nil:
-        fmt.Println("null")
-    default:
-        fmt.Printf("其他类型: %T = %v\n", v, v)
-    }
-}
-
-func main() {
-    fmt.Println("=== 空接口基础 ===")
-    
-    // 空接口可以接受任何类型
-    processAnyValue(42)
-    processAnyValue("Hello")
-    processAnyValue(true)
-    processAnyValue([]int{1, 2, 3})
-    
-    fmt.Println("\n=== 类型识别 ===")
-    
-    values := []interface{}{
-        42,
-        "Hello, World!",
-        true,
-        []int{1, 2, 3, 4, 5},
-        map[string]int{"apple": 5, "banana": 3},
-        func() { fmt.Println("  这是一个匿名函数") },
-        3.14159,
-    }
-    
-    for _, value := range values {
-        identifyType(value)
-    }
-    
-    fmt.Println("\n=== 安全类型断言 ===")
-    
-    testValues := []interface{}{
-        "Go语言",
-        42,
-        3.14,
-        true,
-    }
-    
-    for _, value := range testValues {
-        fmt.Printf("测试值: %v\n", value)
-        safeTypeAssertion(value)
-        fmt.Println()
-    }
-    
-    fmt.Println("=== 通用容器 ===")
-    
-    container := &Container{}
-    container.Add("字符串")
-    container.Add(123)
-    container.Add(true)
-    container.Add([]int{1, 2, 3})
-    
-    fmt.Printf("容器大小: %d\n", container.Size())
-    
-    // 遍历容器
-    fmt.Println("容器内容:")
-    container.ForEach(func(item interface{}) {
-        fmt.Printf("- %v (%T)\n", item, item)
-    })
-    
-    // 获取特定项目
-    item := container.Get(1)
-    if num, ok := item.(int); ok {
-        fmt.Printf("第2个项目是整数: %d\n", num)
-    }
-    
-    fmt.Println("\n=== JSON风格数据 ===")
-    
-    // 模拟JSON数据结构
-    jsonData := map[string]interface{}{
-        "name": "张三",
-        "age":  30.0,
-        "married": true,
-        "children": []interface{}{
-            map[string]interface{}{
-                "name": "小明",
-                "age":  8.0,
-            },
-            map[string]interface{}{
-                "name": "小红",
-                "age":  6.0,
-            },
-        },
-        "address": map[string]interface{}{
-            "street": "长安街",
-            "city":   "北京",
-            "zipcode": "100000",
-        },
-        "spouse": nil,
-    }
-    
-    processJSONLike(jsonData)
-}
-```
-
-### 接口断言和类型开关
-
-```go
-package main
-
-import (
-    "fmt"
-    "strconv"
-)
-
-// 定义一些接口
-type Stringer interface {
-    String() string
-}
-
-type Counter interface {
-    Count() int
-}
-
-type Resetter interface {
-    Reset()
-}
-
-// 实现多个接口的结构体
-type WordCounter struct {
-    words []string
-}
-
-func (wc *WordCounter) String() string {
-    return fmt.Sprintf("WordCounter with %d words: %v", len(wc.words), wc.words)
-}
-
-func (wc *WordCounter) Count() int {
-    return len(wc.words)
-}
-
-func (wc *WordCounter) Reset() {
-    wc.words = nil
-}
-
-func (wc *WordCounter) AddWord(word string) {
-    wc.words = append(wc.words, word)
-}
-
-// 数字计数器
-type NumberCounter struct {
-    value int
-}
-
-func (nc *NumberCounter) String() string {
-    return fmt.Sprintf("NumberCounter: %d", nc.value)
-}
-
-func (nc *NumberCounter) Count() int {
-    return nc.value
-}
-
-func (nc *NumberCounter) Reset() {
-    nc.value = 0
-}
-
-func (nc *NumberCounter) Increment() {
-    nc.value++
-}
-
-func (nc *NumberCounter) Add(n int) {
-    nc.value += n
-}
-
-// 接口检测函数
-func analyzeInterface(value interface{}) {
-    fmt.Printf("\n=== 分析接口: %T ===\n", value)
-    
-    // 检测 Stringer 接口
-    if stringer, ok := value.(Stringer); ok {
-        fmt.Printf("实现了 Stringer: %s\n", stringer.String())
-    } else {
-        fmt.Println("未实现 Stringer")
-    }
-    
-    // 检测 Counter 接口
-    if counter, ok := value.(Counter); ok {
-        fmt.Printf("实现了 Counter: 计数 = %d\n", counter.Count())
-    } else {
-        fmt.Println("未实现 Counter")
-    }
-    
-    // 检测 Resetter 接口
-    if resetter, ok := value.(Resetter); ok {
-        fmt.Println("实现了 Resetter，正在重置...")
-        resetter.Reset()
-        
-        // 重置后再次检查计数
-        if counter, ok := value.(Counter); ok {
-            fmt.Printf("重置后计数: %d\n", counter.Count())
-        }
-    } else {
-        fmt.Println("未实现 Resetter")
-    }
-}
-
-// 类型开关处理不同类型
-func handleDifferentTypes(value interface{}) {
-    switch v := value.(type) {
-    case *WordCounter:
-        fmt.Printf("单词计数器处理: 添加单词 'hello'\n")
-        v.AddWord("hello")
-        
-    case *NumberCounter:
-        fmt.Printf("数字计数器处理: 增加5\n")
-        v.Add(5)
-        
-    case string:
-        fmt.Printf("字符串处理: 转换为大写: %s\n", v)
-        
-    case int:
-        fmt.Printf("整数处理: 乘以2 = %d\n", v*2)
-        
-    case []string:
-        fmt.Printf("字符串切片处理: 连接为: %s\n", 
-            fmt.Sprintf("[%s]", fmt.Sprintf("%v", v)))
-        
-    default:
-        fmt.Printf("未知类型处理: %T = %v\n", v, v)
-    }
-}
-
-// 组合接口检测
-func checkCombinedInterface(value interface{}) {
-    fmt.Printf("\n=== 组合接口检测: %T ===\n", value)
-    
-    // 检测是否同时实现了多个接口
-    canCount := false
-    canReset := false
-    canString := false
-    
-    if _, ok := value.(Counter); ok {
-        canCount = true
-    }
-    if _, ok := value.(Resetter); ok {
-        canReset = true
-    }
-    if _, ok := value.(Stringer); ok {
-        canString = true
-    }
-    
-    fmt.Printf("计数能力: %t, 重置能力: %t, 字符串化: %t\n", 
-        canCount, canReset, canString)
-    
-    // 如果实现了所有接口，进行完整操作
-    if canCount && canReset && canString {
-        fmt.Println("实现了所有接口，执行完整操作流程:")
-        
-        if stringer := value.(Stringer); stringer != nil {
-            fmt.Printf("1. 当前状态: %s\n", stringer.String())
-        }
-        
-        if counter := value.(Counter); counter != nil {
-            fmt.Printf("2. 当前计数: %d\n", counter.Count())
-        }
-        
-        if resetter := value.(Resetter); resetter != nil {
-            fmt.Println("3. 执行重置")
-            resetter.Reset()
-        }
-        
-        if stringer := value.(Stringer); stringer != nil {
-            fmt.Printf("4. 重置后状态: %s\n", stringer.String())
+func (tm *TaskManager) AddTask(task Task) error {
+    // 验证任务（如果支持验证）
+    if validator, ok := task.(Validator); ok {
+        if err := validator.Validate(); err != nil {
+            tm.logger.Log(fmt.Sprintf("任务验证失败: %v", err))
+            return err
         }
     }
+    
+    tm.tasks = append(tm.tasks, task)
+    tm.logger.Log(fmt.Sprintf("添加任务: %s", task.GetDescription()))
+    return nil
 }
 
-// 动态接口调用
-func dynamicInterfaceCall(values []interface{}) {
-    fmt.Println("\n=== 动态接口调用 ===")
+func (tm *TaskManager) ExecuteAll() {
+    tm.logger.Log("开始执行所有任务")
     
-    for i, value := range values {
-        fmt.Printf("\n--- 对象 %d ---\n", i+1)
-        
-        // 根据支持的接口动态调用
-        operations := []string{}
-        
-        if counter, ok := value.(Counter); ok {
-            count := counter.Count()
-            operations = append(operations, "Count()="+strconv.Itoa(count))
+    // 按优先级排序（简单排序）
+    for i := 0; i < len(tm.tasks)-1; i++ {
+        for j := i + 1; j < len(tm.tasks); j++ {
+            if tm.tasks[i].GetPriority() > tm.tasks[j].GetPriority() {
+                tm.tasks[i], tm.tasks[j] = tm.tasks[j], tm.tasks[i]
+            }
         }
+    }
+    
+    // 执行任务
+    for i, task := range tm.tasks {
+        tm.logger.Log(fmt.Sprintf("执行任务 %d (优先级: %d)", i+1, task.GetPriority()))
         
-        if stringer, ok := value.(Stringer); ok {
-            str := stringer.String()
-            operations = append(operations, "String()="+str)
-        }
-        
-        if len(operations) > 0 {
-            fmt.Printf("支持的操作: %v\n", operations)
+        if err := task.Execute(); err != nil {
+            tm.logger.Log(fmt.Sprintf("任务执行失败: %v", err))
         } else {
-            fmt.Printf("类型: %T, 值: %v (无支持的接口)\n", value, value)
+            tm.logger.Log("任务执行成功")
         }
     }
+    
+    tm.logger.Log("所有任务执行完成")
+}
+
+func (tm *TaskManager) GetTaskCount() int {
+    return len(tm.tasks)
 }
 
 func main() {
-    // 创建测试对象
-    wc := &WordCounter{words: []string{"hello", "world", "go"}}
-    nc := &NumberCounter{value: 10}
+    // 创建日志器和任务管理器
+    logger := ConsoleLogger{}
+    manager := NewTaskManager(logger)
     
-    fmt.Println("=== 初始状态 ===")
-    fmt.Printf("WordCounter: %s\n", wc.String())
-    fmt.Printf("NumberCounter: %s\n", nc.String())
-    
-    // 分析接口实现
-    analyzeInterface(wc)
-    analyzeInterface(nc)
-    analyzeInterface("普通字符串")
-    analyzeInterface(42)
-    
-    // 重新创建对象进行类型处理测试
-    wc2 := &WordCounter{words: []string{"go", "lang"}}
-    nc2 := &NumberCounter{value: 5}
-    
-    fmt.Println("\n=== 类型特定处理 ===")
-    testValues := []interface{}{wc2, nc2, "hello", 10, []string{"a", "b", "c"}}
-    
-    for _, value := range testValues {
-        handleDifferentTypes(value)
+    // 创建不同类型的任务
+    emailTask := EmailTask{
+        BaseTask: BaseTask{
+            Description: "发送欢迎邮件",
+            Priority:    1,
+        },
+        To:      "user@example.com",
+        Subject: "欢迎使用我们的服务",
+        Body:    "感谢您的注册！",
     }
     
-    // 组合接口检测
-    wc3 := &WordCounter{words: []string{"test"}}
-    nc3 := &NumberCounter{value: 15}
-    
-    checkCombinedInterface(wc3)
-    checkCombinedInterface(nc3)
-    checkCombinedInterface("字符串不实现接口")
-    
-    // 动态接口调用
-    mixedValues := []interface{}{
-        &WordCounter{words: []string{"dynamic", "call"}},
-        &NumberCounter{value: 20},
-        "plain string",
-        123,
-        true,
+    fileTask := FileTask{
+        BaseTask: BaseTask{
+            Description: "备份数据库",
+            Priority:    2,
+        },
+        FilePath: "/backup/database.sql",
+        Action:   "backup",
     }
     
-    dynamicInterfaceCall(mixedValues)
+    urgentEmail := EmailTask{
+        BaseTask: BaseTask{
+            Description: "紧急通知",
+            Priority:    0, // 最高优先级
+        },
+        To:      "admin@example.com",
+        Subject: "系统维护通知",
+        Body:    "系统将在30分钟后维护",
+    }
+    
+    // 添加任务
+    fmt.Println("=== 添加任务 ===")
+    manager.AddTask(emailTask)
+    manager.AddTask(fileTask)
+    manager.AddTask(urgentEmail)
+    
+    fmt.Printf("\n总任务数: %d\n\n", manager.GetTaskCount())
+    
+    // 执行所有任务
+    fmt.Println("=== 执行任务 ===")
+    manager.ExecuteAll()
+    
+    // 演示验证失败的情况
+    fmt.Println("\n=== 验证失败示例 ===")
+    invalidEmail := EmailTask{
+        BaseTask: BaseTask{
+            Description: "无效邮件任务",
+            Priority:    1,
+        },
+        To:      "", // 空收件人
+        Subject: "测试邮件",
+        Body:    "这是一个测试",
+    }
+    
+    if err := manager.AddTask(invalidEmail); err != nil {
+        fmt.Printf("添加任务失败: %v\n", err)
+    }
+}
+```
+
+## 接口最佳实践
+
+### 1. 接口命名约定
+
+- 单方法接口通常以"-er"结尾：`Reader`, `Writer`, `Closer`
+- 描述行为而非数据：`Drawable`而非`Shape`
+
+### 2. 接受接口，返回结构体
+
+```go
+// 好的设计：接受接口
+func ProcessData(r io.Reader) error {
+    // 处理逻辑
+    return nil
+}
+
+// 返回具体类型
+func NewFileReader(filename string) *FileReader {
+    return &FileReader{filename: filename}
+}
+```
+
+### 3. 保持接口小而专一
+
+```go
+// 好：专一的接口
+type Saver interface {
+    Save() error
+}
+
+type Loader interface {
+    Load() error
+}
+
+// 需要时组合
+type Repository interface {
+    Saver
+    Loader
 }
 ```
 
 ## 本章小结
 
-在这一章中，我们深入学习了Go语言的接口系统：
+接口是Go语言的核心特性，掌握接口的关键点：
 
-### 接口基础
-- **隐式实现** - 无需显式声明实现接口
-- **方法集合** - 接口定义方法的集合
-- **多态性** - 不同类型实现相同接口
-- **接口变量** - 可以持有任何实现该接口的值
+- **隐式实现**：类型自动满足接口，无需显式声明
+- **组合设计**：通过小接口组合构建复杂功能
+- **多态性**：同一接口的不同实现提供不同行为
+- **类型断言**：安全地从接口中提取具体类型
+- **最佳实践**：保持接口小而专一，接受接口返回结构体
 
-### 接口组合
-- **接口嵌入** - 通过嵌入组合接口
-- **设计模式** - 策略、观察者、装饰器等
-- **灵活设计** - 小接口组合成大功能
-- **解耦设计** - 依赖接口而非具体类型
-
-### 空接口和断言
-- **interface{}** - 可以持有任何类型的值
-- **类型断言** - 安全地获取具体类型
-- **类型开关** - 根据类型执行不同逻辑
-- **通用编程** - 编写类型无关的通用代码
-
-### 最佳实践
-- 保持接口小而专注
-- 优先定义接口而非结构体
-- 在消费者端定义接口
-- 使用接口实现松耦合设计
-- 合理使用空接口避免类型丢失
-
-### 设计原则
-- **单一职责** - 每个接口职责明确
-- **接口隔离** - 客户端不依赖不需要的方法
-- **依赖倒置** - 依赖抽象而非具体实现
-- **组合优于继承** - 通过接口组合实现功能
+::: tip 练习建议
+1. 实现一个简单的图形计算系统，定义Shape接口
+2. 创建一个日志系统，支持不同的输出目标
+3. 设计一个数据存储接口，支持多种存储后端
+4. 实验接口组合，理解组合优于继承的设计理念
+:::
