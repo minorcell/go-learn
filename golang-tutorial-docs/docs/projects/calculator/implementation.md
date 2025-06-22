@@ -535,18 +535,6 @@ Factor     := Number | '(' Expression ')' | ('-' | '+') Factor
 
 #### 运算优先级处理
 
-<MermaidDiagram code="graph TD
-    A[parseExpression] --> B[parseTerm]
-    B --> C[parseFactor]
-    
-    A --> D[处理加减运算]
-    B --> E[处理乘除运算]
-    C --> F[处理数字和括号]
-    
-    style A fill:#ffcdd2
-    style B fill:#f8bbd9
-    style C fill:#e1bee7" />
-
 ### 2. 词法分析过程
 
 ```go
