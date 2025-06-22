@@ -2,14 +2,14 @@
 
 本章将指导你安装和配置Go语言开发环境。
 
-## 🖥️ 系统要求
+## 系统要求
 
 Go语言支持主流操作系统：
 - **Windows** 7 或更高版本
 - **macOS** 10.11 或更高版本  
 - **Linux** 内核 2.6.23 或更高版本
 
-## 📥 安装Go语言
+## 安装Go语言
 
 ### Windows安装
 
@@ -56,7 +56,7 @@ sudo yum install golang
 sudo pacman -S go
 ```
 
-## ✅ 验证安装
+## 验证安装
 
 ```bash
 go version
@@ -67,7 +67,7 @@ go version
 go version go1.22.0 linux/amd64
 ```
 
-## ⚙️ 环境配置
+## 环境配置
 
 ### 1. GOPATH和GOROOT
 
@@ -103,7 +103,7 @@ go env -w GOPROXY=https://goproxy.cn,direct
 go env -w GOSUMDB=sum.golang.google.cn
 ```
 
-## 🛠️ 开发工具
+## 开发工具
 
 ### 1. VS Code（推荐）
 
@@ -137,7 +137,7 @@ JetBrains出品的专业Go IDE：
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 ```
 
-## 🏗️ 创建第一个项目
+## 创建第一个项目
 
 ### 1. 初始化模块
 ```bash
@@ -172,7 +172,7 @@ go build
 # 或 hello-go.exe  # Windows
 ```
 
-## 🔧 常用命令
+## 常用命令
 
 | 命令 | 用途 |
 |------|------|
@@ -185,7 +185,7 @@ go build
 | `go fmt` | 格式化代码 |
 | `go vet` | 静态分析工具 |
 
-## 🔍 故障排除
+## 故障排除
 
 ### 问题1：command not found
 **原因**：PATH环境变量未设置
@@ -199,13 +199,13 @@ go build
 **原因**：没有写入权限
 **解决**：使用sudo或更改目录权限
 
-## 📚 学习资源
+## 学习资源
 
 - [Go官方文档](https://golang.org/doc/)
 - [Go语言之旅](https://tour.golang.org/)
 - [Go标准库](https://pkg.go.dev/std)
 - [Go播客](https://changelog.com/gotime)
 
-## 🎉 下一步
+## 下一步
 
 开始 [基础语法](/basics/) 的学习！ 

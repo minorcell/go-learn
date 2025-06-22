@@ -6,7 +6,7 @@ hero:
   text: "系统化的Go编程教程"
   tagline: 从基础语法到项目实战，助您掌握现代Go开发
   image:
-    src: /logo.svg
+    src: /logo.png
     alt: Go学习指南
   actions:
     - theme: brand

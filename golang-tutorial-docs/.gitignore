@@ -23,5 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
-# 忽略vitepress的catch文件
-*catch*
+# VitePress 缓存文件
+docs/.vitepress/cache/
+.vitepress/cache/
+.temp/
+.cache/
+
+# VitePress 构建输出
+docs/.vitepress/dist/
+.vitepress/dist/

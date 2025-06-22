@@ -19,7 +19,7 @@ export default defineConfig({
     ],
 
     themeConfig: {
-        logo: '/logo.svg',
+        logo: '/logo.png',
         siteTitle: 'Go学习指南',
 
         nav: [
@@ -41,7 +41,7 @@ export default defineConfig({
                     text: '学习指南',
                     items: [
                         { text: 'Go语言简介', link: '/guide/introduction' },
-                        { text: '环境搭建', link: '/guide/setup' },
+                        { text: '环境搭建', link: '/guide/setup' }
                     ]
                 }
             ],
