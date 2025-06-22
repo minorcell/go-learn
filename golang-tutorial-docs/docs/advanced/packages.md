@@ -657,7 +657,3 @@ func InternalError(c *gin.Context, message string) {
 - 语义化版本管理
 - 项目结构组织
 - 错误处理和配置管理
-
-## 下一步
-
-掌握了包管理后，让我们继续学习 [并发编程](./concurrency)，探索Go语言最强大的特性之一！ 

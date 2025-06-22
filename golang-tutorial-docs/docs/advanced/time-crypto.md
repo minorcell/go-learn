@@ -1125,7 +1125,3 @@ func verifySignature(message, signature []byte, publicKey *rsa.PublicKey) (bool,
 - 加密算法选择
 - 安全编程准则
 - 性能优化策略
-
-## 下一步
-
-完成了进阶内容的学习后，让我们继续进入 [实战项目](../projects/)，通过实际项目来巩固所学知识！ 

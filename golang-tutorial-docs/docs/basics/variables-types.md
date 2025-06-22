@@ -399,10 +399,6 @@ func main() {
 - 类型转换
 - 字符串与数字互转
 
-## 下一步
-
-掌握了变量和类型后，让我们继续学习 [控制流程](./control-flow)，了解如何控制程序的执行流程！
-
 <ChapterNav />
 
 <ProgressTracker />

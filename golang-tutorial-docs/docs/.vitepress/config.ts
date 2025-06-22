@@ -40,8 +40,10 @@ export default defineConfig({
                 {
                     text: '学习指南',
                     items: [
-                        { text: 'Go语言简介', link: '/guide/introduction' },
-                        { text: '环境搭建', link: '/guide/setup' }
+                        { text: '学习指南首页', link: '/guide/' },
+                        { text: '什么是Go语言', link: '/guide/what-is-go' },
+                        { text: '环境搭建', link: '/guide/setup' },
+                        { text: '最佳实践', link: '/guide/best-practices' }
                     ]
                 }
             ],
