@@ -1,1147 +1,933 @@
 ---
-title: 文件操作
-description: 学习Go语言的文件读写、目录操作和数据处理
+title: 文件操作与I/O
+description: 学习Go语言的文件系统操作、数据格式处理和I/O操作
 ---
 
-# 文件操作
+# 文件操作与I/O
 
-文件操作是后端开发的基础技能。Go语言提供了丰富的文件操作API，让我们一起掌握这些重要功能。
+文件操作是所有编程语言的基础技能。Go语言提供了丰富的标准库来处理文件系统操作、数据格式解析和I/O流处理，让文件操作变得简单高效。
 
 ## 本章内容
 
-- 基本文件读写操作
-- 目录遍历和管理
-- 文件信息获取和处理
-- JSON/XML/CSV数据处理
-- 文件监控和批量操作
+- 文件基础操作和路径处理
+- 文件内容读写和流式处理
+- JSON/CSV/XML等数据格式处理
+- 目录遍历和文件系统操作
+- 配置文件管理和日志系统
 
-## 基本文件操作
+## 文件操作概念
 
-### 文件读取
+### Go语言I/O体系
+
+Go的I/O系统基于接口设计，核心是`io.Reader`和`io.Writer`：
+
+- **Reader接口**：从数据源读取数据的通用接口
+- **Writer接口**：向数据目标写入数据的通用接口
+- **组合接口**：ReadWriter、ReadCloser等组合功能
+- **缓冲I/O**：bufio包提供缓冲读写功能
+
+### 文件操作优势
+
+| 特性 | 说明 | 优势 |
+|------|------|------|
+| **接口统一** | 统一的Reader/Writer接口 | 代码复用性高 |
+| **错误处理** | 显式错误返回 | 错误处理清晰 |
+| **性能优化** | 支持缓冲和并发 | 高效处理大文件 |
+| **跨平台** | 统一的文件路径API | 跨平台兼容性好 |
+
+::: tip 设计原则
+Go文件操作遵循"简单、显式、高效"的设计理念：
+- 使用接口抽象I/O操作
+- 显式处理错误和资源管理
+- 支持流式处理大文件
+:::
+
+## 文件基础操作
+
+### 文件读写基础
 
 ```go
 package main
 
 import (
-    "bufio"
     "fmt"
     "io"
-    "log"
     "os"
     "strings"
 )
 
-func main() {
-    // 方法1：一次性读取整个文件
-    readWholeFile()
-    
-    // 方法2：逐行读取文件
-    readFileLineByLine()
-    
-    // 方法3：读取固定大小的块
-    readFileInChunks()
-}
-
-// 一次性读取整个文件
-func readWholeFile() {
-    fmt.Println("=== 一次性读取整个文件 ===")
-    
-    // 使用 os.ReadFile (Go 1.16+)
-    content, err := os.ReadFile("example.txt")
-    if err != nil {
-        log.Printf("读取文件失败: %v", err)
-        
-        // 创建示例文件
-        createExampleFile()
-        content, err = os.ReadFile("example.txt")
-        if err != nil {
-            log.Fatal(err)
-        }
-    }
-    
-    fmt.Printf("文件内容:\n%s\n", string(content))
-    fmt.Printf("文件大小: %d 字节\n\n", len(content))
-}
-
-// 逐行读取文件
-func readFileLineByLine() {
-    fmt.Println("=== 逐行读取文件 ===")
-    
-    file, err := os.Open("example.txt")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    scanner := bufio.NewScanner(file)
-    lineNum := 1
-    
-    for scanner.Scan() {
-        line := scanner.Text()
-        fmt.Printf("第%d行: %s\n", lineNum, line)
-        lineNum++
-    }
-    
-    if err := scanner.Err(); err != nil {
-        log.Printf("读取文件时出错: %v", err)
-    }
-    fmt.Println()
-}
-
-// 读取固定大小的块
-func readFileInChunks() {
-    fmt.Println("=== 分块读取文件 ===")
-    
-    file, err := os.Open("example.txt")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    buffer := make([]byte, 32) // 每次读取32字节
-    chunkNum := 1
-    
-    for {
-        n, err := file.Read(buffer)
-        if err != nil {
-            if err == io.EOF {
-                fmt.Println("文件读取完成")
-                break
-            }
-            log.Fatal(err)
-        }
-        
-        fmt.Printf("第%d块 (%d字节): %q\n", chunkNum, n, string(buffer[:n]))
-        chunkNum++
-    }
-    fmt.Println()
-}
-
-// 创建示例文件
-func createExampleFile() {
-    content := `Go语言文件操作示例
-这是第二行内容
-包含中文和English混合内容
-数字: 12345
-特殊字符: !@#$%^&*()`
+// 基础文件操作
+func basicFileOperations() {
+    // 写入文件
+    content := "Hello, Go 文件操作!\n学习Go语言文件处理。"
     
     err := os.WriteFile("example.txt", []byte(content), 0644)
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("写入文件失败: %v\n", err)
+        return
     }
-    fmt.Println("已创建示例文件: example.txt")
-}
-```
-
-### 文件写入
-
-```go
-package main
-
-import (
-    "bufio"
-    "fmt"
-    "log"
-    "os"
-    "time"
-)
-
-func main() {
-    // 方法1：一次性写入文件
-    writeWholeFile()
+    fmt.Println("✅ 文件写入成功")
     
-    // 方法2：逐行写入文件
-    writeFileLineByLine()
-    
-    // 方法3：追加内容到文件
-    appendToFile()
-    
-    // 方法4：使用缓冲写入
-    writeWithBuffer()
-}
-
-// 一次性写入文件
-func writeWholeFile() {
-    fmt.Println("=== 一次性写入文件 ===")
-    
-    content := fmt.Sprintf(`文件写入测试
-当前时间: %s
-Go语言版本: 1.21
-测试内容包含多行数据`, time.Now().Format("2006-01-02 15:04:05"))
-    
-    err := os.WriteFile("output.txt", []byte(content), 0644)
+    // 读取文件
+    data, err := os.ReadFile("example.txt")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("读取文件失败: %v\n", err)
+        return
     }
+    fmt.Printf("📄 文件内容:\n%s\n", string(data))
     
-    fmt.Println("已写入文件: output.txt")
-    
-    // 验证写入结果
-    readContent, _ := os.ReadFile("output.txt")
-    fmt.Printf("写入内容:\n%s\n\n", string(readContent))
+    // 检查文件是否存在
+    if _, err := os.Stat("example.txt"); err == nil {
+        fmt.Println("✅ 文件存在")
+    } else if os.IsNotExist(err) {
+        fmt.Println("❌ 文件不存在")
+    }
 }
 
-// 逐行写入文件
-func writeFileLineByLine() {
-    fmt.Println("=== 逐行写入文件 ===")
-    
-    file, err := os.Create("lines.txt")
+// 使用File对象操作
+func fileObjectOperations() {
+    // 创建文件
+    file, err := os.Create("advanced_example.txt")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("创建文件失败: %v\n", err)
+        return
     }
     defer file.Close()
     
+    // 写入多行数据
     lines := []string{
         "第一行数据",
-        "第二行: 包含数字 123",
-        "第三行: 包含特殊字符 !@#",
-        "第四行: English content",
-        "第五行: 最后一行",
+        "第二行数据", 
+        "第三行数据",
     }
     
     for i, line := range lines {
-        _, err := fmt.Fprintf(file, "%d. %s\n", i+1, line)
+        _, err := file.WriteString(fmt.Sprintf("%d: %s\n", i+1, line))
         if err != nil {
-            log.Fatal(err)
+            fmt.Printf("写入失败: %v\n", err)
+            return
         }
     }
     
-    fmt.Println("已逐行写入文件: lines.txt")
-    
-    // 验证结果
-    content, _ := os.ReadFile("lines.txt")
-    fmt.Printf("文件内容:\n%s\n", string(content))
+    fmt.Println("✅ 高级文件操作完成")
 }
 
-// 追加内容到文件
-func appendToFile() {
-    fmt.Println("=== 追加内容到文件 ===")
-    
-    file, err := os.OpenFile("lines.txt", os.O_APPEND|os.O_WRONLY, 0644)
+// 流式读取处理大文件
+func streamReading() {
+    file, err := os.Open("advanced_example.txt")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("打开文件失败: %v\n", err)
+        return
     }
     defer file.Close()
     
-    appendLines := []string{
-        "追加行1: 新增内容",
-        "追加行2: " + time.Now().Format("15:04:05"),
-        "追加行3: 追加操作完成",
+    // 逐行读取
+    content, err := io.ReadAll(file)
+    if err != nil {
+        fmt.Printf("读取失败: %v\n", err)
+        return
     }
     
-    for _, line := range appendLines {
-        _, err := fmt.Fprintf(file, "%s\n", line)
-        if err != nil {
-            log.Fatal(err)
+    lines := strings.Split(string(content), "\n")
+    fmt.Println("📖 逐行读取结果:")
+    for _, line := range lines {
+        if line != "" {
+            fmt.Printf("  %s\n", line)
         }
     }
-    
-    fmt.Println("已追加内容到文件: lines.txt")
-    
-    // 验证结果
-    content, _ := os.ReadFile("lines.txt")
-    fmt.Printf("追加后的文件内容:\n%s\n", string(content))
 }
+```
 
-// 使用缓冲写入
-func writeWithBuffer() {
-    fmt.Println("=== 使用缓冲写入 ===")
-    
-    file, err := os.Create("buffered.txt")
+### 缓冲I/O操作
+
+使用bufio包提升大文件处理性能：
+
+```go
+import (
+    "bufio"
+    "fmt"
+    "os"
+)
+
+func bufferedFileOperations() {
+    // 缓冲写入
+    file, err := os.Create("buffered_output.txt")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("创建文件失败: %v\n", err)
+        return
     }
     defer file.Close()
     
     writer := bufio.NewWriter(file)
-    defer writer.Flush() // 确保缓冲区内容被写入
+    defer writer.Flush() // 确保缓冲区内容写入文件
     
     // 写入大量数据
     for i := 1; i <= 1000; i++ {
-        line := fmt.Sprintf("第%d行: 这是缓冲写入测试数据 - %s\n", 
-            i, time.Now().Format("15:04:05.000"))
-        _, err := writer.WriteString(line)
+        _, err := writer.WriteString(fmt.Sprintf("行 %d: 这是测试数据\n", i))
         if err != nil {
-            log.Fatal(err)
-        }
-        
-        // 每100行手动刷新缓冲区
-        if i%100 == 0 {
-            writer.Flush()
-            fmt.Printf("已写入 %d 行\n", i)
+            fmt.Printf("写入失败: %v\n", err)
+            return
         }
     }
     
-    fmt.Println("缓冲写入完成: buffered.txt")
+    fmt.Println("✅ 缓冲写入完成")
     
-    // 检查文件大小
-    info, _ := os.Stat("buffered.txt")
-    fmt.Printf("文件大小: %d 字节\n\n", info.Size())
+    // 缓冲读取
+    readFile, err := os.Open("buffered_output.txt")
+    if err != nil {
+        fmt.Printf("打开文件失败: %v\n", err)
+        return
+    }
+    defer readFile.Close()
+    
+    scanner := bufio.NewScanner(readFile)
+    lineCount := 0
+    
+    for scanner.Scan() {
+        lineCount++
+        // 只显示前5行和后5行
+        if lineCount <= 5 || lineCount > 995 {
+            fmt.Printf("第%d行: %s\n", lineCount, scanner.Text())
+        } else if lineCount == 6 {
+            fmt.Println("... (省略中间行) ...")
+        }
+    }
+    
+    if err := scanner.Err(); err != nil {
+        fmt.Printf("扫描文件失败: %v\n", err)
+        return
+    }
+    
+    fmt.Printf("✅ 总共读取 %d 行\n", lineCount)
 }
 ```
 
-## 目录操作
+## 路径和目录操作
 
-### 目录遍历和管理
+### 路径处理
 
 ```go
-package main
-
 import (
     "fmt"
-    "io/fs"
-    "log"
-    "os"
     "path/filepath"
-    "time"
+    "os"
 )
 
-func main() {
-    // 创建测试目录结构
-    createTestDirectories()
+func pathOperations() {
+    // 路径拼接（跨平台）
+    path := filepath.Join("data", "users", "profile.json")
+    fmt.Printf("拼接路径: %s\n", path)
     
-    // 目录基本操作
-    directoryBasicOps()
+    // 获取路径信息
+    dir := filepath.Dir(path)
+    base := filepath.Base(path)
+    ext := filepath.Ext(path)
     
-    // 遍历目录
-    walkDirectory()
+    fmt.Printf("目录: %s\n", dir)
+    fmt.Printf("文件名: %s\n", base)
+    fmt.Printf("扩展名: %s\n", ext)
     
-    // 查找特定文件
-    findFiles()
+    // 绝对路径
+    abs, err := filepath.Abs(path)
+    if err == nil {
+        fmt.Printf("绝对路径: %s\n", abs)
+    }
     
-    // 计算目录大小
-    calculateDirSize()
-    
-    // 清理测试目录
-    cleanup()
+    // 清理路径
+    cleanPath := filepath.Clean("./data//users/../users/./profile.json")
+    fmt.Printf("清理后路径: %s\n", cleanPath)
 }
 
-// 创建测试目录结构
-func createTestDirectories() {
-    fmt.Println("=== 创建测试目录结构 ===")
-    
-    dirs := []string{
-        "testdir",
-        "testdir/subdir1",
-        "testdir/subdir2",
-        "testdir/subdir1/deep",
-        "testdir/files",
-    }
-    
-    for _, dir := range dirs {
-        err := os.MkdirAll(dir, 0755)
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Printf("创建目录: %s\n", dir)
-    }
-    
-    // 创建一些测试文件
-    files := map[string]string{
-        "testdir/readme.txt":           "这是说明文件",
-        "testdir/subdir1/data.json":    `{"name": "test", "value": 123}`,
-        "testdir/subdir1/deep/log.txt": "深层目录中的日志文件",
-        "testdir/subdir2/config.yaml":  "config:\n  debug: true",
-        "testdir/files/image.jpg":      "fake image data",
-        "testdir/files/document.pdf":   "fake pdf data",
-    }
-    
-    for path, content := range files {
-        err := os.WriteFile(path, []byte(content), 0644)
-        if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Printf("创建文件: %s\n", path)
-    }
-    fmt.Println()
-}
-
-// 目录基本操作
-func directoryBasicOps() {
-    fmt.Println("=== 目录基本操作 ===")
-    
-    // 获取当前工作目录
-    pwd, err := os.Getwd()
+func directoryOperations() {
+    // 创建目录
+    err := os.MkdirAll("data/users/temp", 0755)
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("创建目录失败: %v\n", err)
+        return
     }
-    fmt.Printf("当前工作目录: %s\n", pwd)
+    fmt.Println("✅ 目录创建成功")
     
-    // 检查目录是否存在
-    if _, err := os.Stat("testdir"); err == nil {
-        fmt.Println("testdir 目录存在")
-    } else if os.IsNotExist(err) {
-        fmt.Println("testdir 目录不存在")
-    }
-    
-    // 读取目录内容
-    entries, err := os.ReadDir("testdir")
+    // 列出目录内容
+    entries, err := os.ReadDir("data")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("读取目录失败: %v\n", err)
+        return
     }
     
-    fmt.Println("testdir 目录内容:")
+    fmt.Println("📁 目录内容:")
     for _, entry := range entries {
         if entry.IsDir() {
-            fmt.Printf("  %s/\n", entry.Name())
+            fmt.Printf("  📁 %s/\n", entry.Name())
         } else {
-            info, _ := entry.Info()
-            fmt.Printf("  %s (%d bytes)\n", entry.Name(), info.Size())
+            fmt.Printf("  📄 %s\n", entry.Name())
         }
     }
-    fmt.Println()
+    
+    // 删除目录
+    err = os.RemoveAll("data/users/temp")
+    if err != nil {
+        fmt.Printf("删除目录失败: %v\n", err)
+    } else {
+        fmt.Println("✅ 临时目录已删除")
+    }
 }
+```
 
-// 遍历目录
+### 文件遍历
+
+```go
 func walkDirectory() {
-    fmt.Println("=== 遍历目录 ===")
+    fmt.Println("🚶 遍历当前目录:")
     
-    err := filepath.WalkDir("testdir", func(path string, d fs.DirEntry, err error) error {
+    err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
         if err != nil {
             return err
         }
         
-        // 计算缩进级别
-        level := len(filepath.SplitList(path)) - 1
-        indent := ""
-        for i := 0; i < level; i++ {
-            indent += "  "
+        // 跳过隐藏文件和目录
+        if strings.HasPrefix(info.Name(), ".") {
+            if info.IsDir() {
+                return filepath.SkipDir
+            }
+            return nil
         }
         
-        if d.IsDir() {
-            fmt.Printf("%s%s/\n", indent, d.Name())
+        if info.IsDir() {
+            fmt.Printf("📁 %s/\n", path)
         } else {
-            info, _ := d.Info()
-            fmt.Printf("%s%s (%d bytes, %s)\n", 
-                indent, d.Name(), info.Size(), info.ModTime().Format("15:04:05"))
+            size := info.Size()
+            modTime := info.ModTime().Format("2006-01-02 15:04:05")
+            fmt.Printf("📄 %s (大小: %d字节, 修改时间: %s)\n", path, size, modTime)
         }
         
         return nil
     })
     
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("遍历目录失败: %v\n", err)
     }
-    fmt.Println()
-}
-
-// 查找特定文件
-func findFiles() {
-    fmt.Println("=== 查找特定文件 ===")
-    
-    // 查找所有 .txt 文件
-    txtFiles := []string{}
-    err := filepath.WalkDir("testdir", func(path string, d fs.DirEntry, err error) error {
-        if err != nil {
-            return err
-        }
-        
-        if !d.IsDir() && filepath.Ext(path) == ".txt" {
-            txtFiles = append(txtFiles, path)
-        }
-        
-        return nil
-    })
-    
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("找到的 .txt 文件:")
-    for _, file := range txtFiles {
-        info, _ := os.Stat(file)
-        fmt.Printf("  %s (%d bytes)\n", file, info.Size())
-    }
-    
-    // 使用 Glob 模式匹配
-    matches, err := filepath.Glob("testdir/**/*.json")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("找到的 .json 文件 (使用Glob):")
-    for _, match := range matches {
-        fmt.Printf("  %s\n", match)
-    }
-    fmt.Println()
-}
-
-// 计算目录大小
-func calculateDirSize() {
-    fmt.Println("=== 计算目录大小 ===")
-    
-    var totalSize int64
-    fileCount := 0
-    dirCount := 0
-    
-    err := filepath.WalkDir("testdir", func(path string, d fs.DirEntry, err error) error {
-        if err != nil {
-            return err
-        }
-        
-        if d.IsDir() {
-            dirCount++
-        } else {
-            info, _ := d.Info()
-            totalSize += info.Size()
-            fileCount++
-        }
-        
-        return nil
-    })
-    
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("目录统计:\n")
-    fmt.Printf("  总大小: %d 字节\n", totalSize)
-    fmt.Printf("  文件数: %d\n", fileCount)
-    fmt.Printf("  目录数: %d\n", dirCount)
-    fmt.Println()
-}
-
-// 清理测试目录
-func cleanup() {
-    fmt.Println("=== 清理测试目录 ===")
-    
-    err := os.RemoveAll("testdir")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    // 清理其他测试文件
-    testFiles := []string{"output.txt", "lines.txt", "buffered.txt", "example.txt"}
-    for _, file := range testFiles {
-        os.Remove(file) // 忽略错误，文件可能不存在
-    }
-    
-    fmt.Println("清理完成")
 }
 ```
 
 ## 数据格式处理
 
-### JSON 数据处理
+### JSON处理
 
 ```go
-package main
-
 import (
     "encoding/json"
     "fmt"
-    "log"
     "os"
     "time"
 )
 
-// 用户结构体
 type User struct {
-    ID       int       `json:"id"`
-    Name     string    `json:"name"`
-    Email    string    `json:"email"`
-    Age      int       `json:"age"`
-    IsActive bool      `json:"is_active"`
-    Created  time.Time `json:"created_at"`
-    Profile  Profile   `json:"profile"`
-    Tags     []string  `json:"tags"`
+    ID        int       `json:"id"`
+    Name      string    `json:"name"`
+    Email     string    `json:"email"`
+    Age       int       `json:"age"`
+    IsActive  bool      `json:"is_active"`
+    CreatedAt time.Time `json:"created_at"`
+    Tags      []string  `json:"tags"`
 }
 
-// 用户资料结构体
-type Profile struct {
-    Bio     string `json:"bio"`
-    Website string `json:"website,omitempty"`
-    Company string `json:"company,omitempty"`
-}
-
-func main() {
-    // JSON编码和解码
-    jsonEncodeAndDecode()
-    
-    // 读写JSON文件
-    jsonFileOperations()
-    
-    // 处理动态JSON
-    handleDynamicJSON()
-    
-    // JSON流处理
-    jsonStreamProcessing()
-}
-
-// JSON编码和解码
-func jsonEncodeAndDecode() {
-    fmt.Println("=== JSON编码和解码 ===")
-    
-    // 创建示例用户
-    user := User{
-        ID:       1,
-        Name:     "张三",
-        Email:    "zhangsan@example.com",
-        Age:      28,
-        IsActive: true,
-        Created:  time.Now(),
-        Profile: Profile{
-            Bio:     "Go语言开发者",
-            Website: "https://example.com",
-            Company: "科技公司",
-        },
-        Tags: []string{"golang", "backend", "microservices"},
-    }
-    
-    // 编码为JSON
-    jsonData, err := json.MarshalIndent(user, "", "  ")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("JSON编码结果:\n%s\n\n", string(jsonData))
-    
-    // 解码JSON
-    var decodedUser User
-    err = json.Unmarshal(jsonData, &decodedUser)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("解码后的用户信息:\n")
-    fmt.Printf("姓名: %s\n", decodedUser.Name)
-    fmt.Printf("邮箱: %s\n", decodedUser.Email)
-    fmt.Printf("年龄: %d\n", decodedUser.Age)
-    fmt.Printf("创建时间: %s\n", decodedUser.Created.Format("2006-01-02 15:04:05"))
-    fmt.Printf("标签: %v\n\n", decodedUser.Tags)
-}
-
-// 读写JSON文件
-func jsonFileOperations() {
-    fmt.Println("=== 读写JSON文件 ===")
-    
-    // 创建多个用户
+func jsonOperations() {
+    // 创建示例数据
     users := []User{
         {
-            ID: 1, Name: "张三", Email: "zhangsan@example.com", Age: 28, IsActive: true,
-            Created: time.Now(),
-            Profile: Profile{Bio: "Go开发者", Company: "A公司"},
-            Tags:    []string{"golang", "backend"},
+            ID:        1,
+            Name:      "张三",
+            Email:     "zhangsan@example.com",
+            Age:       25,
+            IsActive:  true,
+            CreatedAt: time.Now(),
+            Tags:      []string{"开发者", "Go语言"},
         },
         {
-            ID: 2, Name: "李四", Email: "lisi@example.com", Age: 32, IsActive: false,
-            Created: time.Now().Add(-24 * time.Hour),
-            Profile: Profile{Bio: "前端开发者", Company: "B公司"},
-            Tags:    []string{"javascript", "react"},
-        },
-        {
-            ID: 3, Name: "王五", Email: "wangwu@example.com", Age: 25, IsActive: true,
-            Created: time.Now().Add(-48 * time.Hour),
-            Profile: Profile{Bio: "全栈开发者", Website: "https://wangwu.dev"},
-            Tags:    []string{"golang", "javascript", "python"},
+            ID:        2,
+            Name:      "李四",
+            Email:     "lisi@example.com",
+            Age:       30,
+            IsActive:  false,
+            CreatedAt: time.Now().Add(-24 * time.Hour),
+            Tags:      []string{"设计师", "UI/UX"},
         },
     }
     
-    // 写入JSON文件
-    jsonData, err := json.MarshalIndent(users, "", "  ")
+    // JSON编码并写入文件
+    file, err := os.Create("users.json")
     if err != nil {
-        log.Fatal(err)
-    }
-    
-    err = os.WriteFile("users.json", jsonData, 0644)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("已写入用户数据到 users.json")
-    
-    // 读取JSON文件
-    fileData, err := os.ReadFile("users.json")
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    var loadedUsers []User
-    err = json.Unmarshal(fileData, &loadedUsers)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Printf("从文件加载了 %d 个用户:\n", len(loadedUsers))
-    for _, user := range loadedUsers {
-        fmt.Printf("- %s (%s) - 活跃: %t\n", user.Name, user.Email, user.IsActive)
-    }
-    fmt.Println()
-}
-
-// 处理动态JSON
-func handleDynamicJSON() {
-    fmt.Println("=== 处理动态JSON ===")
-    
-    // 模拟接收到的动态JSON数据
-    dynamicJSON := `{
-        "event": "user_login",
-        "timestamp": "2024-01-15T10:30:00Z",
-        "user_id": 123,
-        "metadata": {
-            "ip": "192.168.1.100",
-            "user_agent": "Mozilla/5.0...",
-            "platform": "web"
-        },
-        "properties": {
-            "login_method": "email",
-            "remember_me": true,
-            "session_duration": 3600
-        }
-    }`
-    
-    // 使用 map[string]interface{} 处理动态JSON
-    var data map[string]interface{}
-    err := json.Unmarshal([]byte(dynamicJSON), &data)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    fmt.Println("动态JSON解析结果:")
-    fmt.Printf("事件类型: %s\n", data["event"])
-    fmt.Printf("用户ID: %.0f\n", data["user_id"])
-    
-    // 处理嵌套对象
-    if metadata, ok := data["metadata"].(map[string]interface{}); ok {
-        fmt.Printf("IP地址: %s\n", metadata["ip"])
-        fmt.Printf("平台: %s\n", metadata["platform"])
-    }
-    
-    // 处理不同类型的值
-    if properties, ok := data["properties"].(map[string]interface{}); ok {
-        for key, value := range properties {
-            fmt.Printf("属性 %s: %v (类型: %T)\n", key, value, value)
-        }
-    }
-    fmt.Println()
-}
-
-// JSON流处理
-func jsonStreamProcessing() {
-    fmt.Println("=== JSON流处理 ===")
-    
-    // 创建大量数据进行流处理演示
-    file, err := os.Create("stream_data.json")
-    if err != nil {
-        log.Fatal(err)
+        fmt.Printf("创建JSON文件失败: %v\n", err)
+        return
     }
     defer file.Close()
     
     encoder := json.NewEncoder(file)
+    encoder.SetIndent("", "  ") // 格式化输出
     
-    // 写入JSON数组的开始
-    file.WriteString("[\n")
-    
-    // 流式写入多个JSON对象
-    for i := 1; i <= 5; i++ {
-        user := User{
-            ID:       i,
-            Name:     fmt.Sprintf("用户%d", i),
-            Email:    fmt.Sprintf("user%d@example.com", i),
-            Age:      20 + i*2,
-            IsActive: i%2 == 1,
-            Created:  time.Now().Add(time.Duration(-i) * time.Hour),
-            Profile: Profile{
-                Bio: fmt.Sprintf("这是用户%d的简介", i),
-            },
-            Tags: []string{fmt.Sprintf("tag%d", i)},
-        }
-        
-        if i > 1 {
-            file.WriteString(",\n")
-        }
-        
-        // 使用encoder写入，但不包含数组括号
-        userData, _ := json.MarshalIndent(user, "  ", "  ")
-        file.WriteString("  " + string(userData))
-    }
-    
-    file.WriteString("\n]")
-    
-    fmt.Println("已创建流数据文件: stream_data.json")
-    
-    // 流式读取JSON数据
-    file, err = os.Open("stream_data.json")
+    err = encoder.Encode(users)
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("JSON编码失败: %v\n", err)
+        return
     }
-    defer file.Close()
     
-    decoder := json.NewDecoder(file)
+    fmt.Println("✅ JSON文件写入成功")
     
-    // 读取数组开始标记
-    token, err := decoder.Token()
+    // 从文件读取JSON
+    readFile, err := os.Open("users.json")
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("打开JSON文件失败: %v\n", err)
+        return
     }
-    fmt.Printf("开始标记: %v\n", token)
+    defer readFile.Close()
     
-    userCount := 0
-    // 逐个读取用户对象
-    for decoder.More() {
-        var user User
-        err := decoder.Decode(&user)
-        if err != nil {
-            log.Fatal(err)
-        }
-        
-        userCount++
-        fmt.Printf("流式读取用户%d: %s (%s)\n", 
-            userCount, user.Name, user.Email)
-    }
+    var loadedUsers []User
+    decoder := json.NewDecoder(readFile)
     
-    // 读取数组结束标记
-    token, err = decoder.Token()
+    err = decoder.Decode(&loadedUsers)
     if err != nil {
-        log.Fatal(err)
+        fmt.Printf("JSON解码失败: %v\n", err)
+        return
     }
-    fmt.Printf("结束标记: %v\n", token)
     
-    // 清理文件
-    os.Remove("users.json")
-    os.Remove("stream_data.json")
-    fmt.Println()
+    fmt.Printf("📄 读取到 %d 个用户:\n", len(loadedUsers))
+    for _, user := range loadedUsers {
+        fmt.Printf("  - %s (%s) - 活跃: %t\n", user.Name, user.Email, user.IsActive)
+    }
 }
 ```
 
-##  CSV 和 XML 处理
+### CSV处理
 
-### CSV 文件处理
+```go
+import (
+    "encoding/csv"
+    "fmt"
+    "os"
+    "strconv"
+)
+
+type Product struct {
+    ID       int
+    Name     string
+    Price    float64
+    Category string
+    InStock  bool
+}
+
+func csvOperations() {
+    // 创建CSV数据
+    products := []Product{
+        {1, "Go语言编程", 89.90, "图书", true},
+        {2, "MacBook Pro", 12999.00, "电脑", false},
+        {3, "无线鼠标", 199.00, "配件", true},
+        {4, "机械键盘", 599.00, "配件", true},
+    }
+    
+    // 写入CSV文件
+    file, err := os.Create("products.csv")
+    if err != nil {
+        fmt.Printf("创建CSV文件失败: %v\n", err)
+        return
+    }
+    defer file.Close()
+    
+    writer := csv.NewWriter(file)
+    defer writer.Flush()
+    
+    // 写入表头
+    headers := []string{"ID", "名称", "价格", "分类", "库存"}
+    err = writer.Write(headers)
+    if err != nil {
+        fmt.Printf("写入CSV表头失败: %v\n", err)
+        return
+    }
+    
+    // 写入数据
+    for _, product := range products {
+        record := []string{
+            strconv.Itoa(product.ID),
+            product.Name,
+            fmt.Sprintf("%.2f", product.Price),
+            product.Category,
+            strconv.FormatBool(product.InStock),
+        }
+        
+        err = writer.Write(record)
+        if err != nil {
+            fmt.Printf("写入CSV数据失败: %v\n", err)
+            return
+        }
+    }
+    
+    fmt.Println("✅ CSV文件写入成功")
+    
+    // 读取CSV文件
+    readFile, err := os.Open("products.csv")
+    if err != nil {
+        fmt.Printf("打开CSV文件失败: %v\n", err)
+        return
+    }
+    defer readFile.Close()
+    
+    reader := csv.NewReader(readFile)
+    records, err := reader.ReadAll()
+    if err != nil {
+        fmt.Printf("读取CSV文件失败: %v\n", err)
+        return
+    }
+    
+    fmt.Printf("📊 CSV数据 (%d行):\n", len(records))
+    for i, record := range records {
+        if i == 0 {
+            fmt.Printf("表头: %v\n", record)
+        } else {
+            fmt.Printf("第%d行: %v\n", i, record)
+        }
+    }
+}
+```
+
+## 实战项目：配置管理系统
+
+让我们构建一个完整的配置文件管理系统：
 
 ```go
 package main
 
 import (
-    "encoding/csv"
+    "bufio"
+    "encoding/json"
     "fmt"
-    "log"
     "os"
+    "path/filepath"
     "strconv"
     "strings"
+    "time"
 )
 
-// 学生结构体
-type Student struct {
-    ID     int
-    Name   string
-    Age    int
-    Grade  string
-    Score  float64
-    Active bool
+// 配置结构
+type AppConfig struct {
+    Server   ServerConfig   `json:"server"`
+    Database DatabaseConfig `json:"database"`
+    Logging  LoggingConfig  `json:"logging"`
+    Features FeatureConfig  `json:"features"`
+}
+
+type ServerConfig struct {
+    Host         string `json:"host"`
+    Port         int    `json:"port"`
+    ReadTimeout  int    `json:"read_timeout"`
+    WriteTimeout int    `json:"write_timeout"`
+}
+
+type DatabaseConfig struct {
+    Host     string `json:"host"`
+    Port     int    `json:"port"`
+    Username string `json:"username"`
+    Password string `json:"password"`
+    Database string `json:"database"`
+    MaxConns int    `json:"max_connections"`
+}
+
+type LoggingConfig struct {
+    Level    string `json:"level"`
+    File     string `json:"file"`
+    MaxSize  int    `json:"max_size_mb"`
+    MaxFiles int    `json:"max_files"`
+}
+
+type FeatureConfig struct {
+    EnableCache   bool     `json:"enable_cache"`
+    EnableMetrics bool     `json:"enable_metrics"`
+    AllowedHosts  []string `json:"allowed_hosts"`
+}
+
+// 配置管理器
+type ConfigManager struct {
+    configPath string
+    config     *AppConfig
+}
+
+func NewConfigManager(configPath string) *ConfigManager {
+    return &ConfigManager{
+        configPath: configPath,
+    }
+}
+
+// 创建默认配置
+func (cm *ConfigManager) CreateDefaultConfig() *AppConfig {
+    return &AppConfig{
+        Server: ServerConfig{
+            Host:         "localhost",
+            Port:         8080,
+            ReadTimeout:  15,
+            WriteTimeout: 15,
+        },
+        Database: DatabaseConfig{
+            Host:     "localhost",
+            Port:     5432,
+            Username: "app_user",
+            Password: "your_password",
+            Database: "app_db",
+            MaxConns: 10,
+        },
+        Logging: LoggingConfig{
+            Level:    "info",
+            File:     "logs/app.log",
+            MaxSize:  100,
+            MaxFiles: 5,
+        },
+        Features: FeatureConfig{
+            EnableCache:   true,
+            EnableMetrics: false,
+            AllowedHosts:  []string{"localhost", "127.0.0.1"},
+        },
+    }
+}
+
+// 确保配置目录存在
+func (cm *ConfigManager) ensureConfigDir() error {
+    dir := filepath.Dir(cm.configPath)
+    return os.MkdirAll(dir, 0755)
+}
+
+// 保存配置到文件
+func (cm *ConfigManager) SaveConfig(config *AppConfig) error {
+    if err := cm.ensureConfigDir(); err != nil {
+        return fmt.Errorf("创建配置目录失败: %v", err)
+    }
+    
+    file, err := os.Create(cm.configPath)
+    if err != nil {
+        return fmt.Errorf("创建配置文件失败: %v", err)
+    }
+    defer file.Close()
+    
+    encoder := json.NewEncoder(file)
+    encoder.SetIndent("", "  ")
+    
+    if err := encoder.Encode(config); err != nil {
+        return fmt.Errorf("编码配置失败: %v", err)
+    }
+    
+    cm.config = config
+    return nil
+}
+
+// 从文件加载配置
+func (cm *ConfigManager) LoadConfig() (*AppConfig, error) {
+    file, err := os.Open(cm.configPath)
+    if err != nil {
+        if os.IsNotExist(err) {
+            // 配置文件不存在，创建默认配置
+            fmt.Println("配置文件不存在，创建默认配置...")
+            defaultConfig := cm.CreateDefaultConfig()
+            if err := cm.SaveConfig(defaultConfig); err != nil {
+                return nil, err
+            }
+            return defaultConfig, nil
+        }
+        return nil, fmt.Errorf("打开配置文件失败: %v", err)
+    }
+    defer file.Close()
+    
+    var config AppConfig
+    decoder := json.NewDecoder(file)
+    
+    if err := decoder.Decode(&config); err != nil {
+        return nil, fmt.Errorf("解码配置失败: %v", err)
+    }
+    
+    cm.config = &config
+    return &config, nil
+}
+
+// 备份配置文件
+func (cm *ConfigManager) BackupConfig() error {
+    if cm.config == nil {
+        return fmt.Errorf("没有加载的配置")
+    }
+    
+    timestamp := time.Now().Format("20060102_150405")
+    backupPath := cm.configPath + ".backup." + timestamp
+    
+    sourceFile, err := os.Open(cm.configPath)
+    if err != nil {
+        return fmt.Errorf("打开源配置文件失败: %v", err)
+    }
+    defer sourceFile.Close()
+    
+    backupFile, err := os.Create(backupPath)
+    if err != nil {
+        return fmt.Errorf("创建备份文件失败: %v", err)
+    }
+    defer backupFile.Close()
+    
+    _, err = backupFile.ReadFrom(sourceFile)
+    if err != nil {
+        return fmt.Errorf("复制配置文件失败: %v", err)
+    }
+    
+    fmt.Printf("✅ 配置已备份到: %s\n", backupPath)
+    return nil
+}
+
+// 验证配置
+func (cm *ConfigManager) ValidateConfig(config *AppConfig) []string {
+    var issues []string
+    
+    // 验证服务器配置
+    if config.Server.Port <= 0 || config.Server.Port > 65535 {
+        issues = append(issues, "服务器端口无效")
+    }
+    
+    if config.Server.Host == "" {
+        issues = append(issues, "服务器主机地址为空")
+    }
+    
+    // 验证数据库配置
+    if config.Database.Username == "" {
+        issues = append(issues, "数据库用户名为空")
+    }
+    
+    if config.Database.Port <= 0 || config.Database.Port > 65535 {
+        issues = append(issues, "数据库端口无效")
+    }
+    
+    // 验证日志配置
+    validLevels := []string{"debug", "info", "warn", "error"}
+    levelValid := false
+    for _, level := range validLevels {
+        if config.Logging.Level == level {
+            levelValid = true
+            break
+        }
+    }
+    if !levelValid {
+        issues = append(issues, "日志级别无效")
+    }
+    
+    return issues
+}
+
+// 交互式配置编辑器演示
+func demonstrateConfigManager() {
+    fmt.Println("🔧 配置管理系统演示")
+    fmt.Println("================")
+    
+    // 创建配置管理器
+    manager := NewConfigManager("config/app.json")
+    
+    // 加载配置
+    config, err := manager.LoadConfig()
+    if err != nil {
+        fmt.Printf("加载配置失败: %v\n", err)
+        return
+    }
+    
+    fmt.Println("📄 当前配置:")
+    fmt.Printf("服务器: %s:%d\n", config.Server.Host, config.Server.Port)
+    fmt.Printf("数据库: %s:%d/%s\n", config.Database.Host, config.Database.Port, config.Database.Database)
+    fmt.Printf("日志级别: %s\n", config.Logging.Level)
+    fmt.Printf("缓存启用: %t\n", config.Features.EnableCache)
+    
+    // 验证配置
+    if issues := manager.ValidateConfig(config); len(issues) > 0 {
+        fmt.Println("\n⚠️ 配置验证问题:")
+        for _, issue := range issues {
+            fmt.Printf("  - %s\n", issue)
+        }
+    } else {
+        fmt.Println("\n✅ 配置验证通过")
+    }
+    
+    // 备份配置
+    manager.BackupConfig()
+}
+
+// 日志管理器
+type LogManager struct {
+    logFile string
+}
+
+func NewLogManager(logFile string) *LogManager {
+    return &LogManager{logFile: logFile}
+}
+
+func (lm *LogManager) EnsureLogDir() error {
+    dir := filepath.Dir(lm.logFile)
+    return os.MkdirAll(dir, 0755)
+}
+
+func (lm *LogManager) WriteLog(level, message string) error {
+    if err := lm.EnsureLogDir(); err != nil {
+        return err
+    }
+    
+    file, err := os.OpenFile(lm.logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+    
+    timestamp := time.Now().Format("2006-01-02 15:04:05")
+    logEntry := fmt.Sprintf("[%s] %s: %s\n", timestamp, level, message)
+    
+    _, err = file.WriteString(logEntry)
+    return err
+}
+
+func (lm *LogManager) ReadRecentLogs(lines int) ([]string, error) {
+    file, err := os.Open(lm.logFile)
+    if err != nil {
+        return nil, err
+    }
+    defer file.Close()
+    
+    var allLines []string
+    scanner := bufio.NewScanner(file)
+    
+    for scanner.Scan() {
+        allLines = append(allLines, scanner.Text())
+    }
+    
+    if err := scanner.Err(); err != nil {
+        return nil, err
+    }
+    
+    // 返回最后N行
+    start := len(allLines) - lines
+    if start < 0 {
+        start = 0
+    }
+    
+    return allLines[start:], nil
 }
 
 func main() {
-    // CSV读写操作
-    csvOperations()
+    // 演示配置管理
+    demonstrateConfigManager()
     
-    // 处理大型CSV文件
-    processBigCSV()
+    // 演示日志功能
+    fmt.Println("\n📝 日志管理演示:")
+    logManager := NewLogManager("logs/app.log")
     
-    // CSV数据转换
-    csvDataConversion()
-}
-
-// CSV读写操作
-func csvOperations() {
-    fmt.Println("=== CSV读写操作 ===")
+    // 写入一些日志
+    logManager.WriteLog("INFO", "应用程序启动")
+    logManager.WriteLog("DEBUG", "加载配置文件")
+    logManager.WriteLog("ERROR", "数据库连接失败")
+    logManager.WriteLog("INFO", "重试数据库连接")
+    logManager.WriteLog("INFO", "应用程序就绪")
     
-    // 创建学生数据
-    students := []Student{
-        {1, "张三", 20, "A", 85.5, true},
-        {2, "李四", 19, "B", 92.0, true},
-        {3, "王五", 21, "A", 78.5, false},
-        {4, "赵六", 20, "C", 88.0, true},
-        {5, "钱七", 22, "B", 95.5, true},
-    }
-    
-    // 写入CSV文件
-    writeCSV(students)
-    
-    // 读取CSV文件
-    loadedStudents := readCSV()
-    
-    // 显示读取结果
-    fmt.Println("从CSV文件读取的学生数据:")
-    for _, student := range loadedStudents {
-        fmt.Printf("ID:%d, 姓名:%s, 年龄:%d, 等级:%s, 分数:%.1f, 活跃:%t\n",
-            student.ID, student.Name, student.Age, student.Grade, student.Score, student.Active)
-    }
-    fmt.Println()
-}
-
-// 写入CSV文件
-func writeCSV(students []Student) {
-    file, err := os.Create("students.csv")
+    // 读取最近的日志
+    recentLogs, err := logManager.ReadRecentLogs(3)
     if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    writer := csv.NewWriter(file)
-    defer writer.Flush()
-    
-    // 写入表头
-    header := []string{"ID", "姓名", "年龄", "等级", "分数", "活跃状态"}
-    err = writer.Write(header)
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    // 写入数据行
-    for _, student := range students {
-        record := []string{
-            strconv.Itoa(student.ID),
-            student.Name,
-            strconv.Itoa(student.Age),
-            student.Grade,
-            fmt.Sprintf("%.1f", student.Score),
-            strconv.FormatBool(student.Active),
-        }
-        
-        err = writer.Write(record)
-        if err != nil {
-            log.Fatal(err)
+        fmt.Printf("读取日志失败: %v\n", err)
+    } else {
+        fmt.Println("最近的日志记录:")
+        for _, log := range recentLogs {
+            fmt.Printf("  %s\n", log)
         }
     }
-    
-    fmt.Println("已写入学生数据到 students.csv")
-}
-
-// 读取CSV文件
-func readCSV() []Student {
-    file, err := os.Open("students.csv")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    reader := csv.NewReader(file)
-    records, err := reader.ReadAll()
-    if err != nil {
-        log.Fatal(err)
-    }
-    
-    var students []Student
-    
-    // 跳过表头，从第二行开始处理
-    for i, record := range records[1:] {
-        if len(record) != 6 {
-            fmt.Printf("第%d行数据格式错误: %v\n", i+2, record)
-            continue
-        }
-        
-        id, err := strconv.Atoi(record[0])
-        if err != nil {
-            fmt.Printf("第%d行ID转换错误: %v\n", i+2, err)
-            continue
-        }
-        
-        age, err := strconv.Atoi(record[2])
-        if err != nil {
-            fmt.Printf("第%d行年龄转换错误: %v\n", i+2, err)
-            continue
-        }
-        
-        score, err := strconv.ParseFloat(record[4], 64)
-        if err != nil {
-            fmt.Printf("第%d行分数转换错误: %v\n", i+2, err)
-            continue
-        }
-        
-        active, err := strconv.ParseBool(record[5])
-        if err != nil {
-            fmt.Printf("第%d行活跃状态转换错误: %v\n", i+2, err)
-            continue
-        }
-        
-        student := Student{
-            ID:     id,
-            Name:   record[1],
-            Age:    age,
-            Grade:  record[3],
-            Score:  score,
-            Active: active,
-        }
-        
-        students = append(students, student)
-    }
-    
-    return students
-}
-
-// 处理大型CSV文件
-func processBigCSV() {
-    fmt.Println("=== 处理大型CSV文件 ===")
-    
-    // 创建大型CSV文件用于演示
-    createBigCSV()
-    
-    // 流式处理大文件
-    file, err := os.Open("big_data.csv")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    reader := csv.NewReader(file)
-    
-    var totalScore float64
-    var count int
-    var highScoreCount int
-    
-    // 读取表头
-    header, err := reader.Read()
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("CSV表头: %v\n", header)
-    
-    // 逐行处理
-    for {
-        record, err := reader.Read()
-        if err != nil {
-            break // 文件结束
-        }
-        
-        count++
-        
-        // 解析分数
-        if len(record) >= 3 {
-            score, err := strconv.ParseFloat(record[2], 64)
-            if err == nil {
-                totalScore += score
-                if score >= 90 {
-                    highScoreCount++
-                }
-            }
-        }
-        
-        // 每处理1000行显示进度
-        if count%1000 == 0 {
-            fmt.Printf("已处理 %d 行...\n", count)
-        }
-    }
-    
-    // 统计结果
-    fmt.Printf("处理完成:\n")
-    fmt.Printf("  总行数: %d\n", count)
-    fmt.Printf("  平均分数: %.2f\n", totalScore/float64(count))
-    fmt.Printf("  高分(>=90)人数: %d\n", highScoreCount)
-    fmt.Printf("  高分比例: %.2f%%\n", float64(highScoreCount)/float64(count)*100)
-    
-    // 清理文件
-    os.Remove("big_data.csv")
-    fmt.Println()
-}
-
-// 创建大型CSV文件
-func createBigCSV() {
-    file, err := os.Create("big_data.csv")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer file.Close()
-    
-    writer := csv.NewWriter(file)
-    defer writer.Flush()
-    
-    // 写入表头
-    writer.Write([]string{"ID", "姓名", "分数"})
-    
-    // 写入5000行数据
-    for i := 1; i <= 5000; i++ {
-        record := []string{
-            strconv.Itoa(i),
-            fmt.Sprintf("学生%d", i),
-            fmt.Sprintf("%.1f", 60.0+float64(i%40)), // 分数在60-100之间
-        }
-        writer.Write(record)
-    }
-    
-    fmt.Println("已创建大型CSV文件: big_data.csv (5000行)")
-}
-
-// CSV数据转换
-func csvDataConversion() {
-    fmt.Println("=== CSV数据转换 ===")
-    
-    // 读取原始CSV
-    students := readCSV()
-    
-    // 数据统计和转换
-    gradeStats := make(map[string]int)
-    var totalScore float64
-    activeCount := 0
-    
-    for _, student := range students {
-        gradeStats[student.Grade]++
-        totalScore += student.Score
-        if student.Active {
-            activeCount++
-        }
-    }
-    
-    // 创建统计报告CSV
-    reportFile, err := os.Create("report.csv")
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer reportFile.Close()
-    
-    writer := csv.NewWriter(reportFile)
-    defer writer.Flush()
-    
-    // 写入统计报告
-    writer.Write([]string{"统计项", "数值"})
-    writer.Write([]string{"总学生数", strconv.Itoa(len(students))})
-    writer.Write([]string{"平均分数", fmt.Sprintf("%.2f", totalScore/float64(len(students)))})
-    writer.Write([]string{"活跃学生数", strconv.Itoa(activeCount)})
-    writer.Write([]string{"活跃比例", fmt.Sprintf("%.2f%%", float64(activeCount)/float64(len(students))*100)})
-    
-    // 等级分布
-    writer.Write([]string{"", ""}) // 空行
-    writer.Write([]string{"等级分布", ""})
-    for grade, count := range gradeStats {
-        writer.Write([]string{fmt.Sprintf("等级%s", grade), strconv.Itoa(count)})
-    }
-    
-    fmt.Println("已生成统计报告: report.csv")
-    
-    // 显示统计结果
-    fmt.Printf("数据统计结果:\n")
-    fmt.Printf("  总学生数: %d\n", len(students))
-    fmt.Printf("  平均分数: %.2f\n", totalScore/float64(len(students)))
-    fmt.Printf("  活跃学生: %d (%.1f%%)\n", activeCount, 
-        float64(activeCount)/float64(len(students))*100)
-    fmt.Printf("  等级分布: %v\n", gradeStats)
-    
-    // 清理文件
-    os.Remove("students.csv")
-    os.Remove("report.csv")
-    fmt.Println()
 }
 ```
 
-##  本章小结
+## 最佳实践
 
-在这一章中，我们学习了：
+### 1. 资源管理
 
-### 基本文件操作
-- 文件读取的多种方式
-- 文件写入和追加操作
-- 缓冲读写提升性能
+```go
+func safeFileOperation() {
+    file, err := os.Open("important.txt")
+    if err != nil {
+        return
+    }
+    defer file.Close() // 确保文件关闭
+    
+    // 使用文件...
+}
+```
 
-### 目录管理
-- 目录创建和删除
-- 目录遍历和搜索
-- 文件信息获取
+### 2. 错误处理
 
-### 数据格式处理
-- JSON编码解码和文件操作
-- CSV文件的读写和处理
-- 大文件的流式处理
+```go
+func robustFileRead(filename string) ([]byte, error) {
+    if _, err := os.Stat(filename); os.IsNotExist(err) {
+        return nil, fmt.Errorf("文件 %s 不存在", filename)
+    }
+    
+    data, err := os.ReadFile(filename)
+    if err != nil {
+        return nil, fmt.Errorf("读取文件失败: %v", err)
+    }
+    
+    return data, nil
+}
+```
 
-### 实用技巧
-- 错误处理最佳实践
-- 性能优化方法
-- 数据转换和统计
+### 3. 原子操作
+
+```go
+func atomicFileWrite(filename string, data []byte) error {
+    tempFile := filename + ".tmp"
+    
+    // 写入临时文件
+    err := os.WriteFile(tempFile, data, 0644)
+    if err != nil {
+        return err
+    }
+    
+    // 原子性重命名
+    return os.Rename(tempFile, filename)
+}
+```
+
+### 4. 大文件处理
+
+```go
+func processLargeFile(filename string) error {
+    file, err := os.Open(filename)
+    if err != nil {
+        return err
+    }
+    defer file.Close()
+    
+    scanner := bufio.NewScanner(file)
+    const maxCapacity = 1024 * 1024 // 1MB buffer
+    buf := make([]byte, maxCapacity)
+    scanner.Buffer(buf, maxCapacity)
+    
+    for scanner.Scan() {
+        line := scanner.Text()
+        // 处理每一行
+        processLine(line)
+    }
+    
+    return scanner.Err()
+}
+
+func processLine(line string) {
+    // 处理单行数据
+}
+```
+
+## 本章小结
+
+Go文件操作的核心要点：
+
+- **基础操作**：使用os包进行文件读写、创建、删除等操作
+- **缓冲I/O**：使用bufio包提升大文件处理性能
+- **路径处理**：使用filepath包进行跨平台路径操作
+- **数据格式**：处理JSON、CSV等常见数据格式
+- **资源管理**：正确使用defer确保资源释放
+
+### 下一步
+掌握了文件操作后，我们将学习 [字符串和正则表达式](./strings-regexp.md)，了解文本处理和模式匹配。
+
+::: tip 练习建议
+1. 实现一个日志轮转系统
+2. 创建配置文件热重载功能
+3. 开发文件同步工具
+4. 构建数据导入导出工具
+::: 

@@ -5,40 +5,56 @@ description: 学习Go语言的goroutines、channels和并发编程模式
 
 # 并发编程
 
-Go语言的并发编程是其最重要的特性之一。通过goroutines和channels，Go让并发编程变得简单而优雅。
+并发编程是Go语言的核心特性和最大优势。Go通过goroutines和channels提供了简洁而强大的并发编程模型，让并发编程变得直观和安全。
 
 ## 本章内容
 
 - Goroutines 轻量级协程
-- Channels 通道通信
+- Channels 通道通信机制
 - Select 语句和多路复用
 - 并发安全和同步机制
-- 常见并发模式和最佳实践
+- 并发设计模式和最佳实践
 
-## Goroutines 基础
+## 并发编程概念
 
-### 什么是 Goroutine
+### 为什么需要并发
 
-Goroutine 是Go语言的轻量级线程，由Go运行时管理。
+并发编程允许程序同时处理多个任务，提高程序性能和响应能力：
+
+- **性能提升**：充分利用多核CPU资源
+- **用户体验**：避免阻塞，提高响应速度
+- **资源效率**：更好地利用I/O等待时间
+- **可扩展性**：支持大规模并发处理
+
+### Go并发模型特点
+
+| 特性 | 说明 | 优势 |
+|------|------|------|
+| **轻量级** | Goroutine只需2KB内存 | 可创建百万级协程 |
+| **通信共享** | 通过channels传递数据 | 避免共享内存竞争 |
+| **调度器** | M:N调度模型 | 高效的协程调度 |
+| **内置支持** | 语言级别的并发支持 | 简洁的语法和API |
+
+::: tip 并发哲学
+Go遵循CSP(Communicating Sequential Processes)模型：
+**"不要通过共享内存来通信，通过通信来共享内存"**
+:::
+
+## Goroutines 协程
+
+### 基础用法
 
 ```go
-package main
-
-import (
-    "fmt"
-    "time"
-)
-
 func main() {
-    fmt.Println("主goroutine开始")
+    fmt.Println("主程序开始")
     
-    // 启动新的goroutine
-    go sayHello("世界")
-    go sayHello("Go语言")
+    // 启动goroutine
+    go sayHello("World")
+    go sayHello("Go")
     
-    // 等待一段时间，让goroutines执行
+    // 等待一段时间让goroutines执行
     time.Sleep(2 * time.Second)
-    fmt.Println("主goroutine结束")
+    fmt.Println("主程序结束")
 }
 
 func sayHello(name string) {
@@ -49,953 +65,501 @@ func sayHello(name string) {
 }
 ```
 
-### Goroutine 池模式
+### 等待组 WaitGroup
+
+使用`sync.WaitGroup`等待所有goroutines完成：
 
 ```go
-package main
-
-import (
-    "fmt"
-    "sync"
-    "time"
-)
-
-// Worker 工作者函数
-func worker(id int, jobs <-chan int, results chan<- int, wg *sync.WaitGroup) {
-    defer wg.Done()
-    
-    for job := range jobs {
-        fmt.Printf("Worker %d 开始处理任务 %d\n", id, job)
-        
-        // 模拟工作
-        time.Sleep(time.Second)
-        result := job * 2
-        
-        fmt.Printf("Worker %d 完成任务 %d，结果: %d\n", id, job, result)
-        results <- result
-    }
-}
-
 func main() {
-    const numWorkers = 3
-    const numJobs = 5
-    
-    // 创建通道
-    jobs := make(chan int, numJobs)
-    results := make(chan int, numJobs)
-    
     var wg sync.WaitGroup
     
-    // 启动工作者goroutines
-    for w := 1; w <= numWorkers; w++ {
-        wg.Add(1)
-        go worker(w, jobs, results, &wg)
+    tasks := []string{"任务A", "任务B", "任务C"}
+    
+    for _, task := range tasks {
+        wg.Add(1) // 增加计数
+        go func(name string) {
+            defer wg.Done() // 完成时减少计数
+            processTask(name)
+        }(task)
     }
     
-    // 发送任务
-    for j := 1; j <= numJobs; j++ {
-        jobs <- j
-    }
-    close(jobs)
-    
-    // 等待所有工作者完成
-    go func() {
-        wg.Wait()
-        close(results)
-    }()
-    
-    // 收集结果
-    fmt.Println("\n任务结果:")
-    for result := range results {
-        fmt.Printf("结果: %d\n", result)
-    }
+    wg.Wait() // 等待所有任务完成
+    fmt.Println("所有任务完成")
+}
+
+func processTask(name string) {
+    fmt.Printf("开始执行 %s\n", name)
+    time.Sleep(time.Second)
+    fmt.Printf("完成执行 %s\n", name)
 }
 ```
 
 ## Channels 通道
 
-### 基本通道操作
+### 基础通道操作
+
+Channels是goroutines之间通信的管道：
 
 ```go
-package main
-
-import (
-    "fmt"
-    "time"
-)
-
 func main() {
-    // 创建无缓冲通道
+    // 创建通道
     messages := make(chan string)
     
-    // 发送数据到通道（在goroutine中）
+    // 发送数据（在goroutine中）
     go func() {
         messages <- "Hello"
         messages <- "World"
-        messages <- "Go"
         close(messages) // 关闭通道
     }()
     
-    // 从通道接收数据
+    // 接收数据
     for msg := range messages {
-        fmt.Printf("收到消息: %s\n", msg)
-    }
-    
-    // 有缓冲通道
-    buffered := make(chan int, 3)
-    buffered <- 1
-    buffered <- 2
-    buffered <- 3
-    
-    fmt.Printf("缓冲通道长度: %d\n", len(buffered))
-    fmt.Printf("缓冲通道容量: %d\n", cap(buffered))
-    
-    // 读取缓冲通道
-    for i := 0; i < 3; i++ {
-        value := <-buffered
-        fmt.Printf("从缓冲通道读取: %d\n", value)
+        fmt.Printf("收到: %s\n", msg)
     }
 }
 ```
 
-### 通道方向
+### 通道类型和特性
 
 ```go
-package main
+// 无缓冲通道 - 同步通信
+unbuffered := make(chan int)
 
-import (
-    "fmt"
-    "time"
-)
+// 有缓冲通道 - 异步通信
+buffered := make(chan int, 3)
 
 // 只发送通道
 func sender(ch chan<- string) {
-    for i := 0; i < 3; i++ {
-        message := fmt.Sprintf("消息 %d", i+1)
-        ch <- message
-        time.Sleep(500 * time.Millisecond)
-    }
-    close(ch)
+    ch <- "message"
 }
 
 // 只接收通道
 func receiver(ch <-chan string) {
-    for message := range ch {
-        fmt.Printf("接收到: %s\n", message)
-    }
-}
-
-func main() {
-    // 双向通道
-    ch := make(chan string)
-    
-    // 启动发送者和接收者
-    go sender(ch)
-    go receiver(ch)
-    
-    // 等待完成
-    time.Sleep(3 * time.Second)
+    msg := <-ch
+    fmt.Println(msg)
 }
 ```
 
-## Select 语句
+### Select 多路复用
 
-### 基本 Select 用法
+Select语句让goroutine等待多个通信操作：
 
 ```go
-package main
-
-import (
-    "fmt"
-    "time"
-)
-
 func main() {
-    c1 := make(chan string)
-    c2 := make(chan string)
+    ch1 := make(chan string)
+    ch2 := make(chan string)
     
-    // 第一个goroutine
     go func() {
         time.Sleep(1 * time.Second)
-        c1 <- "来自c1的消息"
+        ch1 <- "来自ch1"
     }()
     
-    // 第二个goroutine
     go func() {
         time.Sleep(2 * time.Second)
-        c2 <- "来自c2的消息"
+        ch2 <- "来自ch2"
     }()
     
-    // 使用select等待多个通道
     for i := 0; i < 2; i++ {
         select {
-        case msg1 := <-c1:
-            fmt.Printf("收到: %s\n", msg1)
-        case msg2 := <-c2:
-            fmt.Printf("收到: %s\n", msg2)
+        case msg1 := <-ch1:
+            fmt.Println("收到", msg1)
+        case msg2 := <-ch2:
+            fmt.Println("收到", msg2)
+        case <-time.After(3 * time.Second):
+            fmt.Println("超时")
+            return
         }
-    }
-}
-```
-
-### Select 超时处理
-
-```go
-package main
-
-import (
-    "fmt"
-    "time"
-)
-
-func main() {
-    ch := make(chan string)
-    
-    // 模拟一个可能很慢的操作
-    go func() {
-        time.Sleep(3 * time.Second)
-        ch <- "操作完成"
-    }()
-    
-    // 使用select实现超时
-    select {
-    case result := <-ch:
-        fmt.Printf("收到结果: %s\n", result)
-    case <-time.After(2 * time.Second):
-        fmt.Println("操作超时！")
-    }
-    
-    // 非阻塞检查
-    select {
-    case msg := <-ch:
-        fmt.Printf("非阻塞收到: %s\n", msg)
-    default:
-        fmt.Println("通道中没有数据")
-    }
-}
-```
-
-### Select 实现扇入模式
-
-```go
-package main
-
-import (
-    "fmt"
-    "math/rand"
-    "time"
-)
-
-// 扇入函数：将多个通道合并为一个
-func fanIn(input1, input2 <-chan string) <-chan string {
-    output := make(chan string)
-    
-    go func() {
-        for {
-            select {
-            case s := <-input1:
-                output <- s
-            case s := <-input2:
-                output <- s
-            }
-        }
-    }()
-    
-    return output
-}
-
-// 生成器函数
-func generator(name string) <-chan string {
-    ch := make(chan string)
-    
-    go func() {
-        for i := 0; ; i++ {
-            ch <- fmt.Sprintf("%s: %d", name, i)
-            time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
-        }
-    }()
-    
-    return ch
-}
-
-func main() {
-    // 创建两个生成器
-    gen1 := generator("生成器1")
-    gen2 := generator("生成器2")
-    
-    // 扇入合并
-    merged := fanIn(gen1, gen2)
-    
-    // 接收合并后的数据
-    for i := 0; i < 10; i++ {
-        fmt.Println(<-merged)
     }
 }
 ```
 
 ## 并发安全
 
-### Mutex 互斥锁
+### 互斥锁 Mutex
+
+当必须共享内存时，使用互斥锁保护数据：
 
 ```go
-package main
-
-import (
-    "fmt"
-    "sync"
-    "time"
-)
-
-// 安全的计数器
-type SafeCounter struct {
+type Counter struct {
     mu    sync.Mutex
     value int
 }
 
-// 增加计数
-func (c *SafeCounter) Increment() {
+func (c *Counter) Increment() {
     c.mu.Lock()
     defer c.mu.Unlock()
     c.value++
 }
 
-// 获取值
-func (c *SafeCounter) GetValue() int {
+func (c *Counter) Value() int {
     c.mu.Lock()
     defer c.mu.Unlock()
     return c.value
 }
-
-func main() {
-    counter := &SafeCounter{}
-    var wg sync.WaitGroup
-    
-    // 启动多个goroutines并发增加计数
-    for i := 0; i < 100; i++ {
-        wg.Add(1)
-        go func(id int) {
-            defer wg.Done()
-            
-            for j := 0; j < 100; j++ {
-                counter.Increment()
-            }
-            
-            fmt.Printf("Goroutine %d 完成\n", id)
-        }(i)
-    }
-    
-    wg.Wait()
-    fmt.Printf("最终计数: %d\n", counter.GetValue())
-}
 ```
 
-### RWMutex 读写锁
+### 读写锁 RWMutex
+
+读多写少的场景使用读写锁提高性能：
 
 ```go
-package main
-
-import (
-    "fmt"
-    "sync"
-    "time"
-)
-
-// 缓存结构
-type Cache struct {
+type SafeMap struct {
     mu   sync.RWMutex
-    data map[string]string
+    data map[string]int
 }
 
-// 新建缓存
-func NewCache() *Cache {
-    return &Cache{
-        data: make(map[string]string),
-    }
+func (sm *SafeMap) Get(key string) (int, bool) {
+    sm.mu.RLock()
+    defer sm.mu.RUnlock()
+    value, ok := sm.data[key]
+    return value, ok
 }
 
-// 写入数据
-func (c *Cache) Set(key, value string) {
-    c.mu.Lock()
-    defer c.mu.Unlock()
-    
-    fmt.Printf("写入: %s = %s\n", key, value)
-    c.data[key] = value
-    time.Sleep(100 * time.Millisecond) // 模拟写入耗时
-}
-
-// 读取数据
-func (c *Cache) Get(key string) (string, bool) {
-    c.mu.RLock()
-    defer c.mu.RUnlock()
-    
-    value, exists := c.data[key]
-    fmt.Printf("读取: %s = %s (存在: %t)\n", key, value, exists)
-    time.Sleep(50 * time.Millisecond) // 模拟读取耗时
-    
-    return value, exists
-}
-
-func main() {
-    cache := NewCache()
-    var wg sync.WaitGroup
-    
-    // 启动写入goroutines
-    for i := 0; i < 3; i++ {
-        wg.Add(1)
-        go func(id int) {
-            defer wg.Done()
-            key := fmt.Sprintf("key%d", id)
-            value := fmt.Sprintf("value%d", id)
-            cache.Set(key, value)
-        }(i)
-    }
-    
-    // 等待写入完成
-    time.Sleep(500 * time.Millisecond)
-    
-    // 启动多个读取goroutines
-    for i := 0; i < 10; i++ {
-        wg.Add(1)
-        go func(id int) {
-            defer wg.Done()
-            key := fmt.Sprintf("key%d", id%3)
-            cache.Get(key)
-        }(i)
-    }
-    
-    wg.Wait()
+func (sm *SafeMap) Set(key string, value int) {
+    sm.mu.Lock()
+    defer sm.mu.Unlock()
+    sm.data[key] = value
 }
 ```
 
-### 原子操作
+## 实战项目：并发任务调度器
+
+让我们创建一个实用的并发任务调度器：
 
 ```go
 package main
 
 import (
-    "fmt"
-    "sync"
-    "sync/atomic"
-    "time"
-)
-
-func main() {
-    var counter int64
-    var wg sync.WaitGroup
-    
-    // 启动多个goroutines进行原子操作
-    for i := 0; i < 100; i++ {
-        wg.Add(1)
-        go func() {
-            defer wg.Done()
-            
-            for j := 0; j < 1000; j++ {
-                atomic.AddInt64(&counter, 1)
-            }
-        }()
-    }
-    
-    wg.Wait()
-    
-    fmt.Printf("原子操作最终计数: %d\n", atomic.LoadInt64(&counter))
-    
-    // 原子操作的其他用法
-    var flag int32
-    
-    // 原子设置
-    atomic.StoreInt32(&flag, 1)
-    fmt.Printf("标志值: %d\n", atomic.LoadInt32(&flag))
-    
-    // 原子交换
-    old := atomic.SwapInt32(&flag, 2)
-    fmt.Printf("交换前: %d, 交换后: %d\n", old, atomic.LoadInt32(&flag))
-    
-    // 原子比较并交换
-    swapped := atomic.CompareAndSwapInt32(&flag, 2, 3)
-    fmt.Printf("CAS成功: %t, 当前值: %d\n", swapped, atomic.LoadInt32(&flag))
-}
-```
-
-## 常见并发模式
-
-### 生产者-消费者模式
-
-```go
-package main
-
-import (
-    "fmt"
-    "math/rand"
-    "sync"
-    "time"
-)
-
-// 产品结构
-type Product struct {
-    ID   int
-    Name string
-}
-
-// 生产者
-func producer(products chan<- Product, wg *sync.WaitGroup) {
-    defer wg.Done()
-    defer close(products)
-    
-    for i := 1; i <= 10; i++ {
-        product := Product{
-            ID:   i,
-            Name: fmt.Sprintf("产品-%d", i),
-        }
-        
-        fmt.Printf("生产: %s\n", product.Name)
-        products <- product
-        
-        // 随机生产时间
-        time.Sleep(time.Duration(rand.Intn(500)) * time.Millisecond)
-    }
-    
-    fmt.Println("生产者完成工作")
-}
-
-// 消费者
-func consumer(id int, products <-chan Product, wg *sync.WaitGroup) {
-    defer wg.Done()
-    
-    for product := range products {
-        fmt.Printf("消费者%d 消费: %s\n", id, product.Name)
-        
-        // 随机消费时间
-        time.Sleep(time.Duration(rand.Intn(800)) * time.Millisecond)
-    }
-    
-    fmt.Printf("消费者%d 完成工作\n", id)
-}
-
-func main() {
-    // 创建缓冲通道
-    products := make(chan Product, 5)
-    var wg sync.WaitGroup
-    
-    // 启动生产者
-    wg.Add(1)
-    go producer(products, &wg)
-    
-    // 启动多个消费者
-    for i := 1; i <= 3; i++ {
-        wg.Add(1)
-        go consumer(i, products, &wg)
-    }
-    
-    wg.Wait()
-    fmt.Println("所有工作完成")
-}
-```
-
-### 管道模式
-
-```go
-package main
-
-import (
-    "fmt"
-    "sync"
-)
-
-// 生成数字
-func generator(nums ...int) <-chan int {
-    out := make(chan int)
-    go func() {
-        for _, n := range nums {
-            out <- n
-        }
-        close(out)
-    }()
-    return out
-}
-
-// 平方计算
-func square(in <-chan int) <-chan int {
-    out := make(chan int)
-    go func() {
-        for n := range in {
-            out <- n * n
-        }
-        close(out)
-    }()
-    return out
-}
-
-// 过滤偶数
-func filterEven(in <-chan int) <-chan int {
-    out := make(chan int)
-    go func() {
-        for n := range in {
-            if n%2 == 0 {
-                out <- n
-            }
-        }
-        close(out)
-    }()
-    return out
-}
-
-// 扇出：将一个通道分发到多个通道
-func fanOut(in <-chan int, workers int) []<-chan int {
-    outputs := make([]<-chan int, workers)
-    
-    for i := 0; i < workers; i++ {
-        out := make(chan int)
-        outputs[i] = out
-        
-        go func() {
-            defer close(out)
-            for n := range in {
-                out <- n * n * n // 立方计算
-            }
-        }()
-    }
-    
-    return outputs
-}
-
-// 扇入：将多个通道合并为一个
-func fanIn(inputs ...<-chan int) <-chan int {
-    var wg sync.WaitGroup
-    out := make(chan int)
-    
-    // 为每个输入通道启动一个goroutine
-    multiplex := func(c <-chan int) {
-        defer wg.Done()
-        for n := range c {
-            out <- n
-        }
-    }
-    
-    wg.Add(len(inputs))
-    for _, c := range inputs {
-        go multiplex(c)
-    }
-    
-    // 关闭输出通道
-    go func() {
-        wg.Wait()
-        close(out)
-    }()
-    
-    return out
-}
-
-func main() {
-    fmt.Println("=== 基本管道模式 ===")
-    
-    // 基本管道：生成 -> 平方 -> 过滤偶数
-    numbers := generator(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    squared := square(numbers)
-    evens := filterEven(squared)
-    
-    for result := range evens {
-        fmt.Printf("结果: %d\n", result)
-    }
-    
-    fmt.Println("\n=== 扇出扇入模式 ===")
-    
-    // 扇出扇入模式
-    input := generator(1, 2, 3, 4, 5)
-    
-    // 扇出到3个工作者
-    workers := fanOut(input, 3)
-    
-    // 扇入合并结果
-    result := fanIn(workers...)
-    
-    for r := range result {
-        fmt.Printf("立方结果: %d\n", r)
-    }
-}
-```
-
-### 限流器模式
-
-```go
-package main
-
-import (
+    "context"
     "fmt"
     "sync"
     "time"
 )
 
-// 限流器结构
-type RateLimiter struct {
-    tokens chan struct{}
-    ticker *time.Ticker
+// Task 任务接口
+type Task interface {
+    Execute(ctx context.Context) error
+    GetID() string
+    GetPriority() int
 }
 
-// 创建限流器
-func NewRateLimiter(rate int, burst int) *RateLimiter {
-    rl := &RateLimiter{
-        tokens: make(chan struct{}, burst),
-        ticker: time.NewTicker(time.Second / time.Duration(rate)),
+// EmailTask 邮件任务
+type EmailTask struct {
+    ID       string
+    To       string
+    Subject  string
+    Priority int
+}
+
+func (e EmailTask) Execute(ctx context.Context) error {
+    select {
+    case <-ctx.Done():
+        return ctx.Err()
+    case <-time.After(500 * time.Millisecond): // 模拟邮件发送
+        fmt.Printf("📧 邮件已发送到 %s: %s\n", e.To, e.Subject)
+        return nil
     }
-    
-    // 初始填满tokens
-    for i := 0; i < burst; i++ {
-        rl.tokens <- struct{}{}
+}
+
+func (e EmailTask) GetID() string       { return e.ID }
+func (e EmailTask) GetPriority() int    { return e.Priority }
+
+// FileTask 文件任务
+type FileTask struct {
+    ID       string
+    FilePath string
+    Action   string
+    Priority int
+}
+
+func (f FileTask) Execute(ctx context.Context) error {
+    select {
+    case <-ctx.Done():
+        return ctx.Err()
+    case <-time.After(200 * time.Millisecond): // 模拟文件操作
+        fmt.Printf("📁 文件操作完成: %s %s\n", f.Action, f.FilePath)
+        return nil
     }
-    
-    // 定期添加token
-    go func() {
-        for range rl.ticker.C {
-            select {
-            case rl.tokens <- struct{}{}:
-            default:
-                // tokens已满，丢弃
-            }
-        }
-    }()
-    
-    return rl
 }
 
-// 获取令牌
-func (rl *RateLimiter) Take() {
-    <-rl.tokens
+func (f FileTask) GetID() string       { return f.ID }
+func (f FileTask) GetPriority() int    { return f.Priority }
+
+// TaskScheduler 任务调度器
+type TaskScheduler struct {
+    workers    int
+    taskQueue  chan Task
+    resultChan chan TaskResult
+    ctx        context.Context
+    cancel     context.CancelFunc
+    wg         sync.WaitGroup
 }
 
-// 停止限流器
-func (rl *RateLimiter) Stop() {
-    rl.ticker.Stop()
-}
-
-// 模拟API请求
-func makeRequest(id int, limiter *RateLimiter, wg *sync.WaitGroup) {
-    defer wg.Done()
-    
-    fmt.Printf("请求%d 等待令牌...\n", id)
-    limiter.Take() // 获取令牌
-    
-    fmt.Printf("请求%d 开始处理\n", id)
-    time.Sleep(100 * time.Millisecond) // 模拟处理时间
-    fmt.Printf("请求%d 处理完成\n", id)
-}
-
-func main() {
-    // 创建限流器：每秒2个请求，突发最多5个
-    limiter := NewRateLimiter(2, 5)
-    defer limiter.Stop()
-    
-    var wg sync.WaitGroup
-    
-    // 模拟10个并发请求
-    for i := 1; i <= 10; i++ {
-        wg.Add(1)
-        go makeRequest(i, limiter, &wg)
-    }
-    
-    wg.Wait()
-    fmt.Println("所有请求完成")
-}
-```
-
-## 实践练习
-
-让我们创建一个完整的并发Web爬虫：
-
-```go
-package main
-
-import (
-    "fmt"
-    "io"
-    "net/http"
-    "sync"
-    "time"
-)
-
-// 爬虫结果
-type CrawlResult struct {
-    URL    string
-    Status int
-    Size   int
+type TaskResult struct {
+    TaskID string
     Error  error
+    Duration time.Duration
 }
 
-// Web爬虫
-type WebCrawler struct {
-    maxWorkers   int
-    maxRetries   int
-    timeout      time.Duration
-    rateLimiter  chan struct{}
-}
-
-// 创建爬虫
-func NewWebCrawler(maxWorkers, maxRetries int, timeout time.Duration) *WebCrawler {
-    return &WebCrawler{
-        maxWorkers:  maxWorkers,
-        maxRetries:  maxRetries,
-        timeout:     timeout,
-        rateLimiter: make(chan struct{}, maxWorkers),
+func NewTaskScheduler(workers int, queueSize int) *TaskScheduler {
+    ctx, cancel := context.WithCancel(context.Background())
+    
+    return &TaskScheduler{
+        workers:    workers,
+        taskQueue:  make(chan Task, queueSize),
+        resultChan: make(chan TaskResult, queueSize),
+        ctx:        ctx,
+        cancel:     cancel,
     }
 }
 
-// 爬取单个URL
-func (wc *WebCrawler) crawlURL(url string) CrawlResult {
-    // 限流
-    wc.rateLimiter <- struct{}{}
-    defer func() { <-wc.rateLimiter }()
+func (ts *TaskScheduler) Start() {
+    fmt.Printf("🚀 启动任务调度器，工作线程数: %d\n", ts.workers)
     
-    client := &http.Client{
-        Timeout: wc.timeout,
+    // 启动工作goroutines
+    for i := 0; i < ts.workers; i++ {
+        ts.wg.Add(1)
+        go ts.worker(i + 1)
     }
     
-    var lastErr error
-    for attempt := 0; attempt <= wc.maxRetries; attempt++ {
-        if attempt > 0 {
-            fmt.Printf("重试 %s (第%d次)\n", url, attempt)
-            time.Sleep(time.Duration(attempt) * time.Second)
-        }
-        
-        resp, err := client.Get(url)
-        if err != nil {
-            lastErr = err
-            continue
-        }
-        
-        defer resp.Body.Close()
-        
-        // 读取响应体大小
-        body, err := io.ReadAll(resp.Body)
-        if err != nil {
-            lastErr = err
-            continue
-        }
-        
-        return CrawlResult{
-            URL:    url,
-            Status: resp.StatusCode,
-            Size:   len(body),
-            Error:  nil,
-        }
-    }
-    
-    return CrawlResult{
-        URL:   url,
-        Error: lastErr,
-    }
+    // 启动结果处理goroutine
+    go ts.resultHandler()
 }
 
-// 并发爬取多个URL
-func (wc *WebCrawler) CrawlURLs(urls []string) []CrawlResult {
-    urlChan := make(chan string, len(urls))
-    resultChan := make(chan CrawlResult, len(urls))
+func (ts *TaskScheduler) worker(id int) {
+    defer ts.wg.Done()
     
-    var wg sync.WaitGroup
-    
-    // 启动工作者goroutines
-    for i := 0; i < wc.maxWorkers; i++ {
-        wg.Add(1)
-        go func(workerID int) {
-            defer wg.Done()
-            
-            for url := range urlChan {
-                fmt.Printf("Worker %d 爬取: %s\n", workerID, url)
-                result := wc.crawlURL(url)
-                resultChan <- result
+    for {
+        select {
+        case <-ts.ctx.Done():
+            fmt.Printf("Worker %d 停止\n", id)
+            return
+        case task, ok := <-ts.taskQueue:
+            if !ok {
+                return
             }
-        }(i)
-    }
-    
-    // 发送URLs到通道
-    go func() {
-        for _, url := range urls {
-            urlChan <- url
+            
+            start := time.Now()
+            fmt.Printf("Worker %d 开始执行任务 %s (优先级: %d)\n", 
+                id, task.GetID(), task.GetPriority())
+            
+            err := task.Execute(ts.ctx)
+            duration := time.Since(start)
+            
+            ts.resultChan <- TaskResult{
+                TaskID:   task.GetID(),
+                Error:    err,
+                Duration: duration,
+            }
         }
-        close(urlChan)
-    }()
-    
-    // 等待所有工作者完成
-    go func() {
-        wg.Wait()
-        close(resultChan)
-    }()
-    
-    // 收集结果
-    var results []CrawlResult
-    for result := range resultChan {
-        results = append(results, result)
     }
+}
+
+func (ts *TaskScheduler) resultHandler() {
+    for result := range ts.resultChan {
+        if result.Error != nil {
+            fmt.Printf("❌ 任务 %s 执行失败: %v (耗时: %v)\n", 
+                result.TaskID, result.Error, result.Duration)
+        } else {
+            fmt.Printf("✅ 任务 %s 执行成功 (耗时: %v)\n", 
+                result.TaskID, result.Duration)
+        }
+    }
+}
+
+func (ts *TaskScheduler) AddTask(task Task) {
+    select {
+    case ts.taskQueue <- task:
+        fmt.Printf("➕ 任务 %s 已加入队列\n", task.GetID())
+    case <-ts.ctx.Done():
+        fmt.Println("调度器已停止，无法添加任务")
+    default:
+        fmt.Println("任务队列已满，任务被丢弃")
+    }
+}
+
+func (ts *TaskScheduler) Stop() {
+    fmt.Println("🛑 停止任务调度器...")
     
-    return results
+    close(ts.taskQueue)      // 关闭任务队列
+    ts.wg.Wait()             // 等待所有worker完成
+    close(ts.resultChan)     // 关闭结果通道
+    ts.cancel()              // 取消上下文
+    
+    fmt.Println("任务调度器已停止")
 }
 
 func main() {
-    // 要爬取的URL列表
-    urls := []string{
-        "https://httpbin.org/delay/1",
-        "https://httpbin.org/delay/2",
-        "https://httpbin.org/status/200",
-        "https://httpbin.org/status/404",
-        "https://httpbin.org/json",
-        "https://httpbin.org/xml",
-        "https://httpbin.org/html",
-        "https://httpbin.org/robots.txt",
+    // 创建调度器
+    scheduler := NewTaskScheduler(3, 10)
+    scheduler.Start()
+    
+    // 添加不同类型的任务
+    tasks := []Task{
+        EmailTask{
+            ID: "email-1", To: "user1@example.com", 
+            Subject: "欢迎邮件", Priority: 1,
+        },
+        FileTask{
+            ID: "file-1", FilePath: "/data/backup.zip", 
+            Action: "压缩", Priority: 2,
+        },
+        EmailTask{
+            ID: "email-2", To: "user2@example.com", 
+            Subject: "通知邮件", Priority: 1,
+        },
+        FileTask{
+            ID: "file-2", FilePath: "/logs/app.log", 
+            Action: "清理", Priority: 3,
+        },
+        EmailTask{
+            ID: "email-urgent", To: "admin@example.com", 
+            Subject: "紧急通知", Priority: 0,
+        },
     }
     
-    // 创建爬虫：3个工作者，最多重试2次，超时10秒
-    crawler := NewWebCrawler(3, 2, 10*time.Second)
-    
-    fmt.Printf("开始爬取 %d 个URL...\n", len(urls))
-    start := time.Now()
-    
-    // 执行爬取
-    results := crawler.CrawlURLs(urls)
-    
-    duration := time.Since(start)
-    
-    // 输出结果
-    fmt.Printf("\n爬取完成，耗时: %v\n", duration)
-    fmt.Println("结果统计:")
-    
-    successCount := 0
-    for _, result := range results {
-        if result.Error != nil {
-            fmt.Printf("%s: %v\n", result.URL, result.Error)
-        } else {
-            fmt.Printf("%s: %d (%d bytes)\n", 
-                result.URL, result.Status, result.Size)
-            successCount++
-        }
+    // 提交任务
+    for _, task := range tasks {
+        scheduler.AddTask(task)
+        time.Sleep(100 * time.Millisecond) // 模拟任务提交间隔
     }
     
-    fmt.Printf("\n成功: %d/%d\n", successCount, len(results))
+    // 等待一段时间让任务执行
+    time.Sleep(3 * time.Second)
+    
+    // 停止调度器
+    scheduler.Stop()
 }
 ```
 
-##  本章小结
+## 并发模式
 
-在这一章中，我们学习了：
+### 工作池模式
 
-### Goroutines
-- 轻量级协程的创建和使用
-- Goroutine池模式
-- 生命周期管理
+```go
+func WorkerPool(numWorkers int, jobs <-chan int, results chan<- int) {
+    var wg sync.WaitGroup
+    
+    for i := 0; i < numWorkers; i++ {
+        wg.Add(1)
+        go func() {
+            defer wg.Done()
+            for job := range jobs {
+                results <- job * 2 // 处理任务
+            }
+        }()
+    }
+    
+    wg.Wait()
+    close(results)
+}
+```
 
-### Channels
-- 通道的创建和操作
-- 缓冲和无缓冲通道
-- 通道方向和关闭
+### 扇出/扇入模式
 
-### Select语句
-- 多通道选择
-- 超时处理
-- 非阻塞操作
+```go
+// 扇出：一个输入分发到多个处理器
+func FanOut(input <-chan int, output1, output2 chan<- int) {
+    for data := range input {
+        select {
+        case output1 <- data:
+        case output2 <- data:
+        }
+    }
+    close(output1)
+    close(output2)
+}
 
-### 并发安全
-- Mutex和RWMutex
-- 原子操作
-- 数据竞争防护
+// 扇入：多个输入合并到一个输出
+func FanIn(input1, input2 <-chan int, output chan<- int) {
+    var wg sync.WaitGroup
+    
+    wg.Add(2)
+    go func() {
+        defer wg.Done()
+        for data := range input1 {
+            output <- data
+        }
+    }()
+    
+    go func() {
+        defer wg.Done()
+        for data := range input2 {
+            output <- data
+        }
+    }()
+    
+    wg.Wait()
+    close(output)
+}
+```
 
-### 并发模式
-- 扇入扇出模式
-- 生产者消费者模式
-- 管道模式和限流器
+## 最佳实践
+
+### 1. 避免过度并发
+
+```go
+// 限制并发数量
+semaphore := make(chan struct{}, 10) // 最多10个并发
+
+func processWithLimit() {
+    semaphore <- struct{}{} // 获取许可
+    defer func() { <-semaphore }() // 释放许可
+    
+    // 处理逻辑
+}
+```
+
+### 2. 优雅关闭
+
+```go
+func gracefulShutdown() {
+    ctx, cancel := context.WithCancel(context.Background())
+    
+    // 监听系统信号
+    c := make(chan os.Signal, 1)
+    signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+    
+    go func() {
+        <-c
+        fmt.Println("收到停止信号，开始优雅关闭...")
+        cancel()
+    }()
+    
+    // 使用context控制goroutines
+}
+```
+
+### 3. 错误处理
+
+```go
+type Result struct {
+    Value int
+    Error error
+}
+
+func safeProcess(input int) Result {
+    // 处理可能出错的操作
+    if input < 0 {
+        return Result{Error: fmt.Errorf("invalid input: %d", input)}
+    }
+    return Result{Value: input * 2}
+}
+```
+
+## 本章小结
+
+Go的并发编程核心要点：
+
+- **Goroutines**：轻量级协程，Go并发的基础
+- **Channels**：goroutines间的通信机制，实现"通过通信共享内存"
+- **Select**：多通道操作的多路复用
+- **同步原语**：必要时使用mutex、WaitGroup等确保安全
+- **设计模式**：工作池、扇出扇入等常用并发模式
+
+::: tip 练习建议
+1. 实现一个并发的网页爬虫
+2. 创建一个生产者-消费者模式的消息队列
+3. 构建一个支持并发的缓存系统
+4. 实验不同的并发模式，体验其适用场景
+:::

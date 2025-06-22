@@ -86,7 +86,7 @@ golang-tutorial-docs/
 │   ├── basics/             # 基础语法章节
 │   ├── advanced/           # 进阶主题章节
 │   ├── projects/           # 实战项目章节
-│   ├── guide/              # 学习指南
+│   ├── guide/              # 指南
 │   └── index.md            # 首页
 ├── scripts/                # 构建脚本
 │   └── generate-docs.js    # 文档生成脚本

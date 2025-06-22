@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-    title: 'Go语言学习指南',
+    title: 'Go语言指南',
     description: '系统化的Go编程教程，从基础语法到项目实战',
 
     lang: 'zh-CN',
@@ -13,18 +13,18 @@ export default defineConfig({
         ['meta', { name: 'theme-color', content: '#00ADD8' }],
         ['meta', { name: 'og:type', content: 'website' }],
         ['meta', { name: 'og:locale', content: 'zh_CN' }],
-        ['meta', { name: 'og:site_name', content: 'Go语言学习指南' }],
-        ['meta', { name: 'og:title', content: 'Go语言学习指南 | 系统化Go编程教程' }],
+        ['meta', { name: 'og:site_name', content: 'Go语言指南' }],
+        ['meta', { name: 'og:title', content: 'Go语言指南 | 系统化Go编程教程' }],
         ['meta', { name: 'og:description', content: '从基础语法到项目实战，助您掌握现代Go开发' }],
     ],
 
     themeConfig: {
         logo: '/logo.png',
-        siteTitle: 'Go学习指南',
+        siteTitle: 'Go语言指南',
 
         nav: [
             { text: '首页', link: '/' },
-            { text: '学习指南', link: '/guide/' },
+            { text: '语言指南', link: '/guide/' },
             {
                 text: '教程',
                 items: [
@@ -38,9 +38,9 @@ export default defineConfig({
         sidebar: {
             '/guide/': [
                 {
-                    text: '学习指南',
+                    text: '语言指南',
                     items: [
-                        { text: '学习指南首页', link: '/guide/' },
+                        { text: '语言指南首页', link: '/guide/' },
                         { text: '什么是Go语言', link: '/guide/what-is-go' },
                         { text: '环境搭建', link: '/guide/setup' },
                         { text: '最佳实践', link: '/guide/best-practices' }
