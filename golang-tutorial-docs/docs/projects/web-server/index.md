@@ -7,15 +7,15 @@ description: 构建一个功能完整的Web服务器应用
 
 构建一个包含用户认证、数据管理和API服务的完整Web应用。
 
-## 📋 项目功能
+## 项目功能
 
-- 🔐 用户注册和登录
-- 📊 RESTful API设计
-- 💾 数据持久化
-- 🛡️ 中间件系统
-- 📱 响应式前端
+- 用户注册和登录
+- RESTful API设计
+- 数据持久化
+- 中间件系统
+- 响应式前端
 
-## 🚀 快速开始
+## 快速开始
 
 ### 项目结构
 ```
@@ -79,7 +79,7 @@ func main() {
     http.HandleFunc("/api/users", usersAPIHandler)
     http.HandleFunc("/api/posts", postsAPIHandler)
     
-    fmt.Println("🚀 Web服务器启动在 http://localhost:8080")
+    fmt.Println("Web服务器启动在 http://localhost:8080")
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
@@ -99,7 +99,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
     <div class="container">
-        <h1>🌐 Go Web服务器</h1>
+        <h1>Go Web服务器</h1>
         <p>一个功能完整的Web应用演示</p>
         
         <div class="api-section">
@@ -113,13 +113,13 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
         </div>
         
         <div class="api-section">
-            <h2>📱 功能页面</h2>
+            <h2>功能页面</h2>
             <a href="/login" class="btn">登录</a>
             <a href="/register" class="btn">注册</a>
         </div>
         
         <div class="api-section">
-            <h2>📊 当前数据</h2>
+            <h2>当前数据</h2>
             <p>用户数: {{.UserCount}}</p>
             <p>文章数: {{.PostCount}}</p>
         </div>
@@ -210,7 +210,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
     <div class="form-container">
-        <h2>🔐 用户登录</h2>
+        <h2>用户登录</h2>
         <form method="POST">
             <input type="text" name="username" placeholder="用户名" required>
             <input type="password" name="password" placeholder="密码" required>
@@ -258,7 +258,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 </head>
 <body>
     <div class="form-container">
-        <h2>📝 用户注册</h2>
+        <h2> 用户注册</h2>
         <form method="POST">
             <input type="text" name="username" placeholder="用户名" required>
             <input type="email" name="email" placeholder="邮箱" required>
@@ -289,12 +289,12 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-## 🔧 运行结果
+## 运行结果
 
 启动服务器：
 ```bash
 $ go run main.go
-🚀 Web服务器启动在 http://localhost:8080
+Web服务器启动在 http://localhost:8080
 ```
 
 访问主页：
@@ -317,7 +317,7 @@ curl -X POST -H "Content-Type: application/json" \
      http://localhost:8080/api/posts
 ```
 
-## 📈 扩展功能
+## 扩展功能
 
 - 数据库集成
 - 用户认证中间件

@@ -1,8 +1,8 @@
-# 💻 代码实现 - 计算器项目
+# 代码实现 - 计算器项目
 
 本文档详细介绍计算器项目的完整代码实现，包括逐行解析和运行示例。
 
-## 🚀 完整代码实现
+## 完整代码实现
 
 ### main.go - 完整实现
 
@@ -443,15 +443,15 @@ func (ui *UserInterface) parseCommand(input string) Command {
 func (ui *UserInterface) handleCalculate(expression string) {
 	result, err := ui.calculator.Calculate(expression)
 	if err != nil {
-		fmt.Printf("❌ 错误: %v\n", err)
+		fmt.Printf("错误: %v\n", err)
 		return
 	}
 	
 	// 格式化结果显示
 	if result == float64(int64(result)) {
-		fmt.Printf("✅ 结果: %.0f\n", result)
+		fmt.Printf("结果: %.0f\n", result)
 	} else {
-		fmt.Printf("✅ 结果: %.6g\n", result)
+		fmt.Printf("结果: %.6g\n", result)
 	}
 }
 
@@ -460,11 +460,11 @@ func (ui *UserInterface) handleShowHistory() {
 	history := ui.calculator.GetHistory()
 	
 	if len(history) == 0 {
-		fmt.Println("📝 暂无计算历史")
+		fmt.Println(" 暂无计算历史")
 		return
 	}
 	
-	fmt.Println("📚 计算历史:")
+	fmt.Println("计算历史:")
 	for i, entry := range history {
 		if entry.Result == float64(int64(entry.Result)) {
 			fmt.Printf("%3d. %s = %.0f  [%s]\n", 
@@ -480,22 +480,22 @@ func (ui *UserInterface) handleShowHistory() {
 
 // handleShowHelp 处理显示帮助命令
 func (ui *UserInterface) handleShowHelp() {
-	fmt.Println("📖 Go计算器使用帮助:")
+	fmt.Println("Go计算器使用帮助:")
 	fmt.Println()
-	fmt.Println("🧮 支持的运算:")
+	fmt.Println("支持的运算:")
 	fmt.Println("  +  加法    示例: 2 + 3")
 	fmt.Println("  -  减法    示例: 5 - 2")
 	fmt.Println("  *  乘法    示例: 3 * 4")
 	fmt.Println("  /  除法    示例: 8 / 2")
 	fmt.Println("  () 括号    示例: (2 + 3) * 4")
 	fmt.Println()
-	fmt.Println("📝 支持的命令:")
+	fmt.Println(" 支持的命令:")
 	fmt.Println("  history, h    显示计算历史")
 	fmt.Println("  clear, c      清空历史记录")
 	fmt.Println("  help, ?       显示帮助信息")
 	fmt.Println("  quit, q       退出计算器")
 	fmt.Println()
-	fmt.Println("💡 示例表达式:")
+	fmt.Println("示例表达式:")
 	fmt.Println("  2 + 3 * 4      → 14")
 	fmt.Println("  (10 + 5) / 3   → 5")
 	fmt.Println("  -5 + 3         → -2")
@@ -505,7 +505,7 @@ func (ui *UserInterface) handleShowHelp() {
 // handleClear 处理清空历史命令
 func (ui *UserInterface) handleClear() {
 	ui.calculator.ClearHistory()
-	fmt.Println("🗑️  历史记录已清空")
+	fmt.Println(" 历史记录已清空")
 }
 
 // handleQuit 处理退出命令
@@ -521,7 +521,7 @@ func main() {
 }
 ```
 
-## 🔍 核心算法详解
+## 核心算法详解
 
 ### 1. 递归下降解析器
 
@@ -571,7 +571,7 @@ parseTerm() for "3 * 4":
   返回: 3 * 4 = 12
 ```
 
-## 🎮 运行示例
+## 运行示例
 
 ### 编译和运行
 
@@ -593,25 +593,25 @@ go build -o calculator main.go
 ========================
 
 > 2 + 3
-✅ 结果: 5
+结果: 5
 
 > 2 + 3 * 4
-✅ 结果: 14
+结果: 14
 
 > (10 + 5) / 3
-✅ 结果: 5
+结果: 5
 
 > -5 + 3
-✅ 结果: -2
+结果: -2
 
 > 3.14 * 2
-✅ 结果: 6.28
+结果: 6.28
 
 > 10 / 0
-❌ 错误: 语法分析错误: 除数不能为零
+错误: 语法分析错误: 除数不能为零
 
 > history
-📚 计算历史:
+计算历史:
   1. 2 + 3 = 5  [14:30:15]
   2. 2 + 3 * 4 = 14  [14:30:20]
   3. (10 + 5) / 3 = 5  [14:30:25]
@@ -619,22 +619,22 @@ go build -o calculator main.go
   5. 3.14 * 2 = 6.28  [14:30:35]
 
 > help
-📖 Go计算器使用帮助:
+Go计算器使用帮助:
 
-🧮 支持的运算:
+支持的运算:
   +  加法    示例: 2 + 3
   -  减法    示例: 5 - 2
   *  乘法    示例: 3 * 4
   /  除法    示例: 8 / 2
   () 括号    示例: (2 + 3) * 4
 
-📝 支持的命令:
+ 支持的命令:
   history, h    显示计算历史
   clear, c      清空历史记录
   help, ?       显示帮助信息
   quit, q       退出计算器
 
-💡 示例表达式:
+示例表达式:
   2 + 3 * 4      → 14
   (10 + 5) / 3   → 5
   -5 + 3         → -2
@@ -644,7 +644,7 @@ go build -o calculator main.go
 👋 感谢使用Go计算器！
 ```
 
-## 🧪 测试用例
+## 测试用例
 
 ### 创建测试文件 main_test.go
 
@@ -809,7 +809,7 @@ go test -bench=.
 go test -cover
 ```
 
-## 📊 性能分析
+## 性能分析
 
 ### 测试结果示例
 
@@ -851,7 +851,7 @@ coverage: 92.3% of statements
 ok  	calculator	1.234s
 ```
 
-## 🚀 扩展功能
+## 扩展功能
 
 ### 1. 添加科学计算功能
 
@@ -909,7 +909,7 @@ func (em *ExpressionManager) Load(name string) (string, bool) {
 }
 ```
 
-## 📝 学习要点总结
+##  学习要点总结
 
 通过实现这个计算器项目，您学到了：
 

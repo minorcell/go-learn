@@ -2,7 +2,7 @@
 
 网络编程是Go语言的强项之一，Go内置的`net/http`包提供了功能强大且易用的HTTP客户端和服务器实现。本章将学习如何使用Go进行网络编程。
 
-## 🌐 HTTP客户端
+## HTTP客户端
 
 ### 基础HTTP请求
 
@@ -158,7 +158,7 @@ POST状态码: 200
 上下文请求状态码: 200
 ```
 
-## 🖥️ HTTP服务器
+## HTTP服务器
 
 ### 基础HTTP服务器
 
@@ -495,7 +495,7 @@ curl -X PUT http://localhost:8080/users/1 \
 curl -X DELETE http://localhost:8080/users/1
 ```
 
-## 🔧 中间件
+## 中间件
 
 中间件是处理HTTP请求的强大模式：
 
@@ -602,7 +602,7 @@ curl http://localhost:8080/protected
 curl -H "Authorization: Bearer secret-token" http://localhost:8080/protected
 ```
 
-## 🔄 WebSocket
+## WebSocket
 
 Go也支持WebSocket实时通信：
 
@@ -749,7 +749,7 @@ func main() {
 }
 ```
 
-## 💡 最佳实践
+## 最佳实践
 
 ### 1. 错误处理
 ```go
@@ -805,7 +805,7 @@ func gracefulShutdown() {
 }
 ```
 
-## 🎯 实践练习
+## 实践练习
 
 1. **HTTP客户端练习**：创建一个程序，调用公开API（如天气API）并解析响应
 2. **RESTful API练习**：扩展用户管理API，添加分页、搜索功能

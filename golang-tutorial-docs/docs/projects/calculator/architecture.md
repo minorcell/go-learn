@@ -1,8 +1,8 @@
-# 🏗️ 架构设计 - 计算器项目
+# 架构设计 - 计算器项目
 
 本文档详细介绍计算器项目的系统架构、模块设计和数据流程。
 
-## 🎯 架构概述
+## 架构概述
 
 计算器采用分层架构设计，将用户界面、业务逻辑和数据处理分离，确保代码的可维护性和可扩展性。
 
@@ -13,9 +13,9 @@
 - **依赖倒置**：高层模块不依赖低层模块
 - **接口隔离**：使用小而专一的接口
 
-## 🏛️ 系统架构
+## 系统架构
 
-## 📦 模块设计
+## 模块设计
 
 ### 1. 用户界面层 (UI Layer)
 
@@ -151,7 +151,7 @@ func (h *HistoryManager) GetLast(n int) []HistoryEntry
 - **时间戳**：记录每次计算的时间
 - **容量管理**：限制历史记录数量
 
-## 🔄 数据流程
+## 数据流程
 
 ### 计算流程
 
@@ -167,7 +167,7 @@ Factor     := Number | '(' Expression ')'
 Number     := [0-9]+ ('.' [0-9]+)?
 ```
 
-## 🔧 核心算法
+## 核心算法
 
 ### 1. 词法分析 (Tokenization)
 
@@ -239,7 +239,7 @@ func (p *ExpressionParser) parseExpression() (float64, error) {
 
 ### 3. 错误处理策略
 
-## 🧪 测试策略
+## 测试策略
 
 ### 单元测试模块
 
@@ -315,7 +315,7 @@ func TestMemoryUsage(t *testing.T) {
 }
 ```
 
-## 📊 扩展性设计
+## 扩展性设计
 
 ### 1. 插件系统
 ```go
@@ -346,7 +346,7 @@ func LoadConfig(filename string) (*Config, error)
 func (c *Config) Save(filename string) error
 ```
 
-## 📈 性能优化
+## 性能优化
 
 ### 1. 内存优化
 - **对象池**：重用Token对象减少GC压力
@@ -367,6 +367,6 @@ func (c *Config) Save(filename string) error
 1. **[代码实现](./implementation.md)** - 详细的代码实现和解析
 
 <div style="text-align: center; margin-top: 2rem;">
-  <a href="./product-design.html" style="display: inline-block; padding: 8px 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin: 0 8px;">← 产品设计</a>
+  <a href="./index.html" style="display: inline-block; padding: 8px 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; margin: 0 8px;">← 项目概述</a>
   <a href="./implementation.html" style="display: inline-block; padding: 8px 16px; background: #00ADD8; color: white; text-decoration: none; border-radius: 4px; margin: 0 8px;">代码实现 →</a>
 </div> 

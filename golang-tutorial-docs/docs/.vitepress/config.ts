@@ -87,7 +87,6 @@ export default defineConfig({
                             collapsed: false,
                             items: [
                                 { text: '项目概述', link: '/projects/calculator/' },
-                                { text: '产品设计', link: '/projects/calculator/product-design' },
                                 { text: '架构设计', link: '/projects/calculator/architecture' },
                                 { text: '代码实现', link: '/projects/calculator/implementation' }
                             ]

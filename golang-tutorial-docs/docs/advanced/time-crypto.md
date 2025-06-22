@@ -7,7 +7,7 @@ description: 学习Go语言的时间操作和密码学应用
 
 时间处理和安全加密是现代应用开发的重要组成部分。Go语言提供了强大的time包和crypto包，让我们深入学习这些功能。
 
-## 📖 本章内容
+## 本章内容
 
 - 时间基础操作和格式化
 - 时间计算和时区处理
@@ -15,7 +15,7 @@ description: 学习Go语言的时间操作和密码学应用
 - 哈希算法和数字签名
 - 对称和非对称加密
 
-## ⏰ 时间处理
+## 时间处理
 
 ### 基础时间操作
 
@@ -391,9 +391,9 @@ func timeoutControl() {
     
     select {
     case res := <-result:
-        fmt.Printf("✅ %s\n", res)
+        fmt.Printf("%s\n", res)
     case <-ctx.Done():
-        fmt.Printf("❌ 任务超时: %v\n", ctx.Err())
+        fmt.Printf("任务超时: %v\n", ctx.Err())
     }
     
     // 模拟超时的任务
@@ -409,9 +409,9 @@ func timeoutControl() {
     
     select {
     case res := <-result2:
-        fmt.Printf("✅ %s\n", res)
+        fmt.Printf("%s\n", res)
     case <-ctx2.Done():
-        fmt.Printf("❌ 长任务超时: %v\n", ctx2.Err())
+        fmt.Printf("长任务超时: %v\n", ctx2.Err())
     }
     
     // 使用time.After进行超时控制
@@ -419,7 +419,7 @@ func timeoutControl() {
     start := time.Now()
     select {
     case <-time.After(2 * time.Second):
-        fmt.Printf("⏰ 2秒超时触发 (耗时: %v)\n", time.Since(start))
+        fmt.Printf("2秒超时触发 (耗时: %v)\n", time.Since(start))
     }
     
     fmt.Println()
@@ -553,7 +553,7 @@ func (s *Scheduler) RemoveTask(name string) {
 }
 ```
 
-## 🔐 加密和安全
+## 加密和安全
 
 ### 哈希算法
 
@@ -696,9 +696,9 @@ func hashComparison() {
     
     // 比较哈希
     if originalHash == modifiedHash {
-        fmt.Println("✅ 数据未被修改")
+        fmt.Println("数据未被修改")
     } else {
-        fmt.Println("❌ 数据已被修改")
+        fmt.Println("数据已被修改")
     }
     
     // 数据完整性验证
@@ -714,9 +714,9 @@ func verifyDataIntegrity(data string, expectedHash []byte) {
     actualHash := sha256.Sum256([]byte(data))
     
     if compareHashes(actualHash[:], expectedHash) {
-        fmt.Printf("✅ 数据 '%s' 完整性验证通过\n", data)
+        fmt.Printf("数据 '%s' 完整性验证通过\n", data)
     } else {
-        fmt.Printf("❌ 数据 '%s' 完整性验证失败\n", data)
+        fmt.Printf("数据 '%s' 完整性验证失败\n", data)
     }
 }
 
@@ -765,9 +765,9 @@ func passwordHashing() {
     
     for _, testPwd := range testPasswords {
         if verifyPassword(testPwd, salt, multiRoundHash) {
-            fmt.Printf("✅ 密码 '%s' 验证通过\n", testPwd)
+            fmt.Printf("密码 '%s' 验证通过\n", testPwd)
         } else {
-            fmt.Printf("❌ 密码 '%s' 验证失败\n", testPwd)
+            fmt.Printf("密码 '%s' 验证失败\n", testPwd)
         }
     }
     
@@ -859,9 +859,9 @@ func symmetricEncryption() {
     
     // 验证
     if string(decrypted) == plaintext {
-        fmt.Println("✅ 加密解密成功")
+        fmt.Println("加密解密成功")
     } else {
-        fmt.Println("❌ 加密解密失败")
+        fmt.Println("加密解密失败")
     }
     
     fmt.Println()
@@ -960,9 +960,9 @@ func asymmetricEncryption() {
     
     // 验证
     if string(decrypted) == plaintext {
-        fmt.Println("✅ RSA加密解密成功")
+        fmt.Println("RSA加密解密成功")
     } else {
-        fmt.Println("❌ RSA加密解密失败")
+        fmt.Println("RSA加密解密失败")
     }
     
     // 导出密钥
@@ -1045,9 +1045,9 @@ func digitalSignature() {
     }
     
     if valid {
-        fmt.Println("✅ 数字签名验证成功")
+        fmt.Println("数字签名验证成功")
     } else {
-        fmt.Println("❌ 数字签名验证失败")
+        fmt.Println("数字签名验证失败")
     }
     
     // 测试篡改数据
@@ -1061,9 +1061,9 @@ func digitalSignature() {
     }
     
     if validTampered {
-        fmt.Println("❌ 篡改消息验证通过（不应该发生）")
+        fmt.Println("篡改消息验证通过（不应该发生）")
     } else {
-        fmt.Println("✅ 篡改消息验证失败（正确）")
+        fmt.Println("篡改消息验证失败（正确）")
     }
     
     fmt.Println()
@@ -1098,34 +1098,34 @@ func verifySignature(message, signature []byte, publicKey *rsa.PublicKey) (bool,
 }
 ```
 
-## 📝 本章小结
+##  本章小结
 
 在这一章中，我们学习了：
 
-### 🔹 时间处理
+### 时间处理
 - 时间创建、获取和格式化
 - 时间计算和比较操作
 - 时区处理和转换
 - 定时器和周期任务
 
-### 🔹 加密安全
+### 加密安全
 - 哈希算法应用和比较
 - 对称加密（AES）实现
 - 非对称加密（RSA）应用
 - 数字签名和验证
 
-### 🔹 实用技巧
+### 实用技巧
 - 超时控制和任务调度
 - 密码安全存储
 - 数据完整性验证
 - 密钥管理和导出
 
-### 🔹 最佳实践
+### 最佳实践
 - 时间处理注意事项
 - 加密算法选择
 - 安全编程准则
 - 性能优化策略
 
-## 🎯 下一步
+## 下一步
 
 完成了进阶内容的学习后，让我们继续进入 [实战项目](../projects/)，通过实际项目来巩固所学知识！ 

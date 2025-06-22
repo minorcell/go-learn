@@ -7,7 +7,7 @@ description: 学习Go语言的文件读写、目录操作和数据处理
 
 文件操作是后端开发的基础技能。Go语言提供了丰富的文件操作API，让我们一起掌握这些重要功能。
 
-## 📖 本章内容
+## 本章内容
 
 - 基本文件读写操作
 - 目录遍历和管理
@@ -15,7 +15,7 @@ description: 学习Go语言的文件读写、目录操作和数据处理
 - JSON/XML/CSV数据处理
 - 文件监控和批量操作
 
-## 📁 基本文件操作
+## 基本文件操作
 
 ### 文件读取
 
@@ -280,7 +280,7 @@ func writeWithBuffer() {
 }
 ```
 
-## 📂 目录操作
+## 目录操作
 
 ### 目录遍历和管理
 
@@ -383,10 +383,10 @@ func directoryBasicOps() {
     fmt.Println("testdir 目录内容:")
     for _, entry := range entries {
         if entry.IsDir() {
-            fmt.Printf("  📁 %s/\n", entry.Name())
+            fmt.Printf("  %s/\n", entry.Name())
         } else {
             info, _ := entry.Info()
-            fmt.Printf("  📄 %s (%d bytes)\n", entry.Name(), info.Size())
+            fmt.Printf("  %s (%d bytes)\n", entry.Name(), info.Size())
         }
     }
     fmt.Println()
@@ -409,10 +409,10 @@ func walkDirectory() {
         }
         
         if d.IsDir() {
-            fmt.Printf("%s📁 %s/\n", indent, d.Name())
+            fmt.Printf("%s%s/\n", indent, d.Name())
         } else {
             info, _ := d.Info()
-            fmt.Printf("%s📄 %s (%d bytes, %s)\n", 
+            fmt.Printf("%s%s (%d bytes, %s)\n", 
                 indent, d.Name(), info.Size(), info.ModTime().Format("15:04:05"))
         }
         
@@ -520,7 +520,7 @@ func cleanup() {
 }
 ```
 
-## 📊 数据格式处理
+## 数据格式处理
 
 ### JSON 数据处理
 
@@ -804,7 +804,7 @@ func jsonStreamProcessing() {
 }
 ```
 
-## 📝 CSV 和 XML 处理
+##  CSV 和 XML 处理
 
 ### CSV 文件处理
 
@@ -1122,30 +1122,30 @@ func csvDataConversion() {
 }
 ```
 
-## 📝 本章小结
+##  本章小结
 
 在这一章中，我们学习了：
 
-### 🔹 基本文件操作
+### 基本文件操作
 - 文件读取的多种方式
 - 文件写入和追加操作
 - 缓冲读写提升性能
 
-### 🔹 目录管理
+### 目录管理
 - 目录创建和删除
 - 目录遍历和搜索
 - 文件信息获取
 
-### 🔹 数据格式处理
+### 数据格式处理
 - JSON编码解码和文件操作
 - CSV文件的读写和处理
 - 大文件的流式处理
 
-### 🔹 实用技巧
+### 实用技巧
 - 错误处理最佳实践
 - 性能优化方法
 - 数据转换和统计
 
-## 🎯 下一步
+## 下一步
 
 掌握了文件操作后，让我们继续学习 [网络编程](./network-http)，探索网络通信和HTTP服务开发！ 
