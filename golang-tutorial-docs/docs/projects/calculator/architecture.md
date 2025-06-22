@@ -199,23 +199,23 @@ func (h *HistoryManager) GetLast(n int) []HistoryEntry
     UI->>CP: 解析命令
     CP->>UI: 返回命令对象
     
-    alt 计算命令
-        UI->>C: 调用Calculate()
-        C->>EP: 解析表达式
-        EP->>EP: 词法分析
-        EP->>EP: 语法分析
-        EP->>EP: 计算求值
-        EP->>C: 返回结果
-        C->>HM: 保存到历史
-        C->>UI: 返回结果
-        UI->>U: 显示结果
-    else 历史命令
-        UI->>C: 调用GetHistory()
-        C->>HM: 获取历史记录
-        HM->>C: 返回历史列表
-        C->>UI: 返回历史
-        UI->>U: 显示历史
-    end" />
+    Note over UI,C: 计算命令流程
+    UI->>C: 调用Calculate()
+    C->>EP: 解析表达式
+    EP->>EP: 词法分析
+    EP->>EP: 语法分析
+    EP->>EP: 计算求值
+    EP->>C: 返回结果
+    C->>HM: 保存到历史
+    C->>UI: 返回结果
+    UI->>U: 显示结果
+    
+    Note over UI,HM: 历史命令流程
+    UI->>C: 调用GetHistory()
+    C->>HM: 获取历史记录
+    HM->>C: 返回历史列表
+    C->>UI: 返回历史
+    UI->>U: 显示历史" />
 
 ### 表达式解析算法
 
@@ -233,7 +233,7 @@ func (h *HistoryManager) GetLast(n int) []HistoryEntry
     E --> H[数字 Number]
     E --> I[括号表达式]
     
-    I --> J['(' Expression ')']
+    I --> J[括号表达式内容]
     
     style A fill:#ffcdd2
     style B fill:#f8bbd9
@@ -321,16 +321,16 @@ func (p *ExpressionParser) parseExpression() (float64, error) {
 
 <MermaidDiagram code="graph TD
     A[用户输入] --> B{输入验证}
-    B -->|有效| C[词法分析]
-    B -->|无效| D[输入错误]
+    B --> C[词法分析]
+    B --> D[输入错误]
     
     C --> E{Token验证}
-    E -->|有效| F[语法分析]
-    E -->|无效| G[语法错误]
+    E --> F[语法分析]
+    E --> G[语法错误]
     
     F --> H{计算验证}
-    H -->|成功| I[返回结果]
-    H -->|失败| J[数学错误]
+    H --> I[返回结果]
+    H --> J[数学错误]
     
     D --> K[显示错误信息]
     G --> K
