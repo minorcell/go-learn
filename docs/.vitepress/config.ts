@@ -9,7 +9,7 @@ export default defineConfig({
     cleanUrls: true,
 
     head: [
-        ['link', { rel: 'icon', href: '/favicon.ico' }],
+        ['link', { rel: 'icon', href: '/logo.png' }],
         ['meta', { name: 'theme-color', content: '#00ADD8' }],
         ['meta', { name: 'og:type', content: 'website' }],
         ['meta', { name: 'og:locale', content: 'zh_CN' }],
