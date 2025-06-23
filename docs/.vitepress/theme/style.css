@@ -3,10 +3,6 @@
  * 基于Go语言官方配色方案 (#00ADD8)
  */
 
-* {
-    -webkit-user-select: none;
-}
-
 *::-webkit-scrollbar {
     width: 0 !important;
     -ms-overflow-style: none;
