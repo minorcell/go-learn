@@ -225,8 +225,7 @@ export default defineConfig({
         ],
 
         footer: {
-            message: '基于 <a href="https://vitepress.dev">VitePress</a> 构建的Go工程师成长指南',
-            copyright: `Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
+            copyright: `Go工程师成长指南 Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
         },
 
         editLink: {
