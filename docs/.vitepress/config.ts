@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-    title: 'Go工程师成长指南',
+    title: 'Gopher成长指南',
     description: '全栈式Go语言学习路径，从语言基础到工程实践，从生态认知到职业成长',
 
     lang: 'zh-CN',
@@ -13,14 +13,14 @@ export default defineConfig({
         ['meta', { name: 'theme-color', content: '#00ADD8' }],
         ['meta', { name: 'og:type', content: 'website' }],
         ['meta', { name: 'og:locale', content: 'zh_CN' }],
-        ['meta', { name: 'og:site_name', content: 'Go工程师成长指南' }],
-        ['meta', { name: 'og:title', content: 'Go工程师成长指南 | 全栈式Go语言学习路径' }],
+        ['meta', { name: 'og:site_name', content: 'Gopher成长指南' }],
+        ['meta', { name: 'og:title', content: 'Gopher成长指南 | 全栈式Go语言学习路径' }],
         ['meta', { name: 'og:description', content: '从语言基础到工程实践，从生态认知到职业成长的完整指南' }],
     ],
 
     themeConfig: {
         logo: '/logo.png',
-        siteTitle: 'Go工程师成长指南',
+        siteTitle: 'Gopher成长指南',
 
         nav: [
             { text: '首页', link: '/' },
@@ -59,46 +59,47 @@ export default defineConfig({
             // 学习模块侧边栏
             '/learn/': [
                 {
-                    text: '📚 学习模块',
+                    text: '学习模块',
                     items: [
                         { text: '学习首页', link: '/learn/' }
                     ]
                 },
                 {
-                    text: '🔰 基础语法',
+                    text: '基础入门',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/fundamentals/' },
-                        { text: '变量和数据类型', link: '/learn/fundamentals/variables-types' },
-                        { text: '控制流程结构', link: '/learn/fundamentals/control-flow' },
-                        { text: '函数和方法', link: '/learn/fundamentals/functions' },
+                        { text: '变量与类型', link: '/learn/fundamentals/variables-types' },
                         { text: '数组、切片和映射', link: '/learn/fundamentals/arrays-slices-maps' },
-                        { text: '结构体和接口', link: '/learn/fundamentals/structs-interfaces' },
-                        { text: '错误处理机制', link: '/learn/fundamentals/error-handling' }
+                        { text: '控制流', link: '/learn/fundamentals/control-flow' },
+                        { text: '函数', link: '/learn/fundamentals/functions' },
+                        { text: '指针', link: '/learn/fundamentals/pointers' },
+                        { text: '结构体', link: '/learn/fundamentals/structs' }
                     ]
                 },
                 {
-                    text: '🚀 进阶特性',
+                    text: '深入核心特性',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/advanced/' },
-                        { text: '并发编程', link: '/learn/advanced/concurrency' },
-                        { text: '反射和类型断言', link: '/learn/advanced/reflection' },
-                        { text: '包管理和模块系统', link: '/learn/advanced/modules' },
-                        { text: '内存管理和垃圾回收', link: '/learn/advanced/memory-gc' },
-                        { text: 'CGO和系统调用', link: '/learn/advanced/cgo-syscalls' }
+                        { text: '方法', link: '/learn/advanced/methods' },
+                        { text: '接口', link: '/learn/advanced/interfaces' },
+                        { text: '并发', link: '/learn/advanced/concurrency' },
+                        { text: '泛型', link: '/learn/advanced/generics' },
+                        { text: '测试', link: '/learn/advanced/testing' }
                     ]
                 },
                 {
-                    text: '💡 核心概念',
+                    text: '核心概念',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/concepts/' },
-                        { text: 'Go的设计哲学', link: '/learn/concepts/philosophy' },
-                        { text: '类型系统和接口机制', link: '/learn/concepts/type-system' },
-                        { text: '内存模型和并发安全', link: '/learn/concepts/memory-model' },
-                        { text: '编译器原理和优化', link: '/learn/concepts/compiler' },
-                        { text: '运行时系统架构', link: '/learn/concepts/runtime' }
+                        { text: '错误处理', link: '/learn/concepts/errors' },
+                        { text: '设计哲学', link: '/learn/concepts/philosophy' },
+                        { text: '类型系统', link: '/learn/concepts/type-system' },
+                        { text: '内存模型', link: '/learn/concepts/memory-model' },
+                        { text: '运行时', link: '/learn/concepts/runtime' },
+                        { text: '编译器', link: '/learn/concepts/compiler' }
                     ]
                 }
             ],
@@ -106,13 +107,13 @@ export default defineConfig({
             // 工程实践模块侧边栏
             '/practice/': [
                 {
-                    text: '⚡ 工程实践模块',
+                    text: '工程实践模块',
                     items: [
                         { text: '实践首页', link: '/practice/' }
                     ]
                 },
                 {
-                    text: '🛠️ 实战项目',
+                    text: '实战项目',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/projects/' },
@@ -124,7 +125,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🎨 设计模式',
+                    text: '设计模式',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/patterns/' },
@@ -136,19 +137,19 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🔧 工具链',
+                    text: '工具链',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/tools/' },
-                        { text: '开发环境配置', link: '/practice/tools/development-setup' },
-                        { text: '代码质量工具', link: '/practice/tools/code-quality' },
-                        { text: '测试和基准测试', link: '/practice/tools/testing' },
-                        { text: '性能分析工具', link: '/practice/tools/profiling' },
-                        { text: '构建和部署工具', link: '/practice/tools/build-deploy' }
+                        { text: '工欲善其事：搭建开发环境', link: '/practice/tools/development-setup' },
+                        { text: '代码的准星：静态分析', link: '/practice/tools/code-quality' },
+                        { text: '精密瞄准镜：测试套件', link: '/practice/tools/testing' },
+                        { text: '高精度放大镜：性能剖析', link: '/practice/tools/profiling' },
+                        { text: '铸造成器：编译与构建', link: '/practice/tools/build-deploy' }
                     ]
                 },
                 {
-                    text: '🚀 部署运维',
+                    text: '部署运维',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/deployment/' },
@@ -164,13 +165,13 @@ export default defineConfig({
             // 生态模块侧边栏
             '/ecosystem/': [
                 {
-                    text: '🌍 生态模块',
+                    text: '生态模块',
                     items: [
                         { text: '生态首页', link: '/ecosystem/' }
                     ]
                 },
                 {
-                    text: '🏗️ 框架生态',
+                    text: '框架生态',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/frameworks/' },
@@ -182,7 +183,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '📦 常用库',
+                    text: '常用库',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/libraries/' },
@@ -194,7 +195,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '👥 社区资源',
+                    text: '社区资源',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/community/' },
@@ -206,15 +207,15 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '📈 技术趋势',
+                    text: '技术趋势',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/trends/' },
-                        { text: '版本演进', link: '/ecosystem/trends/version-history' },
-                        { text: '编译器优化', link: '/ecosystem/trends/compiler-improvements' },
-                        { text: '云原生趋势', link: '/ecosystem/trends/cloud-native' },
-                        { text: '新兴应用领域', link: '/ecosystem/trends/emerging-areas' },
-                        { text: '未来发展路线', link: '/ecosystem/trends/future-roadmap' }
+                        { text: 'Go与云原生', link: '/ecosystem/trends/cloud-native' },
+                        { text: '编译器与性能', link: '/ecosystem/trends/compiler-improvements' },
+                        { text: '版本历史与演进', link: '/ecosystem/trends/version-history' },
+                        { text: '泛型演进史', link: '/ecosystem/trends/generics-evolution' },
+                        { text: 'AI与Go', link: '/ecosystem/trends/ai-integration' }
                     ]
                 }
             ]
@@ -225,7 +226,7 @@ export default defineConfig({
         ],
 
         footer: {
-            copyright: `Go工程师成长指南 Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
+            copyright: `Gopher成长指南 Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
         },
 
         editLink: {
