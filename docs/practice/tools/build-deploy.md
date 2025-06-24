@@ -91,6 +91,8 @@ go build -x
 
 #### 构建标签（Build Tags）
 
+::: details 示例：构建标签
+
 ```go
 // +build dev
 
@@ -102,7 +104,9 @@ const (
     Debug  = true
 )
 ```
+:::
 
+::: details 示例：构建标签
 ```go
 // +build prod
 
@@ -114,14 +118,16 @@ const (
     Debug  = false
 )
 ```
+:::
 
+::: details 示例：构建标签
 ```bash
 # 使用构建标签
 go build -tags dev      # 开发环境
 go build -tags prod     # 生产环境
 go build -tags "prod monitoring"  # 多个标签
 ```
-
+:::
 #### 编译优化选项
 
 ```bash
@@ -139,6 +145,7 @@ go build -ldflags="-X main.version=${VERSION} -X 'main.buildTime=${BUILD_TIME}'"
 
 #### 版本信息嵌入
 
+::: details 示例：版本信息嵌入
 ```go
 package main
 
@@ -168,11 +175,12 @@ func main() {
     fmt.Println("Application is running...")
 }
 ```
-
+:::
 ### Makefile 构建自动化
 
 #### 基础Makefile
 
+::: details 示例：基础Makefile
 ```makefile
 # Makefile
 .PHONY: build clean test coverage help
@@ -274,9 +282,10 @@ help:
 	@echo "  run        - Run the application"
 	@echo "  run-dev    - Run in development mode"
 ```
-
+:::
 #### 高级Makefile技巧
 
+::: details 示例：高级Makefile技巧
 ```makefile
 # 检查工具是否安装
 check-tools:
@@ -310,13 +319,14 @@ quality: fmt lint test security
 release: clean quality build-all
 	@echo "Release artifacts ready in bin/"
 ```
-
+:::
 ## 🐳 容器化实践
 
 ### Docker基础使用
 
 #### 简单Dockerfile
 
+::: details 示例：简单Dockerfile
 ```dockerfile
 # 简单但不够优化的Dockerfile
 FROM golang:1.21
@@ -329,9 +339,10 @@ RUN go build -o main .
 EXPOSE 8080
 CMD ["./main"]
 ```
-
+:::
 #### 多阶段构建优化
 
+::: details 示例：多阶段构建优化
 ```dockerfile
 # 多阶段构建 - 推荐方式
 # 构建阶段
@@ -372,9 +383,10 @@ EXPOSE 8080
 # 启动应用
 ENTRYPOINT ["/main"]
 ```
-
+:::
 #### 进一步优化的Dockerfile
 
+::: details 示例：进一步优化的Dockerfile
 ```dockerfile
 # 高度优化的生产级Dockerfile
 FROM golang:1.21-alpine AS builder
@@ -430,9 +442,10 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 EXPOSE 8080
 ENTRYPOINT ["/main"]
 ```
-
+:::
 ### Docker Compose 本地开发
 
+::: details 示例：Docker Compose 本地开发
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -490,7 +503,8 @@ volumes:
   postgres_data:
   redis_data:
 ```
-
+:::
+::: details 示例：Dockerfile.dev
 ```dockerfile
 # Dockerfile.dev - 开发环境专用
 FROM golang:1.21-alpine
@@ -513,13 +527,14 @@ COPY . .
 # 使用air进行热重载
 CMD ["air"]
 ```
-
+:::
 ## 🚀 CI/CD 流水线
 
 ### GitHub Actions
 
 #### 基础工作流
 
+::: details 示例：基础工作流
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -634,9 +649,10 @@ jobs:
         name: binaries
         path: myapp-*
 ```
-
+:::
 #### Docker构建和发布
 
+::: details 示例：Docker构建和发布
 ```yaml
 # .github/workflows/docker.yml
 name: Docker Build and Push
@@ -697,9 +713,10 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 ```
-
+:::
 ### GitLab CI
 
+::: details 示例：GitLab CI
 ```yaml
 # .gitlab-ci.yml
 stages:
@@ -849,13 +866,14 @@ deploy_production:
   only:
     - tags
 ```
-
+:::
 ## 🎯 部署策略
 
 ### Kubernetes部署
 
 #### 基础部署配置
 
+::: details 示例：基础部署配置
 ```yaml
 # k8s/namespace.yaml
 apiVersion: v1
@@ -1001,9 +1019,10 @@ spec:
             port:
               number: 80
 ```
-
+:::
 #### HPA（水平自动扩展）
 
+::: details 示例：HPA（水平自动扩展）
 ```yaml
 # k8s/hpa.yaml
 apiVersion: autoscaling/v2
@@ -1032,9 +1051,10 @@ spec:
         type: Utilization
         averageUtilization: 80
 ```
-
+:::
 ### 健康检查实现
 
+::: details 示例：健康检查实现
 ```go
 package main
 
@@ -1175,7 +1195,7 @@ func main() {
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
 ```
-
+:::
 ## 🎯 构建部署最佳实践
 
 ### 1. 构建优化清单
@@ -1193,7 +1213,7 @@ func main() {
 - [ ] 添加健康检查和非root用户
 
 ### 2. 安全性考虑
-
+::: details 示例：安全性最佳实践
 ```dockerfile
 # 安全性最佳实践
 FROM golang:1.21-alpine AS builder
@@ -1216,9 +1236,9 @@ EXPOSE 8080
 # 使用 ENTRYPOINT 而不是 CMD
 ENTRYPOINT ["/main"]
 ```
-
+:::
 ### 3. 监控和可观测性
-
+::: details 示例：监控和可观测性
 ```go
 // 集成Prometheus指标
 package main
@@ -1280,7 +1300,7 @@ func main() {
     log.Fatal(http.ListenAndServe(":8080", handler))
 }
 ```
-
+:::
 ---
 
 💡 **构建部署心法**：

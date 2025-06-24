@@ -9,6 +9,7 @@
 ### 高质量Go代码的特征
 
 #### 🔍 可读性优先
+::: details 示例：可读性优先
 ```go
 // ❌ 难以理解的代码
 func p(u string) ([]byte, error) {
@@ -17,7 +18,10 @@ func p(u string) ([]byte, error) {
     defer r.Body.Close()
     return ioutil.ReadAll(r.Body)
 }
-
+```
+:::
+::: details 示例：可读性优先
+```go
 // ✅ 清晰易懂的代码
 func fetchUserProfile(userURL string) ([]byte, error) {
     response, err := http.Get(userURL)
@@ -34,7 +38,7 @@ func fetchUserProfile(userURL string) ([]byte, error) {
     return profile, nil
 }
 ```
-
+:::
 #### 📏 一致性胜过个性
 Go的格式化工具`gofmt`强制统一代码风格，这消除了团队中的"风格之争"，让大家专注于业务逻辑。
 
@@ -98,6 +102,8 @@ gofmt -s main.go
 `goimports`是`gofmt`的增强版本，不仅格式化代码，还自动管理import语句。
 
 #### 核心功能
+
+::: details 示例：核心功能
 ```go
 // 之前：手动管理导入
 package main
@@ -114,12 +120,15 @@ func main() {
     fmt.Println(result)
 }
 ```
-
+:::
+::: details 示例：核心功能
 ```bash
 # 运行goimports后
 goimports -w main.go
 ```
+:::
 
+::: details 示例：核心功能
 ```go
 // 之后：自动添加缺失的导入
 package main
@@ -134,14 +143,13 @@ func main() {
     fmt.Println(result)
 }
 ```
-
+:::
 #### 高级配置
 
 ```bash
 # 本地导入优先（将项目内部包分组）
 goimports -local "github.com/yourorg/yourproject" -w .
 ```
-
 ## 🔍 静态分析：发现潜在问题
 
 ### go vet：Go内置的代码审查员
@@ -150,6 +158,7 @@ goimports -local "github.com/yourorg/yourproject" -w .
 
 #### 常见检查项目
 
+::: details 示例：常见检查项目
 ```go
 // 1. Printf格式字符串错误
 func badPrintf() {
@@ -183,7 +192,7 @@ func atomicError() {
     fmt.Println(newValue)
 }
 ```
-
+:::
 #### 使用技巧
 
 ```bash
@@ -206,6 +215,7 @@ go build -vet ./...
 
 #### 核心检查规则
 
+::: details 示例：核心检查规则
 ```go
 // 1. 导出函数需要注释
 // ❌ 缺少注释
@@ -249,7 +259,7 @@ func validateInput(input string) error {
     return nil
 }
 ```
-
+:::
 ### staticcheck：现代静态分析工具
 
 `staticcheck`是`golint`的现代替代品，提供更全面的代码检查。
@@ -272,6 +282,7 @@ staticcheck -f json ./...
 
 #### 高级检查示例
 
+::: details 示例：高级检查示例
 ```go
 // 1. 检测无效的字符串比较
 func stringComparison() {
@@ -312,7 +323,7 @@ func nilPointer() {
     m["key"] = 1
 }
 ```
-
+:::
 ## 🔒 安全扫描工具
 
 ### gosec：Go安全分析器
@@ -334,6 +345,7 @@ gosec -fmt=json -out=results.json ./...
 
 #### 常见安全问题检测
 
+::: details 示例：常见安全问题检测
 ```go
 // 1. SQL注入风险
 func badSQLQuery(db *sql.DB, userInput string) error {
@@ -384,12 +396,14 @@ func goodRandomGeneration() {
     fmt.Printf("Token: %x\n", token)
 }
 ```
-
+:::
 ## 🔧 工具集成和自动化
 
 ### 编辑器集成
 
 #### VS Code配置
+
+::: details 示例：VS Code配置
 ```json
 {
     "go.lintTool": "staticcheck",
@@ -402,9 +416,10 @@ func goodRandomGeneration() {
     }
 }
 ```
-
+:::
 ### Makefile自动化
 
+::: details 示例：Makefile自动化
 ```makefile
 # Makefile
 .PHONY: lint vet fmt check-fmt security
@@ -436,11 +451,12 @@ security:
 quality: check-fmt vet lint security
 	@echo "All quality checks passed!"
 ```
-
+:::
 ### CI/CD集成
 
 #### GitHub Actions配置
 
+::: details 示例：GitHub Actions配置
 ```yaml
 # .github/workflows/quality.yml
 name: Code Quality
@@ -480,7 +496,7 @@ jobs:
     - name: Run security scan
       run: gosec ./...
 ```
-
+:::
 ## 📊 质量度量和监控
 
 ### 代码质量指标
@@ -508,6 +524,7 @@ go tool cover -html=coverage.out -o coverage.html
 
 ### 质量门禁设置
 
+::: details 示例：质量门禁设置
 ```bash
 # quality-gate.sh
 #!/bin/bash
@@ -543,7 +560,7 @@ fi
 
 echo "✅ All quality checks passed!"
 ```
-
+:::
 ## 🚀 最佳实践总结
 
 ### 1. 渐进式采用策略

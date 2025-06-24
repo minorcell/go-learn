@@ -18,6 +18,7 @@ Go团队相信：**性能优化应该基于数据，而不是猜测**。
 
 ### 测量优先于优化
 
+::: details 示例：测量优先于优化
 ```go
 // ❌ 基于猜测的优化
 func processData(data []string) []string {
@@ -50,7 +51,7 @@ func BenchmarkProcessData(b *testing.B) {
     }
 }
 ```
-
+:::
 ### 优化的三个层次
 
 1. **算法层优化**：O(n²) → O(n log n)
@@ -63,6 +64,7 @@ func BenchmarkProcessData(b *testing.B) {
 
 ### 基础概念理解
 
+::: details 示例：基础概念理解
 ```go
 // pprof可以分析以下几种性能数据：
 //
@@ -88,11 +90,12 @@ func main() {
     runApplication()
 }
 ```
-
+:::
 ### CPU性能分析
 
 #### 手动CPU分析
 
+::: details 示例：手动CPU分析
 ```go
 package main
 
@@ -134,9 +137,10 @@ func fibonacci(n int) int {
     return fibonacci(n-1) + fibonacci(n-2)
 }
 ```
-
+:::
 #### 分析CPU profile
 
+::: details 示例：分析CPU profile
 ```bash
 # 生成profile文件后，使用pprof分析
 go tool pprof cpu.prof
@@ -152,11 +156,12 @@ go tool pprof cpu.prof
 go tool pprof -top cpu.prof
 go tool pprof -web cpu.prof
 ```
-
+:::
 ### 内存分析
 
 #### 内存分析的两个维度
 
+::: details 示例：内存分析的两个维度
 ```go
 package main
 
@@ -209,9 +214,10 @@ func processData(data []byte) {
     }
 }
 ```
-
+:::
 #### 内存分析命令
 
+::: details 示例：内存分析命令
 ```bash
 # 分析内存使用
 go tool pprof mem.prof
@@ -227,11 +233,12 @@ go tool pprof -alloc_objects mem.prof # 总分配对象数
 go tool pprof -inuse_space mem.prof   # 当前使用空间
 go tool pprof -inuse_objects mem.prof # 当前使用对象数
 ```
-
+:::
 ### 实时性能监控
 
 #### HTTP pprof端点
 
+::: details 示例：HTTP pprof端点
 ```go
 package main
 
@@ -315,9 +322,10 @@ func blockingTask() {
     }
 }
 ```
-
+:::
 #### 实时分析命令
 
+::: details 示例：实时分析命令
 ```bash
 # 连接到运行中的应用进行实时分析
 
@@ -342,6 +350,7 @@ go tool pprof http://localhost:6060/debug/pprof/goroutine
 # 直接在浏览器查看
 # http://localhost:6060/debug/pprof/
 ```
+:::
 
 ## 🔍 高级分析技术
 
@@ -349,6 +358,7 @@ go tool pprof http://localhost:6060/debug/pprof/goroutine
 
 火焰图是理解程序性能的最直观方式：
 
+::: details 示例：火焰图分析
 ```bash
 # 生成火焰图
 go tool pprof -http=:8080 cpu.prof
@@ -362,9 +372,10 @@ go tool pprof -svg cpu.prof > flame.svg
 # - 颜色：不同的函数
 # - 宽度：函数占用的CPU时间比例
 ```
-
+:::
 ### trace工具：理解程序执行轨迹
 
+::: details 示例：trace工具：理解程序执行轨迹
 ```go
 package main
 
@@ -427,7 +438,7 @@ func demonstrateGoroutineInteraction() {
     wg.Wait()
 }
 ```
-
+:::
 ```bash
 # 分析trace文件
 go tool trace trace.out
@@ -443,6 +454,7 @@ go tool trace trace.out
 
 ### 内存逃逸分析
 
+::: details 示例：内存逃逸分析
 ```go
 package main
 
@@ -503,11 +515,12 @@ go build -gcflags="-m" main.go
 # 更详细的分析
 go build -gcflags="-m -m" main.go
 ```
-
+:::
 ## 📊 性能优化实战案例
 
 ### 案例1：字符串拼接优化
 
+::: details 示例：案例1：字符串拼接优化
 ```go
 package main
 
@@ -581,9 +594,10 @@ func BenchmarkFasterStringConcat(b *testing.B) {
     }
 }
 ```
-
+:::
 ### 案例2：内存池优化
 
+::: details 示例：案例2：内存池优化
 ```go
 package main
 
@@ -659,9 +673,10 @@ func generateTestData(count int) [][]byte {
     return data
 }
 ```
-
+:::
 ### 案例3：并发优化
 
+::: details 示例：案例3：并发优化
 ```go
 package main
 
@@ -753,6 +768,7 @@ func BenchmarkConcurrent(b *testing.B) {
     }
 }
 ```
+:::
 
 ## 🎯 性能优化最佳实践
 
@@ -783,6 +799,7 @@ graph TD
 
 ### 3. 生产环境监控
 
+::: details 示例：生产环境监控
 ```go
 package main
 
@@ -845,7 +862,7 @@ func checkPerformanceMetrics() {
     log.Println("Performance check completed")
 }
 ```
-
+:::
 ### 4. 性能优化清单
 
 #### 算法和数据结构

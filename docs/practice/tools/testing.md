@@ -18,6 +18,7 @@
 
 ### 简单胜过复杂
 
+::: details 示例：简单胜过复杂
 ```go
 // 这就是一个完整的Go测试
 func TestAdd(t *testing.T) {
@@ -28,7 +29,7 @@ func TestAdd(t *testing.T) {
     }
 }
 ```
-
+:::
 没有复杂的注解，没有魔法方法，就是普通的Go函数。这种简单性让测试变得易写、易读、易维护。
 
 ### 测试就在身边
@@ -47,6 +48,7 @@ myproject/
 
 ### 测试函数的命名规范
 
+::: details 示例：测试函数的命名规范
 ```go
 package calculator
 
@@ -69,7 +71,7 @@ func TestDivideByZero(t *testing.T) {
     // 测试零除错误
 }
 ```
-
+:::
 **命名原则**：
 - 必须以`Test`开头
 - 函数名应该清楚描述测试的功能
@@ -80,6 +82,7 @@ func TestDivideByZero(t *testing.T) {
 
 Go社区最佳实践之一，用一个测试函数覆盖多个测试用例：
 
+::: details 示例：表格驱动测试
 ```go
 func TestAdd(t *testing.T) {
     testCases := []struct {
@@ -105,7 +108,7 @@ func TestAdd(t *testing.T) {
     }
 }
 ```
-
+:::
 **优势解析**：
 - **全面性**：一次性测试多种场景
 - **可读性**：测试用例一目了然
@@ -116,6 +119,7 @@ func TestAdd(t *testing.T) {
 
 Go的错误处理模式在测试中同样重要：
 
+::: details 示例：错误处理测试
 ```go
 func TestDivide(t *testing.T) {
     testCases := []struct {
@@ -161,13 +165,14 @@ func TestDivide(t *testing.T) {
     }
 }
 ```
-
+:::
 ## 🏗️ 高级测试技术
 
 ### 测试辅助函数
 
 将测试逻辑模块化，提高代码复用性：
 
+::: details 示例：测试辅助函数
 ```go
 // 测试辅助函数，不以Test开头
 func assertAdd(t *testing.T, a, b, expected int) {
@@ -185,11 +190,12 @@ func TestAddOperations(t *testing.T) {
     assertAdd(t, 0, 0, 0)
 }
 ```
-
+:::
 ### Setup和Teardown
 
 管理测试的初始化和清理工作：
 
+::: details 示例：Setup和Teardown
 ```go
 func TestMain(m *testing.M) {
     // 全局设置
@@ -230,11 +236,12 @@ func setupTestDatabase(t *testing.T) *sql.DB {
     return db
 }
 ```
-
+:::
 ### Mock和依赖注入
 
 Go的接口系统让Mock变得自然而优雅：
 
+::: details 示例：Mock和依赖注入
 ```go
 // 定义接口
 type UserRepository interface {
@@ -304,6 +311,7 @@ func TestUserService(t *testing.T) {
     })
 }
 ```
+:::
 
 ## 🌐 Web和API测试
 
@@ -311,6 +319,7 @@ func TestUserService(t *testing.T) {
 
 Go标准库的`httptest`包让Web测试变得简单：
 
+::: details 示例：HTTP测试
 ```go
 func TestUserHandler(t *testing.T) {
     // 创建测试用的HTTP服务器
@@ -397,11 +406,12 @@ func TestUserHandler(t *testing.T) {
     }
 }
 ```
-
+:::
 ### 使用testify增强测试体验
 
 虽然Go内置测试足够强大，但`testify`库提供了更好的断言体验：
 
+::: details 示例：使用testify增强测试体验
 ```go
 import (
     "github.com/stretchr/testify/assert"
@@ -453,11 +463,12 @@ func TestUserServiceTestSuite(t *testing.T) {
     suite.Run(t, new(UserServiceTestSuite))
 }
 ```
-
+:::
 ## 📊 基准测试：性能的科学测量
 
 ### 基本基准测试
 
+::: details 示例：基本基准测试
 ```go
 func BenchmarkAdd(b *testing.B) {
     for i := 0; i < b.N; i++ {
@@ -482,7 +493,7 @@ func BenchmarkStringBuilder(b *testing.B) {
     }
 }
 ```
-
+:::
 ### 运行基准测试
 
 ```bash
@@ -506,6 +517,7 @@ go test -bench=. -benchmem
 
 ### 高级基准测试技术
 
+::: details 示例：高级基准测试技术
 ```go
 func BenchmarkMapOperations(b *testing.B) {
     sizes := []int{10, 100, 1000, 10000}
@@ -550,11 +562,12 @@ func BenchmarkByteSliceWithPool(b *testing.B) {
     }
 }
 ```
-
+:::
 ## 📈 测试覆盖率分析
 
 ### 生成覆盖率报告
 
+::: details 示例：生成覆盖率报告
 ```bash
 # 生成覆盖率文件
 go test -coverprofile=coverage.out ./...
@@ -573,9 +586,10 @@ go test -cover ./mypackage
 # github.com/myproject/calculator/divide.go:8: Divide         85.7%
 # total:                                       (statements)   92.3%
 ```
-
+:::
 ### 覆盖率最佳实践
 
+::: details 示例：覆盖率最佳实践
 ```go
 // ❌ 为了覆盖率而写的无意义测试
 func TestGetUserName(t *testing.T) {
@@ -610,11 +624,12 @@ func TestUserValidation(t *testing.T) {
     }
 }
 ```
-
+:::
 ## 🔄 测试驱动开发（TDD）
 
 ### 红-绿-重构循环
 
+::: details 示例：红-绿-重构循环
 ```go
 // 1. 红：先写测试（会失败）
 func TestCalculateDiscount(t *testing.T) {
@@ -669,11 +684,12 @@ func CalculateDiscount(amount float64, userType string) float64 {
     return amount
 }
 ```
-
+:::
 ## 🛠️ 测试工具生态
 
 ### 常用测试库
 
+::: details 示例：常用测试库
 ```go
 // 1. testify - 断言和Mock框架
 import (
@@ -713,9 +729,10 @@ var _ = Describe("Calculator", func() {
     })
 })
 ```
-
+:::
 ### CI/CD集成
 
+::: details 示例：CI/CD集成
 ```yaml
 # .github/workflows/test.yml
 name: Tests
@@ -750,7 +767,7 @@ jobs:
     - name: Run benchmarks
       run: go test -bench=. -benchmem ./...
 ```
-
+:::
 ## 🎯 测试最佳实践总结
 
 ### 1. 测试命名和组织
@@ -790,6 +807,7 @@ Unit Tests (大量，快速，独立)
 
 ### 4. 常见陷阱和解决方案
 
+::: details 示例：常见陷阱和解决方案
 ```go
 // ❌ 测试依赖于外部状态
 func TestGetCurrentTime(t *testing.T) {
@@ -817,7 +835,7 @@ func TestGetCurrentTime(t *testing.T) {
     }
 }
 ```
-
+:::
 ---
 
 💡 **测试心法**：写测试不是为了完成任务，而是为了让代码更可靠。好的测试是活文档，它们告诉未来的你（和团队成员）代码应该如何工作。
