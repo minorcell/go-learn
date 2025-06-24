@@ -68,7 +68,7 @@ export default defineConfig({
                     text: '🔰 基础语法',
                     collapsed: false,
                     items: [
-                        { text: '基础语法概览', link: '/learn/fundamentals/' },
+                        { text: '概览', link: '/learn/fundamentals/' },
                         { text: '变量和数据类型', link: '/learn/fundamentals/variables-types' },
                         { text: '控制流程结构', link: '/learn/fundamentals/control-flow' },
                         { text: '函数和方法', link: '/learn/fundamentals/functions' },
@@ -81,7 +81,7 @@ export default defineConfig({
                     text: '🚀 进阶特性',
                     collapsed: false,
                     items: [
-                        { text: '进阶特性概览', link: '/learn/advanced/' },
+                        { text: '概览', link: '/learn/advanced/' },
                         { text: '并发编程', link: '/learn/advanced/concurrency' },
                         { text: '反射和类型断言', link: '/learn/advanced/reflection' },
                         { text: '包管理和模块系统', link: '/learn/advanced/modules' },
@@ -93,7 +93,7 @@ export default defineConfig({
                     text: '💡 核心概念',
                     collapsed: false,
                     items: [
-                        { text: '核心概念概览', link: '/learn/concepts/' },
+                        { text: '概览', link: '/learn/concepts/' },
                         { text: 'Go的设计哲学', link: '/learn/concepts/philosophy' },
                         { text: '类型系统和接口机制', link: '/learn/concepts/type-system' },
                         { text: '内存模型和并发安全', link: '/learn/concepts/memory-model' },
@@ -115,7 +115,7 @@ export default defineConfig({
                     text: '🛠️ 实战项目',
                     collapsed: false,
                     items: [
-                        { text: '项目实战概览', link: '/practice/projects/' },
+                        { text: '概览', link: '/practice/projects/' },
                         { text: 'CLI命令行工具', link: '/practice/projects/cli-tools' },
                         { text: 'Web API服务', link: '/practice/projects/web-api' },
                         { text: '微服务架构实践', link: '/practice/projects/microservices' },
@@ -127,7 +127,7 @@ export default defineConfig({
                     text: '🎨 设计模式',
                     collapsed: false,
                     items: [
-                        { text: '设计模式概览', link: '/practice/patterns/' },
+                        { text: '概览', link: '/practice/patterns/' },
                         { text: '创建型模式', link: '/practice/patterns/creational' },
                         { text: '结构型模式', link: '/practice/patterns/structural' },
                         { text: '行为型模式', link: '/practice/patterns/behavioral' },
@@ -139,7 +139,7 @@ export default defineConfig({
                     text: '🔧 工具链',
                     collapsed: false,
                     items: [
-                        { text: '工具链概览', link: '/practice/tools/' },
+                        { text: '概览', link: '/practice/tools/' },
                         { text: '开发环境配置', link: '/practice/tools/development-setup' },
                         { text: '代码质量工具', link: '/practice/tools/code-quality' },
                         { text: '测试和基准测试', link: '/practice/tools/testing' },
@@ -151,7 +151,7 @@ export default defineConfig({
                     text: '🚀 部署运维',
                     collapsed: false,
                     items: [
-                        { text: '部署运维概览', link: '/practice/deployment/' },
+                        { text: '概览', link: '/practice/deployment/' },
                         { text: '容器化实践', link: '/practice/deployment/containerization' },
                         { text: 'CI/CD流水线', link: '/practice/deployment/cicd' },
                         { text: '监控和日志', link: '/practice/deployment/monitoring' },
@@ -173,7 +173,7 @@ export default defineConfig({
                     text: '🏗️ 框架生态',
                     collapsed: false,
                     items: [
-                        { text: '框架生态概览', link: '/ecosystem/frameworks/' },
+                        { text: '概览', link: '/ecosystem/frameworks/' },
                         { text: 'Web框架', link: '/ecosystem/frameworks/web' },
                         { text: '微服务框架', link: '/ecosystem/frameworks/microservices' },
                         { text: 'ORM框架', link: '/ecosystem/frameworks/orm' },
@@ -185,7 +185,7 @@ export default defineConfig({
                     text: '📦 常用库',
                     collapsed: false,
                     items: [
-                        { text: '常用库概览', link: '/ecosystem/libraries/' },
+                        { text: '概览', link: '/ecosystem/libraries/' },
                         { text: 'HTTP客户端库', link: '/ecosystem/libraries/http-clients' },
                         { text: 'JSON和序列化', link: '/ecosystem/libraries/serialization' },
                         { text: '加密和安全', link: '/ecosystem/libraries/security' },
@@ -197,7 +197,7 @@ export default defineConfig({
                     text: '👥 社区资源',
                     collapsed: false,
                     items: [
-                        { text: '社区资源概览', link: '/ecosystem/community/' },
+                        { text: '概览', link: '/ecosystem/community/' },
                         { text: '官方资源', link: '/ecosystem/community/official' },
                         { text: '技术博客和文章', link: '/ecosystem/community/blogs' },
                         { text: '开源项目推荐', link: '/ecosystem/community/open-source' },
@@ -209,7 +209,7 @@ export default defineConfig({
                     text: '📈 技术趋势',
                     collapsed: false,
                     items: [
-                        { text: '技术趋势概览', link: '/ecosystem/trends/' },
+                        { text: '概览', link: '/ecosystem/trends/' },
                         { text: '版本演进', link: '/ecosystem/trends/version-history' },
                         { text: '编译器优化', link: '/ecosystem/trends/compiler-improvements' },
                         { text: '云原生趋势', link: '/ecosystem/trends/cloud-native' },
