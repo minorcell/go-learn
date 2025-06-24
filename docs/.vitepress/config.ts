@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-    title: 'Go工程师成长指南',
+    title: 'Gopher成长指南',
     description: '全栈式Go语言学习路径，从语言基础到工程实践，从生态认知到职业成长',
 
     lang: 'zh-CN',
@@ -13,14 +13,14 @@ export default defineConfig({
         ['meta', { name: 'theme-color', content: '#00ADD8' }],
         ['meta', { name: 'og:type', content: 'website' }],
         ['meta', { name: 'og:locale', content: 'zh_CN' }],
-        ['meta', { name: 'og:site_name', content: 'Go工程师成长指南' }],
-        ['meta', { name: 'og:title', content: 'Go工程师成长指南 | 全栈式Go语言学习路径' }],
+        ['meta', { name: 'og:site_name', content: 'Gopher成长指南' }],
+        ['meta', { name: 'og:title', content: 'Gopher成长指南 | 全栈式Go语言学习路径' }],
         ['meta', { name: 'og:description', content: '从语言基础到工程实践，从生态认知到职业成长的完整指南' }],
     ],
 
     themeConfig: {
         logo: '/logo.png',
-        siteTitle: 'Go工程师成长指南',
+        siteTitle: 'Gopher成长指南',
 
         nav: [
             { text: '首页', link: '/' },
@@ -226,7 +226,7 @@ export default defineConfig({
         ],
 
         footer: {
-            copyright: `Go工程师成长指南 Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
+            copyright: `Gopher成长指南 Copyright © 2025 <a href="https://github.com/minorcell/go-learn">mCell</a>`
         },
 
         editLink: {

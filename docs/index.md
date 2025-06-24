@@ -2,14 +2,14 @@
 layout: home
 
 hero:
-  name: "Go工程师成长指南"
+  name: "Gopher成长指南"
   text: "全栈式Go语言学习路径"
   tagline: 从语言基础到工程实践，从生态认知到职业成长的完整指南
   image:
     src: /logo.png
-    alt: Go工程师成长指南
+    alt: Gopher成长指南
   actions:
-    - theme: brand
+    - theme: alt
       text: 开始学习
       link: /learn/
     - theme: alt
@@ -18,6 +18,9 @@ hero:
     - theme: alt
       text: 生态探索
       link: /ecosystem/
+    - theme: brand
+      text: GitHub
+      link: https://github.com/minorcell/go-learn
 
 ---
 
