@@ -18,6 +18,7 @@ Go 推崇以通信代替共享内存。与传统锁机制相比，它的原生�
 
 ### 直观对比
 
+::: details 示例：直观对比
 ```go
 // ❌ 使用共享内存（传统并发）
 mutex.Lock()
@@ -27,7 +28,7 @@ mutex.Unlock()
 // ✅ 使用 channel（Go 风格）
 ch <- 1 // 通过消息传递改变状态
 ```
-
+:::
 ### 特点总结
 
 * **轻量级 goroutine**：调度器管理，百万并发无压力
@@ -56,12 +57,13 @@ graph TD
 
 将处理过程分为多个阶段，每一阶段运行在独立 goroutine 中，通过 channel 串联：
 
+::: details 示例：Pipeline 模式
 ```go
 numbers := generate(ctx, 10)
 squares := square(ctx, numbers)
 evens := filterEven(ctx, squares)
 ```
-
+:::
 ✅ 特别适合：
 
 * 分布式任务流水线
@@ -74,11 +76,12 @@ evens := filterEven(ctx, squares)
 
 固定数量的 goroutine（worker）从任务队列中消费任务，适合高并发批量处理：
 
+::: details 示例：Worker Pool 模式
 ```go
 pool := NewWorkerPool(4)
 pool.Submit(task)
 ```
-
+:::
 适用：
 
 * 消息消费系统（如 Kafka consumer）
@@ -104,11 +107,12 @@ pool.Submit(task)
 
 事件驱动设计中的核心模式，通过广播机制实现“生产者-订阅者”解耦：
 
+::: details 示例：发布订阅模式
 ```go
 bus.Publish(UserCreated, data)
 bus.Subscribe(subscriber)
 ```
-
+:::
 典型场景：
 
 * 用户行为通知
@@ -125,6 +129,7 @@ bus.Subscribe(subscriber)
 * **滑动窗口（Sliding Window）**
 * **分布式限流器（Redis / etcd）**
 
+::: details 示例：Rate Limiting 模式
 ```go
 if limiter.Allow() {
     // 执行操作
@@ -132,7 +137,7 @@ if limiter.Allow() {
     // 返回 429
 }
 ```
-
+:::
 适用：
 
 * 接口限流、突发流控
@@ -144,11 +149,12 @@ if limiter.Allow() {
 
 用来传递取消信号、超时控制和请求范围数据，是现代 Go 并发的基石。
 
+::: details 示例：Context 模式
 ```go
 ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 defer cancel()
 ```
-
+:::
 适用：
 
 * HTTP 请求生命周期

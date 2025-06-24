@@ -72,6 +72,8 @@ graph TD
 `gofmt`不仅仅是一个工具，它代表了Go社区的一个重要理念：**格式化的代码比个性化的代码更有价值**。
 
 #### 基本使用
+
+::: details 示例：基本使用
 ```bash
 # 格式化单个文件
 gofmt -w main.go
@@ -85,7 +87,7 @@ gofmt -d main.go
 # 简化代码结构
 gofmt -s main.go
 ```
-
+:::
 #### 为什么使用gofmt？
 
 **一致性价值**：
@@ -146,10 +148,12 @@ func main() {
 :::
 #### 高级配置
 
+::: details 示例：高级配置
 ```bash
 # 本地导入优先（将项目内部包分组）
 goimports -local "github.com/yourorg/yourproject" -w .
 ```
+:::
 ## 🔍 静态分析：发现潜在问题
 
 ### go vet：Go内置的代码审查员
@@ -195,6 +199,7 @@ func atomicError() {
 :::
 #### 使用技巧
 
+::: details 示例：使用技巧
 ```bash
 # 检查当前包
 go vet
@@ -208,7 +213,7 @@ go vet -printf ./...
 # 在构建时自动运行
 go build -vet ./...
 ```
-
+:::
 ### golint：代码风格检查
 
 虽然`golint`已经不再维护，但理解它的检查规则对写出地道的Go代码很重要。
@@ -266,6 +271,7 @@ func validateInput(input string) error {
 
 #### 安装和使用
 
+::: details 示例：安装和使用
 ```bash
 # 安装
 go install honnef.co/go/tools/cmd/staticcheck@latest
@@ -279,7 +285,7 @@ staticcheck -checks=SA1* ./...
 # 输出JSON格式（适合CI集成）
 staticcheck -f json ./...
 ```
-
+:::
 #### 高级检查示例
 
 ::: details 示例：高级检查示例
@@ -332,6 +338,7 @@ func nilPointer() {
 
 #### 安装和基本使用
 
+::: details 示例：安装和基本使用
 ```bash
 # 安装
 go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
@@ -342,7 +349,7 @@ gosec ./...
 # 生成详细报告
 gosec -fmt=json -out=results.json ./...
 ```
-
+:::
 #### 常见安全问题检测
 
 ::: details 示例：常见安全问题检测
@@ -502,26 +509,29 @@ jobs:
 ### 代码质量指标
 
 #### 1. 圈复杂度监控
+::: details 示例：圈复杂度监控
 ```bash
 # 使用gocyclo检查复杂度
 go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
 gocyclo -top 10 .
 ```
-
+:::
 #### 2. 代码重复检测
+::: details 示例：代码重复检测
 ```bash
 # 使用dupl检测重复代码
 go install github.com/mibk/dupl@latest
 dupl -threshold 50 .
 ```
-
+:::
 #### 3. 代码覆盖率
+::: details 示例：代码覆盖率
 ```bash
 # 生成覆盖率报告
 go test -coverprofile=coverage.out ./...
 go tool cover -html=coverage.out -o coverage.html
 ```
-
+:::
 ### 质量门禁设置
 
 ::: details 示例：质量门禁设置

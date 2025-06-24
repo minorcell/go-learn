@@ -14,6 +14,7 @@ outline: deep
 
 想象你需要初始化一个数据库连接，代码可能如下：
 
+::: details 示例：直接硬编码创建对象
 ```go
 // ❌ 反例：直接硬编码创建对象
 func main() {
@@ -27,7 +28,7 @@ func main() {
     }
 }
 ```
-
+:::
 这样的写法存在多个问题：
 
 * **配置耦合**：参数写死，难以复用或变更
@@ -67,9 +68,8 @@ graph TD
 * 抽象工厂（Abstract Factory）
 * 函数式工厂（Functional Factory）
 
-::: code-group
-
-```go [Simple Factory]
+::: details 示例：Simple Factory
+```go
 func NewDatabase(config Config) (*sql.DB, error) {
     switch config.Type {
     case PostgreSQL:
@@ -81,14 +81,18 @@ func NewDatabase(config Config) (*sql.DB, error) {
     }
 }
 ```
+:::
 
-```go [Factory Method]
+::: details 示例：Factory Method
+```go
 type LoggerFactory interface {
     CreateLogger() Logger
 }
 ```
+:::
 
-```go [Functional Factory]
+::: details 示例：Functional Factory
+```go
 func NewHTTPClient(options ...ClientOption) *http.Client {
     client := &http.Client{}
     for _, opt := range options {
@@ -97,7 +101,6 @@ func NewHTTPClient(options ...ClientOption) *http.Client {
     return client
 }
 ```
-
 :::
 
 更多示例见：[工厂模式实现](/practice/patterns/factory)
@@ -117,7 +120,6 @@ func NewHTTPClient(options ...ClientOption) *http.Client {
 * 可扩展性好
 
 ::: details 示例：构建 HTTP Server
-
 ```go
 server := NewServerBuilder().
     Host("0.0.0.0").
@@ -126,7 +128,6 @@ server := NewServerBuilder().
     AddRoute("/", handler).
     Build()
 ```
-
 :::
 
 ---
@@ -137,6 +138,7 @@ server := NewServerBuilder().
 
 当构造函数参数太多或变化频繁时，用选项模式是 Go 的惯用手法。
 
+::: details 示例：选项模式
 ```go
 cache := NewCache(
     WithMaxSize(100),
@@ -144,7 +146,7 @@ cache := NewCache(
     WithEvictionCallback(func(key string, val any) { ... }),
 )
 ```
-
+:::
 优点：
 
 * 调用更灵活
@@ -159,6 +161,7 @@ cache := NewCache(
 
 某个对象全局唯一，且生命周期和程序一致（如配置对象、连接池）。
 
+::: details 示例：单例模式
 ```go
 var once sync.Once
 var instance *Config
@@ -170,7 +173,7 @@ func GetConfig() *Config {
     return instance
 }
 ```
-
+:::
 📌 推荐用 `sync.Once` 来保证线程安全与懒加载。
 
 ---
@@ -181,6 +184,7 @@ func GetConfig() *Config {
 
 适合插件系统、驱动管理、动态扩展等需求。
 
+::: details 示例：注册器模式
 ```go
 type Registry struct {
     drivers map[string]Driver
@@ -194,7 +198,7 @@ func (r *Registry) Get(name string) Driver {
     return r.drivers[name]
 }
 ```
-
+:::
 常见应用：数据库驱动、图像解码器、协议适配器等。
 
 ---

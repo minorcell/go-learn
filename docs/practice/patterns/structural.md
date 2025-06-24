@@ -14,6 +14,7 @@ outline: deep
 
 与传统 OOP 中的“继承树”不同，Go 倾向于使用接口 + 嵌入组合对象行为：
 
+::: details 示例：Go 的组合方式
 ```go
 // Go 的组合方式
 
@@ -34,7 +35,7 @@ type ColoredShape struct {
     Color string  // 扩展属性
 }
 ```
-
+:::
 ✅ Go 的组合设计带来了：
 
 * **更灵活的结构组织**
@@ -64,6 +65,7 @@ graph TD
 
 ### 示例：将旧系统支付接口适配为现代接口
 
+::: details 示例：将旧系统支付接口适配为现代接口
 ```go
 // 目标接口
 interface PaymentProcessor {
@@ -79,7 +81,7 @@ func (l *LegacyAdapter) ProcessPayment(a float64, c string) Result {
     return wrap(ok)
 }
 ```
-
+:::
 更多见：[适配器完整示例](/practice/patterns/structural#适配器模式)
 
 ---
@@ -88,6 +90,7 @@ func (l *LegacyAdapter) ProcessPayment(a float64, c string) Result {
 
 动态为对象添加功能，而不修改其结构。在 Go 中大量用于 HTTP 中间件链：
 
+::: details 示例：装饰器模式
 ```go
 func Logging(next http.HandlerFunc) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +99,7 @@ func Logging(next http.HandlerFunc) http.HandlerFunc {
     }
 }
 ```
-
+:::
 组合中间件：
 
 ```go
@@ -109,6 +112,7 @@ handler := Auth(CORS(Logging(finalHandler)))
 
 用于树形结构（如文件系统、UI 组件树），允许你将对象组合成层次结构，并像处理单个对象一样使用它们。
 
+::: details 示例：组合模式
 ```go
 type Node interface {
     Render() string
@@ -130,13 +134,14 @@ func (c Container) Render() string {
     return out
 }
 ```
-
+:::
 ---
 
 ## 🔗 桥接模式（Bridge）
 
 将抽象与实现分离，使它们可以独立演化。
 
+::: details 示例：桥接模式
 ```go
 // 抽象层
 interface Notification {
@@ -153,13 +158,14 @@ struct EmailNotification {
     Sender Sender
 }
 ```
-
+:::
 ---
 
 ## 🧱 外观模式（Facade）
 
 为复杂子系统提供一个统一入口，简化调用：
 
+::: details 示例：外观模式
 ```go
 // 子系统
 AuthService.Login(), OrderService.Create()
@@ -170,6 +176,7 @@ AppFacade.PlaceOrder(user, product) {
     OrderService.Create(product)
 }
 ```
+:::
 
 ---
 
@@ -177,6 +184,7 @@ AppFacade.PlaceOrder(user, product) {
 
 为某对象提供“访问控制”或“增强行为”的代理对象，常用于缓存、权限控制等：
 
+::: details 示例：代理模式
 ```go
 func (p *CacheProxy) Get(key string) (Value, error) {
     if val := p.Cache.Get(key); val != nil {
@@ -187,13 +195,14 @@ func (p *CacheProxy) Get(key string) (Value, error) {
     return val, nil
 }
 ```
-
+:::
 ---
 
 ## ♻️ 享元模式（Flyweight）
 
 通过共享对象来减少内存开销，适合大量重复数据的场景。
 
+::: details 示例：享元模式
 ```go
 type GlyphFactory struct {
     glyphs map[string]*Glyph
@@ -208,7 +217,7 @@ func (f *GlyphFactory) Get(char string) *Glyph {
     return g
 }
 ```
-
+:::
 ---
 
 ## ✅ 模式选择建议

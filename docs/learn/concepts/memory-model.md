@@ -10,6 +10,7 @@
 
 在日常生活中，我们习惯了线性的时间：先发生的事件必然在后发生的事件之前被观察到。但在并发编程中，这个基本假设不再成立：
 
+::: details 示例：时间与因果关系的重新定义
 ```go
 // 看起来简单的并发代码
 var data int
@@ -40,12 +41,12 @@ func main() {
 这不是 bug，而是**现代计算机系统的基本特性**。内存模型的作用就是在这种混沌中建立秩序。
 
 ### 可见性与原子性的困境
-::: details 示例：可见性与原子性的困境
 并发编程的核心挑战可以归结为两个问题：
 
 1. **可见性问题**：一个 goroutine 的修改什么时候对其他 goroutine 可见？
 2. **原子性问题**：如何保证一组操作要么全部发生，要么全部不发生？
 
+::: details 示例：可见性与原子性的困境
 ```go
 // 可见性问题的典型例子
 var counter int
@@ -877,6 +878,7 @@ func main() {
 :::
 然后使用 pprof 分析：
 
+::: details 示例：使用 pprof 分析锁竞争
 ```bash
 # 分析 mutex 竞争
 go tool pprof http://localhost:6060/debug/pprof/mutex
@@ -884,6 +886,7 @@ go tool pprof http://localhost:6060/debug/pprof/mutex
 # 分析阻塞操作
 go tool pprof http://localhost:6060/debug/pprof/block
 ```
+:::
 
 ## 内存模型的哲学反思
 

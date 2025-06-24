@@ -14,13 +14,14 @@ outline: deep
 
 Go 拒绝传统的 try-catch 异常模型，转而采用 `error` 作为普通返回值，推动显式控制流。
 
+::: details 示例：错误处理模式
 ```go
 result, err := riskyOperation()
 if err != nil {
     return fmt.Errorf("operation failed: %w", err)
 }
 ```
-
+:::
 💡 核心优势：
 
 * 错误即值，可组合、传递、检查、包装
@@ -47,6 +48,7 @@ graph TD
 
 ### 简单错误返回
 
+::: details 示例：简单错误返回
 ```go
 func divide(a, b float64) (float64, error) {
     if b == 0 {
@@ -55,9 +57,10 @@ func divide(a, b float64) (float64, error) {
     return a / b, nil
 }
 ```
-
+:::
 ### 哨兵错误（Sentinel Error）
 
+::: details 示例：哨兵错误
 ```go
 var ErrUserNotFound = errors.New("user not found")
 
@@ -68,9 +71,10 @@ func GetUser(id int) (*User, error) {
     return &User{}, nil
 }
 ```
-
+:::
 ### 自定义错误类型
 
+::: details 示例：自定义错误类型
 ```go
 type ValidationError struct {
     Field string
@@ -81,19 +85,21 @@ func (e *ValidationError) Error() string {
     return fmt.Sprintf("invalid %s: %s", e.Field, e.Msg)
 }
 ```
-
+:::
 ---
 
 ## 🎁 错误包装模式
 
 ### fmt.Errorf + %w
 
+::: details 示例：fmt.Errorf + %w
 ```go
 return fmt.Errorf("create user failed: %w", err)
 ```
-
+:::
 ### 自定义包装器
 
+::: details 示例：自定义包装器
 ```go
 return &ContextError{
     Op: "saveUser",
@@ -101,7 +107,7 @@ return &ContextError{
     Err: err,
 }
 ```
-
+:::
 使用 `errors.Unwrap()` 和 `errors.As()` 解链。
 
 ---
@@ -110,44 +116,49 @@ return &ContextError{
 
 ### errors.Is
 
+::: details 示例：errors.Is
 ```go
 if errors.Is(err, ErrUserNotFound) {
     // 处理用户不存在
 }
 ```
-
+:::     
 ### errors.As
 
+::: details 示例：errors.As
 ```go
 var ve *ValidationError
 if errors.As(err, &ve) {
     fmt.Println("字段错误：", ve.Field)
 }
 ```
-
+:::
 ---
 
 ## 📡 错误传播与聚合
 
 ### 错误链
 
+::: details 示例：错误链
 ```go
 return fmt.Errorf("fetch order: %w", dbErr)
 ```
-
+:::
 ### 聚合多个错误
 
+::: details 示例：聚合多个错误
 ```go
 errs := []error{err1, err2}
 return errors.Join(errs...)
 ```
-
+:::
 ---
 
 ## 🔄 错误恢复与降级
 
 ### panic / recover
 
+::: details 示例：panic / recover
 ```go
 defer func() {
     if r := recover(); r != nil {
@@ -155,18 +166,20 @@ defer func() {
     }
 }()
 ```
-
+:::
 ### Fallback 模式
 
+::: details 示例：Fallback 模式
 ```go
 if err := primary.Do(); err != nil {
     log.Println("主服务失败，尝试降级")
     return fallback.Do()
 }
 ```
-
+:::
 ### 重试机制
 
+::: details 示例：重试机制
 ```go
 for i := 0; i < 3; i++ {
     if err := op(); err == nil {
@@ -175,7 +188,7 @@ for i := 0; i < 3; i++ {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 ---
 
 ## ✅ 模式选型建议

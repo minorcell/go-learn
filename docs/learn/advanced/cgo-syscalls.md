@@ -627,6 +627,7 @@ func main() {
 }
 ```
 :::
+
 ## CGO 的陷阱与智慧
 
 ### 并发安全的复杂性
@@ -723,6 +724,7 @@ func demonstrateThreadSafety() {
 }
 ```
 :::
+
 ### 错误处理的边界
 
 ::: details 示例：错误处理的边界
@@ -810,6 +812,7 @@ func demonstrateErrorHandling() {
 
 ### 交叉编译的挑战
 
+::: details 示例：交叉编译的挑战
 ```bash
 # 纯 Go 程序的交叉编译很简单
 GOOS=linux GOARCH=amd64 go build main.go
@@ -819,9 +822,10 @@ CGO_ENABLED=1 GOOS=linux GOARCH=amd64 \
 CC=x86_64-linux-gnu-gcc \
 go build main.go
 ```
-
+:::
 ### 静态链接 vs 动态链接
 
+::: details 示例：静态链接 vs 动态链接
 ```go
 package main
 
@@ -843,6 +847,8 @@ func main() {
 }
 ```
 :::
+
+::: details 示例：静态链接 vs 动态链接
 ```bash
 # 静态链接（更大的二进制文件，但更好的部署性）
 CGO_ENABLED=1 go build -ldflags "-linkmode external -extldflags -static" main.go
@@ -855,6 +861,7 @@ CGO_ENABLED=1 go build main.go
 
 ### 纯 Go 实现的优先考虑
 
+::: details 示例：纯 Go 实现的优先考虑
 ```go
 // 在使用 CGO 之前，考虑纯 Go 的替代方案
 
@@ -887,6 +894,7 @@ func compressData(data []byte) ([]byte, error) {
 :::
 ### 进程间通信的替代
 
+::: details 示例：进程间通信的替代
 ```go
 // 有时使用外部进程比 CGO 更合适
 package main

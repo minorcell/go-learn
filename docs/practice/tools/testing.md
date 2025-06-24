@@ -496,6 +496,7 @@ func BenchmarkStringBuilder(b *testing.B) {
 :::
 ### 运行基准测试
 
+::: details 示例：运行基准测试
 ```bash
 # 运行所有基准测试
 go test -bench=.
@@ -514,7 +515,7 @@ go test -bench=. -benchmem
 # BenchmarkStringConcat-8       500000000     3.2 ns/op     0 B/op   0 allocs/op
 # BenchmarkStringBuilder-8      200000000     8.1 ns/op    32 B/op   1 allocs/op
 ```
-
+:::
 ### 高级基准测试技术
 
 ::: details 示例：高级基准测试技术

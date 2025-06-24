@@ -9,6 +9,8 @@
 ### Go构建部署的独特优势
 
 #### 🎯 单一可执行文件
+
+::: details 示例：Go编译后就是一个独立的可执行文件
 ```bash
 # Go编译后就是一个独立的可执行文件
 go build -o myapp main.go
@@ -16,7 +18,7 @@ go build -o myapp main.go
 # 无需安装运行时环境，直接运行
 ./myapp
 ```
-
+:::
 这种设计哲学的深层含义：
 - **部署简单**：不需要复杂的依赖管理
 - **容器友好**：完美适配Docker容器化
@@ -24,6 +26,8 @@ go build -o myapp main.go
 - **启动快速**：无需虚拟机预热
 
 #### ⚡ 交叉编译能力
+
+::: details 示例：交叉编译能力
 ```bash
 # 在Linux上为Windows编译
 GOOS=windows GOARCH=amd64 go build -o myapp.exe main.go
@@ -34,7 +38,7 @@ GOOS=linux GOARCH=amd64 go build -o myapp-linux main.go
 # 为ARM架构编译（如树莓派）
 GOOS=linux GOARCH=arm go build -o myapp-arm main.go
 ```
-
+:::
 ## 📊 构建部署工具全景
 
 ```mermaid
@@ -72,6 +76,7 @@ graph TD
 
 #### 基础构建命令
 
+::: details 示例：基础构建命令
 ```bash
 # 最简单的构建
 go build
@@ -88,10 +93,10 @@ go build -v
 # 构建时显示编译器命令
 go build -x
 ```
-
+:::
 #### 构建标签（Build Tags）
 
-::: details 示例：构建标签
+::: details 示例：构建标签（dev）
 
 ```go
 // +build dev
@@ -106,7 +111,7 @@ const (
 ```
 :::
 
-::: details 示例：构建标签
+::: details 示例：构建标签（prod）
 ```go
 // +build prod
 
@@ -120,7 +125,7 @@ const (
 ```
 :::
 
-::: details 示例：构建标签
+::: details 示例：构建标签（dev、prod）
 ```bash
 # 使用构建标签
 go build -tags dev      # 开发环境
@@ -130,6 +135,7 @@ go build -tags "prod monitoring"  # 多个标签
 :::
 #### 编译优化选项
 
+::: details 示例：编译优化选项
 ```bash
 # 去除调试信息，减小文件大小
 go build -ldflags="-s -w" -o myapp
@@ -142,7 +148,7 @@ VERSION=$(git describe --tags --always)
 BUILD_TIME=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 go build -ldflags="-X main.version=${VERSION} -X 'main.buildTime=${BUILD_TIME}'" -o myapp
 ```
-
+:::
 #### 版本信息嵌入
 
 ::: details 示例：版本信息嵌入

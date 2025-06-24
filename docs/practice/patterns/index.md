@@ -9,6 +9,7 @@
 ### Go设计模式的独特性
 
 #### 🔍 组合优于继承
+::: details 示例：组合优于继承
 ```go
 // 传统OOP中可能使用继承
 // class Dog extends Animal { }
@@ -38,8 +39,9 @@ func main() {
     dog.Sleep() // 可以调用"父类"方法
 }
 ```
-
+:::
 #### 🎯 接口的鸭子类型
+::: details 示例：接口的鸭子类型
 ```go
 // Go的接口是隐式实现的
 type Writer interface {
@@ -55,8 +57,9 @@ func (n NetworkWriter) Write(data []byte) (int, error) { /* ... */ }
 
 // 不需要显式声明"implements Writer"
 ```
-
+:::
 #### ⚡ 并发原语内建
+::: details 示例：并发原语内建
 ```go
 // Go的goroutine和channel让并发模式变得自然
 func producer(ch chan<- int) {
@@ -78,7 +81,7 @@ func main() {
     consumer(ch)
 }
 ```
-
+:::
 ## 📊 Go设计模式全景
 
 ### 模式分类重新思考
@@ -125,6 +128,7 @@ Go特有的模式分类：
 
 #### 为什么需要创建型模式？
 
+::: details 示例：为什么需要创建型模式？
 ```go
 // ❌ 直接创建对象的问题
 func main() {
@@ -157,7 +161,7 @@ func NewUserService(config DBConfig) *UserService {
     return &UserService{db: db}
 }
 ```
-
+:::
 #### Go中的创建型模式特色
 
 - **函数式工厂**：利用Go的函数作为一等公民
@@ -172,6 +176,7 @@ func NewUserService(config DBConfig) *UserService {
 
 #### Go中的组合之美
 
+::: details 示例：适配器模式的Go实现
 ```go
 // 适配器模式的Go实现
 type LegacyPrinter struct{}
@@ -203,7 +208,7 @@ func (l LoggingPrinter) Print(text string) {
     fmt.Println("Logging: print completed")
 }
 ```
-
+:::
 #### 结构型模式的Go特色
 
 - **接口组合**：小接口组合成大功能
@@ -218,6 +223,7 @@ func (l LoggingPrinter) Print(text string) {
 
 #### 策略模式的Go实现
 
+::: details 示例：策略模式的Go实现
 ```go
 // 策略接口
 type PaymentStrategy interface {
@@ -256,7 +262,7 @@ func (p *PaymentProcessor) ProcessPayment(amount float64) error {
     return p.strategy.Pay(amount)
 }
 ```
-
+:::
 #### 行为型模式的Go优势
 
 - **接口的隐式实现**：无需继承层次
@@ -271,6 +277,7 @@ func (p *PaymentProcessor) ProcessPayment(amount float64) error {
 
 #### Worker Pool模式
 
+::: details 示例：Worker Pool模式
 ```go
 // 工作任务
 type Job struct {
@@ -317,9 +324,10 @@ func processJob(job Job) Result {
     }
 }
 ```
-
+:::
 #### Pipeline模式
 
+::: details 示例：Pipeline模式
 ```go
 // 数据处理管道
 func Pipeline(input <-chan int) <-chan string {
@@ -344,7 +352,7 @@ func Pipeline(input <-chan int) <-chan string {
     return stage2
 }
 ```
-
+:::
 ## 🛠️ Go惯用模式
 
 ### [错误处理模式](/practice/patterns/error-handling)
@@ -353,6 +361,7 @@ func Pipeline(input <-chan int) <-chan string {
 
 #### 错误包装模式
 
+::: details 示例：错误包装模式
 ```go
 import (
     "fmt"
@@ -399,9 +408,10 @@ func CreateUser(user User) error {
     return nil
 }
 ```
-
+:::
 #### 选项模式
 
+::: details 示例：选项模式
 ```go
 // 配置选项
 type ServerOption func(*Server)
@@ -459,7 +469,7 @@ func main() {
     server.Start()
 }
 ```
-
+:::
 ## 🎯 模式选择指南
 
 ### 何时使用哪种模式？
@@ -477,6 +487,7 @@ func main() {
 ### 反模式警告
 
 #### ❌ 过度设计
+::: details 示例：过度设计
 ```go
 // 不需要为简单功能创建复杂的模式
 type SimpleCalculator interface {
@@ -489,8 +500,9 @@ type CalculatorFactory interface {
 
 // 这对于简单的加法运算来说过于复杂
 ```
-
+:::
 #### ✅ 适度设计
+::: details 示例：适度设计
 ```go
 // 简单问题用简单方案
 func Add(a, b int) int {
@@ -499,7 +511,7 @@ func Add(a, b int) int {
 
 // 只有在真正需要时才引入模式
 ```
-
+:::
 ## 🚀 实践建议
 
 ### 1. 渐进式应用
