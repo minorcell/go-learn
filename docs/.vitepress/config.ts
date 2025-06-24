@@ -141,11 +141,11 @@ export default defineConfig({
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/tools/' },
-                        { text: '开发环境配置', link: '/practice/tools/development-setup' },
-                        { text: '代码质量工具', link: '/practice/tools/code-quality' },
-                        { text: '测试和基准测试', link: '/practice/tools/testing' },
-                        { text: '性能分析工具', link: '/practice/tools/profiling' },
-                        { text: '构建和部署工具', link: '/practice/tools/build-deploy' }
+                        { text: '工欲善其事：搭建开发环境', link: '/practice/tools/development-setup' },
+                        { text: '代码的准星：静态分析', link: '/practice/tools/code-quality' },
+                        { text: '精密瞄准镜：测试套件', link: '/practice/tools/testing' },
+                        { text: '高精度放大镜：性能剖析', link: '/practice/tools/profiling' },
+                        { text: '铸造成器：编译与构建', link: '/practice/tools/build-deploy' }
                     ]
                 },
                 {
