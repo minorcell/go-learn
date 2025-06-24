@@ -103,7 +103,7 @@ func NewHTTPClient(options ...ClientOption) *http.Client {
 ```
 :::
 
-更多示例见：[工厂模式实现](/practice/patterns/factory)
+更多示例见：[工厂模式实现](#🏭-工厂模式factory-pattern)
 
 ---
 
