@@ -65,28 +65,28 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '基础语法',
+                    text: '基础入门',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/fundamentals/' },
-                        { text: '变量和数据类型', link: '/learn/fundamentals/variables-types' },
-                        { text: '控制流程结构', link: '/learn/fundamentals/control-flow' },
-                        { text: '函数和方法', link: '/learn/fundamentals/functions' },
+                        { text: '变量与类型', link: '/learn/fundamentals/variables-types' },
                         { text: '数组、切片和映射', link: '/learn/fundamentals/arrays-slices-maps' },
-                        { text: '结构体和接口', link: '/learn/fundamentals/structs-interfaces' },
-                        { text: '错误处理机制', link: '/learn/fundamentals/error-handling' }
+                        { text: '控制流', link: '/learn/fundamentals/control-flow' },
+                        { text: '函数', link: '/learn/fundamentals/functions' },
+                        { text: '指针', link: '/learn/fundamentals/pointers' },
+                        { text: '结构体', link: '/learn/fundamentals/structs' }
                     ]
                 },
                 {
-                    text: '进阶特性',
+                    text: '深入核心特性',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/advanced/' },
-                        { text: '并发编程', link: '/learn/advanced/concurrency' },
-                        { text: '反射和类型断言', link: '/learn/advanced/reflection' },
-                        { text: '包管理和模块系统', link: '/learn/advanced/modules' },
-                        { text: '内存管理和垃圾回收', link: '/learn/advanced/memory-gc' },
-                        { text: 'CGO和系统调用', link: '/learn/advanced/cgo-syscalls' }
+                        { text: '方法', link: '/learn/advanced/methods' },
+                        { text: '接口', link: '/learn/advanced/interfaces' },
+                        { text: '并发', link: '/learn/advanced/concurrency' },
+                        { text: '泛型', link: '/learn/advanced/generics' },
+                        { text: '测试', link: '/learn/advanced/testing' }
                     ]
                 },
                 {
@@ -94,11 +94,12 @@ export default defineConfig({
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/concepts/' },
-                        { text: 'Go的设计哲学', link: '/learn/concepts/philosophy' },
-                        { text: '类型系统和接口机制', link: '/learn/concepts/type-system' },
-                        { text: '内存模型和并发安全', link: '/learn/concepts/memory-model' },
-                        { text: '编译器原理和优化', link: '/learn/concepts/compiler' },
-                        { text: '运行时系统架构', link: '/learn/concepts/runtime' }
+                        { text: '错误处理', link: '/learn/concepts/errors' },
+                        { text: '设计哲学', link: '/learn/concepts/philosophy' },
+                        { text: '类型系统', link: '/learn/concepts/type-system' },
+                        { text: '内存模型', link: '/learn/concepts/memory-model' },
+                        { text: '运行时', link: '/learn/concepts/runtime' },
+                        { text: '编译器', link: '/learn/concepts/compiler' }
                     ]
                 }
             ],
