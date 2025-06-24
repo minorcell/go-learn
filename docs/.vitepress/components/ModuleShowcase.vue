@@ -54,7 +54,7 @@ const modules = [
             '进阶特性：并发编程、反射、CGO、内存管理等高级特性',
             '核心概念：Go的设计理念、类型系统、接口机制、内存模型'
         ],
-        link: '/learn/'
+        link: 'go-learn/learn/'
     },
     {
         id: 'practice',
@@ -68,7 +68,7 @@ const modules = [
             '工具链：开发、测试、调试、性能分析工具的使用',
             '部署运维：容器化、CI/CD、监控等生产环境实践'
         ],
-        link: '/practice/'
+        link: 'go-learn/practice/'
     },
     {
         id: 'ecosystem',
@@ -82,7 +82,7 @@ const modules = [
             '社区资源：官方文档、技术博客、开源项目推荐',
             '技术趋势：Go语言发展趋势和新特性预览'
         ],
-        link: '/ecosystem/'
+        link: 'go-learn/ecosystem/'
     }
 ]
 
