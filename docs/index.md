@@ -19,14 +19,10 @@ hero:
       text: 生态探索
       link: /ecosystem/
 
-features:
-  - icon: '🚀'
-    title: "专为工程师打造"
-    details: "不满足于基础语法的罗列。内容专为有经验的软件工程师设计，深入探讨Go的设计哲学、工程实践与底层原理。"
-  - icon: '✨'
-    title: "拒绝泛型，追求独特"
-    details: "每一篇文章都拥有独特的叙事风格——从苏格拉底对话到建筑蓝图，用最启发性的方式讲解核心概念，让学习不再枯燥。"
-  - icon: '🗺️'
-    title: "体系化成长路径"
-    details: "从语言核心到云原生实践，提供了一条清晰、完整的成长路径，助您成为全面的Go语言专家。"
 ---
+
+<ModuleShowcase />
+
+<script setup>
+import ModuleShowcase from './.vitepress/components/ModuleShowcase.vue'
+</script>
