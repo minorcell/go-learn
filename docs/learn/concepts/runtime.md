@@ -6,6 +6,7 @@
 
 当您运行一个 Go 程序时，除了您编写的业务逻辑，还有一个复杂的运行时系统在后台协调一切：
 
+::: details 示例：运行时的使命
 ```go
 func main() {
     // 您看到的代码
@@ -21,7 +22,7 @@ func main() {
 // - 运行垃圾回收器
 // - 管理系统调用
 ```
-
+:::
 运行时让 Go 的并发模型成为可能，也让内存管理变得自动化。它是 Go 语言表达力和性能之间的桥梁。
 
 ## Goroutine 调度器：M:N 模型的艺术
@@ -50,6 +51,7 @@ P (Processor)：逻辑处理器，连接 G 和 M
 
 ### 调度器的工作原理
 
+::: details 示例：调度器的工作原理
 ```go
 func demonstrateScheduling() {
     runtime.GOMAXPROCS(2)  // 设置逻辑处理器数量
@@ -66,7 +68,7 @@ func demonstrateScheduling() {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 调度器的调度时机：
 1. **主动让出**：调用 `runtime.Gosched()`
 2. **系统调用**：进入系统调用时
@@ -75,6 +77,7 @@ func demonstrateScheduling() {
 
 ### 工作窃取算法
 
+::: details 示例：工作窃取算法
 ```go
 // 当一个 P 的运行队列为空时，会从其他 P 窃取工作
 func workStealing() {
@@ -94,7 +97,7 @@ func workStealing() {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 这种算法确保所有处理器都保持繁忙状态。
 
 ## 内存分配器：高效的内存管理
@@ -121,6 +124,7 @@ mheap (全局堆)
 
 ### 对象大小的分类处理
 
+::: details 示例：对象大小的分类处理
 ```go
 func memoryAllocation() {
     // 微小对象 (< 16 bytes)：使用 tiny allocator
@@ -140,9 +144,10 @@ func memoryAllocation() {
     _ = bigData
 }
 ```
-
+:::
 ### 内存分配的优化
 
+::: details 示例：内存分配的优化
 ```go
 // 对象池：重用对象减少分配
 var bufferPool = sync.Pool{
@@ -162,13 +167,14 @@ func efficientAllocation() {
     // 返回池中重用，避免频繁分配
 }
 ```
-
+:::
 ## 垃圾回收器：自动内存管理
 
 Go 的垃圾回收器经历了多代演进，现在使用的是三色并发标记清扫算法：
 
 ### 三色标记算法
 
+::: details 示例：三色标记算法
 ```go
 // 垃圾回收的三个颜色状态：
 // 白色：未访问的对象（垃圾候选）
@@ -197,9 +203,10 @@ func demonstrateGC() {
     runtime.GC()  // 手动触发垃圾回收
 }
 ```
-
+:::
 ### 写屏障：并发安全的保证
 
+::: details 示例：写屏障：并发安全的保证
 ```go
 func writeBarrierExample() {
     var ptr *Node
@@ -211,9 +218,10 @@ func writeBarrierExample() {
     // 这保证了并发 GC 的正确性
 }
 ```
-
+:::
 ### GC 调优
 
+::: details 示例：GC 调优
 ```go
 func gcTuning() {
     // 查看 GC 统计
@@ -231,13 +239,14 @@ func gcTuning() {
     runtime.GC()
 }
 ```
-
+:::
 ## 系统调用管理
 
 Go 运行时巧妙地处理系统调用，避免阻塞整个程序：
 
 ### 阻塞系统调用的处理
 
+::: details 示例：阻塞系统调用的处理
 ```go
 func systemCallHandling() {
     // 当 goroutine 进行阻塞系统调用时：
@@ -263,9 +272,10 @@ func systemCallHandling() {
     _ = data
 }
 ```
-
+:::
 ### 网络轮询器
 
+::: details 示例：网络轮询器
 ```go
 func networkPoller() {
     // Go 运行时包含网络轮询器，使用 epoll/kqueue/IOCP
@@ -303,11 +313,12 @@ func handleConnection(conn net.Conn) {
     }
 }
 ```
-
+:::
 ## 运行时调试和监控
 
 ### 运行时统计信息
 
+::: details 示例：运行时统计信息
 ```go
 func runtimeStats() {
     // Goroutine 数量
@@ -326,9 +337,10 @@ func runtimeStats() {
     fmt.Printf("Stack Inuse: %d\n", memStats.StackInuse)
 }
 ```
-
+:::
 ### Stack Trace 和调试
 
+::: details 示例：Stack Trace 和调试
 ```go
 func debugRuntime() {
     // 打印当前 goroutine 的堆栈
@@ -346,9 +358,10 @@ func debugRuntime() {
     debug.SetMaxStack(1 << 20)  // 1MB
 }
 ```
-
+:::
 ### 性能分析支持
 
+::: details 示例：性能分析支持
 ```go
 import (
     _ "net/http/pprof"
@@ -392,11 +405,12 @@ func doExpensiveWork() {
     }
 }
 ```
-
+:::
 ## 信号处理
 
 Go 运行时处理操作系统信号：
 
+::: details 示例：信号处理
 ```go
 func signalHandling() {
     signalChan := make(chan os.Signal, 1)
@@ -426,11 +440,12 @@ func cleanup() {
     // 关闭数据库连接、清理临时文件等
 }
 ```
-
+:::
 ## 运行时优化策略
 
 ### 1. GOMAXPROCS 调优
 
+::: details 示例：GOMAXPROCS 调优
 ```go
 func optimizeGOMAXPROCS() {
     // 默认值等于 CPU 核心数
@@ -459,9 +474,10 @@ func getContainerCPULimit() int {
     return runtime.NumCPU()
 }
 ```
-
+:::
 ### 2. 内存优化
 
+::: details 示例：内存优化
 ```go
 func memoryOptimization() {
     // 预分配切片容量
@@ -492,9 +508,10 @@ func memoryOptimization() {
     _ = items
 }
 ```
-
+:::
 ### 3. Goroutine 池
 
+::: details 示例：Goroutine 池
 ```go
 type WorkerPool struct {
     tasks   chan func()
@@ -546,7 +563,7 @@ func useWorkerPool() {
     }
 }
 ```
-
+:::
 ## 下一步
 
 运行时是 Go 语言的核心基础设施，理解它的工作原理能让您写出更高效的程序。现在您已经全面了解了 Go 的学习体系，是时候将这些知识应用到[实际项目](/practice)中了。

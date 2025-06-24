@@ -11,21 +11,22 @@ Go 的函数设计围绕一个核心洞察：**代码是写给人看的，机器
 ### 简洁性的力量
 
 看看其他语言中定义函数需要多少仪式感：
-
+::: details 示例：Java 中的冗余
 ```java
 // Java 中的冗余
 public static String greet(String name) {
     return "Hello, " + name;
 }
 ```
-
+:::
+::: details 示例：Go 中的简洁
 ```go
 // Go 中的简洁
 func greet(name string) string {
     return "Hello, " + name
 }
 ```
-
+:::
 Go 去掉了不必要的修饰词，让您专注于函数真正要表达的东西：**输入什么，输出什么，做什么处理**。
 
 ## 多返回值：诚实的错误处理
@@ -35,7 +36,7 @@ Go 最独特的特性之一是多返回值，这不是技术炫技，而是对�
 ### 传统错误处理的困境
 
 其他语言通常采用异常机制：
-
+::: details 示例：Python 风格：隐藏的控制流
 ```python
 # Python 风格：隐藏的控制流
 def divide(a, b):
@@ -47,11 +48,12 @@ try:
 except ZeroDivisionError:
     # 处理错误
 ```
-
+:::
 这种方式的问题是**隐式性**——您无法从函数签名看出它可能失败，必须依赖文档或痛苦的经验。
 
 ### Go 的诚实表达
 
+::: details 示例：Go 的诚实表达
 ```go
 func divide(a, b float64) (float64, error) {
     if b == 0 {
@@ -70,13 +72,14 @@ if err != nil {
 // 只有在没有错误时才能使用结果
 fmt.Printf("结果: %f\n", result)
 ```
-
+:::
 这种设计强制您**在编写时就考虑失败的情况**，而不是事后补救。
 
 ### 命名返回值：代码即文档
 
 Go 的命名返回值不只是语法糖，它们体现了一种理念：**让代码自己说话**。
 
+::: details 示例：命名返回值：代码即文档
 ```go
 func parseCoordinate(input string) (x, y float64, err error) {
     parts := strings.Split(input, ",")
@@ -100,7 +103,7 @@ func parseCoordinate(input string) (x, y float64, err error) {
     return // 清晰地表达：返回当前的 x, y, err 值
 }
 ```
-
+:::
 函数签名直接告诉您：这个函数解析坐标，返回 x 和 y 坐标，可能失败。不需要注释，不需要文档。
 
 ## 函数作为值：组合的哲学
@@ -110,7 +113,7 @@ Go 将函数视为一等公民，这反映了一个深层的设计理念：**组
 ### 行为的参数化
 
 传统面向对象编程通过继承来变化行为：
-
+::: details 示例：传统 OOP 方式
 ```java
 // 传统 OOP 方式
 abstract class DataProcessor {
@@ -120,9 +123,9 @@ abstract class DataProcessor {
 class EmailProcessor extends DataProcessor { ... }
 class SMSProcessor extends DataProcessor { ... }
 ```
-
+:::
 Go 选择了更直接的方式——将行为作为参数传递：
-
+::: details 示例：Go 的方式：行为参数化
 ```go
 // Go 的方式：行为参数化
 type Processor func(Data) error
@@ -156,13 +159,14 @@ func main() {
     processData(smsData, processSMS)
 }
 ```
-
+:::
 这种方式的优势是**明确性**——您在调用点就能看到具体的行为，不需要追踪继承链。
 
 ### 闭包：状态与行为的结合
 
 闭包让您能创建"记住"环境的函数：
 
+::: details 示例：闭包：状态与行为的结合
 ```go
 func createValidator(rules []Rule) func(Data) error {
     // 闭包"捕获"了 rules
@@ -183,7 +187,7 @@ emailValidator := createValidator(emailRules)
 // 验证器"记住"了它的规则
 err := emailValidator(someEmailData)
 ```
-
+:::
 这种模式让您能**将配置与行为分离**，同时保持使用的简洁性。
 
 ## 方法：为数据添加意义
@@ -194,6 +198,7 @@ Go 的方法系统体现了另一个重要思想：**行为应该与相关的数
 
 传统的面向对象编程强调继承和多态。Go 选择了更简单的路径：**让数据拥有行为**。
 
+::: details 示例：重新定义"面向对象"
 ```go
 type BankAccount struct {
     balance float64
@@ -224,13 +229,14 @@ func (a BankAccount) Balance() float64 {
     return a.balance
 }
 ```
-
+:::
 这种设计的美妙之处在于**概念的统一**——账户不仅仅是数据，它有自己的行为规则。
 
 ### 值接收者 vs 指针接收者：语义的选择
 
 选择接收者类型不仅是性能考虑，更是**语义表达**：
 
+::: details 示例：值接收者 vs 指针接收者：语义的选择
 ```go
 type Point struct {
     X, Y float64
@@ -256,13 +262,14 @@ p2 := Point{4, 6}
 distance := p1.Distance(p2)  // 不会改变 p1 或 p2
 p1.MoveTo(0, 0)             // 明确表示 p1 会被修改
 ```
-
+:::
 这种区分让代码的意图变得明确：读取型操作用值接收者，修改型操作用指针接收者。
 
 ### 为任何类型添加行为
 
 Go 独特地允许为任何类型定义方法，这开启了有趣的可能性：
 
+::: details 示例：为任何类型添加行为
 ```go
 // 为基础类型创建富有表达力的抽象
 type Duration time.Duration
@@ -285,11 +292,12 @@ func (d Duration) Humanize() string {
 timeout := Duration(5 * time.Minute)
 fmt.Println(timeout.Humanize()) // "5分钟"
 ```
-
+:::
 ## 可变参数：优雅的灵活性
 
 可变参数让函数能适应不同的使用场景，同时保持类型安全：
 
+::: details 示例：可变参数：优雅的灵活性
 ```go
 func log(level string, messages ...string) {
     timestamp := time.Now().Format("2006-01-02 15:04:05")
@@ -305,7 +313,7 @@ log("INFO", "应用启动")
 log("ERROR", "数据库连接失败", "正在重试", "请检查网络")
 log("DEBUG", "用户登录", "用户ID: 12345", "IP: 192.168.1.1")
 ```
-
+:::
 这种设计避免了函数重载的复杂性，同时提供了灵活性。
 
 ## defer：资源管理的优雅解决方案
@@ -314,6 +322,7 @@ log("DEBUG", "用户登录", "用户ID: 12345", "IP: 192.168.1.1")
 
 ### 传统方式的困境
 
+::: details 示例：传统方式的困境
 ```go
 // 没有 defer 的世界
 func processFile(filename string) error {
@@ -344,11 +353,12 @@ func processFile(filename string) error {
     return nil
 }
 ```
-
+:::
 随着函数复杂度增长，您需要在每个退出点都记住清理资源。这既容易出错，又让代码变得混乱。
 
 ### defer 的优雅
 
+::: details 示例：defer 的优雅
 ```go
 func processFile(filename string) error {
     file, err := os.Open(filename)
@@ -375,13 +385,14 @@ func processFile(filename string) error {
     return nil // file.Close() 会自动调用
 }
 ```
-
+:::
 `defer` 让您能在资源获取的地方就声明清理逻辑，这种**就近原则**让代码更容易理解和维护。
 
 ### defer 的栈式执行
 
 多个 defer 按照后进先出的顺序执行，这符合资源管理的自然规律：
 
+::: details 示例：defer 的栈式执行
 ```go
 func complexOperation() error {
     // 获取数据库连接
@@ -410,13 +421,14 @@ func complexOperation() error {
     return tx.Commit() // 成功时提交事务
 }
 ```
-
+:::
 这种顺序确保了依赖关系的正确性：后获取的资源先释放。
 
 ## 函数设计的哲学
 
 ### 单一职责：做一件事并做好
 
+::: details 示例：单一职责：做一件事并做好
 ```go
 // ✅ 单一职责：只验证邮箱格式
 func isValidEmail(email string) bool {
@@ -441,13 +453,14 @@ func sendWelcomeEmail(email string) error {
     return sendEmail(email, "欢迎", "感谢您的注册！")
 }
 ```
-
+:::
 每个函数专注于一个明确的任务，这让它们更容易理解、测试和重用。
 
 ### 错误处理：提供有用的上下文
 
 好的错误处理不只是报告失败，还要帮助诊断问题：
 
+::: details 示例：错误处理：提供有用的上下文
 ```go
 func connectToDatabase(host string, port int, db string) (*sql.DB, error) {
     dsn := fmt.Sprintf("host=%s port=%d dbname=%s", host, port, db)
@@ -469,13 +482,14 @@ func connectToDatabase(host string, port int, db string) (*sql.DB, error) {
     return conn, nil
 }
 ```
-
+:::
 这种错误处理方式让调试变得容易，因为错误消息包含了足够的信息来定位问题。
 
 ### 接口导向的设计
 
 设计函数时，考虑使用接口而不是具体类型：
 
+::: details 示例：接口导向的设计
 ```go
 // ✅ 接受接口，更灵活
 func processData(reader io.Reader, writer io.Writer) error {
@@ -500,6 +514,7 @@ func processData(reader io.Reader, writer io.Writer) error {
 // - 内存到网络
 // - 任何实现了 io.Reader 和 io.Writer 的类型
 ```
+:::
 
 ## 下一步的思考
 

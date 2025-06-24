@@ -10,6 +10,7 @@
 
 考虑两种极端的内存管理模式：
 
+::: details 示例：C 语言：完全控制，完全责任
 ```c
 // C 语言：完全控制，完全责任
 char* data = malloc(1024);
@@ -17,7 +18,8 @@ char* data = malloc(1024);
 free(data);  // 忘记这行？内存泄漏
 // data[0] = 'x';  // 使用已释放的内存？程序崩溃
 ```
-
+:::
+::: details 示例：Go 语言：有限控制，系统责任
 ```go
 // Go 语言：有限控制，系统责任
 func processData() {
@@ -26,7 +28,7 @@ func processData() {
     // 系统自动回收，无需担心
 }
 ```
-
+:::
 C 语言给了程序员最大的控制权，但代价是巨大的心智负担和潜在的安全风险。Go 选择了不同的路径：**用一些性能开销换取安全性和简洁性**。
 
 ### Go 的权衡哲学
@@ -46,6 +48,7 @@ Go 的内存管理体现了一种实用主义的权衡：
 
 Go 运行时会智能地决定变量应该分配在哪里，这种决策过程叫做**逃逸分析**：
 
+::: details 示例：栈与堆：自动与手动的分界
 ```go
 func stackExample() int {
     x := 42  // 很可能在栈上：生命周期明确
@@ -64,11 +67,12 @@ func complexExample() {
     // 如果 slice 逃逸或太大，会在堆上
 }
 ```
-
+:::
 这种自动决策的美妙之处在于：**您专注于逻辑，系统负责优化**。编译器会分析数据流，自动选择最合适的分配策略。
 
 ### 逃逸分析：编译器的智慧
 
+::: details 示例：逃逸分析：编译器的智慧
 ```go
 // 使用 go build -gcflags="-m" 查看逃逸分析结果
 
@@ -90,7 +94,7 @@ func interfaceEscape() {
     // interface{} 参数必须在堆上
 }
 ```
-
+:::
 逃逸分析的核心思想是：**如果编译器能证明一个对象的生命周期不会超出其作用域，就可以在栈上分配**。这种分析让 Go 在保持内存安全的同时，尽可能减少堆分配。
 
 ## 垃圾回收：自动清理的艺术
@@ -99,6 +103,7 @@ func interfaceEscape() {
 
 Go 的垃圾回收器使用三色标记算法，这是一个既优雅又高效的解决方案：
 
+::: details 示例：三色标记：优雅的算法
 ```
 初始状态：所有对象都是白色（未访问）
 
@@ -113,13 +118,14 @@ Go 的垃圾回收器使用三色标记算法，这是一个既优雅又高效�
 清理阶段：
 回收所有白色对象（不可达对象）
 ```
-
+:::
 这个算法的美妙之处在于：**它可以与程序并发运行**。程序可以继续分配对象、修改指针，而 GC 在后台悄悄工作。
 
 ### 并发 GC 的挑战
 
 并发 GC 面临一个根本挑战：**程序在修改对象图，而 GC 在扫描对象图**。如何保证一致性？
 
+::: details 示例：并发 GC 的挑战
 ```go
 // 程序可能在 GC 扫描时修改指针
 type Node struct {
@@ -136,13 +142,14 @@ func modifyDuringGC() {
     node1.next = node2  // 这里需要写屏障
 }
 ```
-
+:::
 Go 使用**写屏障**技术解决这个问题：当程序修改指针时，写屏障会通知 GC 这个变化，确保新的引用关系被正确记录。
 
 ### GC 的性能特征
 
 Go 的 GC 设计有明确的性能目标：
 
+::: details 示例：Go 1.8+ 的 GC 目标：
 ```go
 // Go 1.8+ 的 GC 目标：
 // - 暂停时间：< 100 微秒
@@ -158,7 +165,7 @@ func lowLatencyExample() {
     }
 }
 ```
-
+:::
 这种设计哲学是：**宁要可预测的一般性能，不要不可预测的极致性能**。
 
 ## GC 触发：智能的时机选择
@@ -167,6 +174,7 @@ func lowLatencyExample() {
 
 Go 的 GC 触发机制体现了一种平衡：
 
+::: details 示例：何时运行 GC？
 ```go
 // 1. 内存增长触发
 // 当堆大小比上次 GC 后增长 100% 时
@@ -177,9 +185,10 @@ Go 的 GC 触发机制体现了一种平衡：
 // 3. 手动触发
 runtime.GC()  // 通常不需要，但在某些场景有用
 ```
-
+:::
 ### GOGC 参数：调节的艺术
 
+::: details 示例：GOGC 参数：调节的艺术
 ```bash
 # GOGC=100（默认）：堆增长 100% 后触发 GC
 # GOGC=200：堆增长 200% 后触发 GC（更少的 GC，更多内存）
@@ -187,7 +196,7 @@ runtime.GC()  // 通常不需要，但在某些场景有用
 
 GOGC=200 go run myprogram.go
 ```
-
+:::
 这个参数让您能够在**内存使用**和**GC 频率**之间找到平衡点。
 
 ## 内存优化：与 GC 协作的艺术
@@ -196,6 +205,7 @@ GOGC=200 go run myprogram.go
 
 ### 减少分配压力
 
+::: details 示例：减少分配压力
 ```go
 // ❌ 频繁分配字符串
 func inefficientConcat() string {
@@ -216,9 +226,10 @@ func efficientConcat() string {
     return builder.String()
 }
 ```
-
+:::
 ### 对象复用：内存池的智慧
 
+::: details 示例：对象复用：内存池的智慧
 ```go
 import "sync"
 
@@ -246,11 +257,12 @@ func processWithPool() {
     // ...
 }
 ```
-
+:::
 对象池的哲学是：**重用比重新分配更高效**。但要注意，池化也有成本，只有在高频分配场景下才值得。
 
 ### 切片优化：容量的智慧
 
+::: details 示例：切片优化：容量的智慧
 ```go
 // ❌ 频繁扩容
 func badSliceUsage() []int {
@@ -270,7 +282,7 @@ func goodSliceUsage() []int {
     return result
 }
 ```
-
+:::
 预分配的价值在于：**一次分配胜过多次分配**。
 
 ## 内存泄漏：即使有 GC 也要小心
@@ -279,6 +291,7 @@ GC 并不能解决所有内存问题，某些模式仍然会导致内存泄漏�
 
 ### goroutine 泄漏
 
+::: details 示例：goroutine 泄漏
 ```go
 // ❌ goroutine 泄漏
 func leakyGoroutine() {
@@ -311,9 +324,10 @@ func properGoroutine() {
     <-done  // 等待 goroutine 结束
 }
 ```
-
+:::
 ### 切片引用泄漏
 
+::: details 示例：切片引用泄漏
 ```go
 // ❌ 切片可能持有大数组的引用
 func sliceLeak() []byte {
@@ -329,11 +343,12 @@ func sliceCorrect() []byte {
     return result
 }
 ```
-
+:::
 ## 性能监控：理解而非猜测
 
 ### 运行时统计
 
+::: details 示例：运行时统计
 ```go
 import "runtime"
 
@@ -354,9 +369,10 @@ func memoryStats() {
     }
 }
 ```
-
+:::
 ### GC 跟踪：理解 GC 行为
 
+::: details 示例：GC 跟踪：理解 GC 行为
 ```bash
 # 启用 GC 跟踪
 GODEBUG=gctrace=1 go run main.go
@@ -366,7 +382,7 @@ GODEBUG=gctrace=1 go run main.go
 # ↑   ↑    ↑    ↑  ↑                    ↑                           ↑           ↑         ↑
 # GC  编号  时间  CPU STW+并发+STW         CPU时间                     内存变化     目标     处理器数
 ```
-
+:::
 这些数据帮助您理解：
 - GC 是否过于频繁？
 - GC 暂停时间是否合理？
@@ -376,6 +392,7 @@ GODEBUG=gctrace=1 go run main.go
 
 ### 大对象的特殊处理
 
+::: details 示例：大对象的特殊处理
 ```go
 // 大对象（>32KB）有特殊的分配路径
 func handleLargeObjects() {
@@ -387,9 +404,10 @@ func handleLargeObjects() {
     process(large)
 }
 ```
-
+:::
 ### 高频分配的批量处理
 
+::: details 示例：高频分配的批量处理
 ```go
 // 将小的频繁分配合并为大的批量分配
 func batchAllocation() {
@@ -405,11 +423,12 @@ func batchAllocation() {
     }
 }
 ```
-
+:::
 ## 与其他 GC 的对比思考
 
 ### Stop-the-World vs 并发
 
+::: details 示例：Stop-the-World vs 并发
 ```go
 // Java/C# 的老式 GC：Stop-the-World
 // 优点：简单，彻底
@@ -419,11 +438,12 @@ func batchAllocation() {
 // 优点：低延迟，可预测
 // 缺点：复杂，可能的吞吐量损失
 ```
-
+:::
 Go 选择了**延迟友好**的设计，这反映了其目标场景：网络服务、分布式系统，这些场景对延迟更敏感。
 
 ### 分代 vs 非分代
 
+::: details 示例：分代 vs 非分代
 ```go
 // 传统分代 GC 的假设：
 // "大多数对象死得很快"（generational hypothesis）
@@ -433,13 +453,14 @@ Go 选择了**延迟友好**的设计，这反映了其目标场景：网络服�
 // - 避免了写屏障的复杂性
 // - 适合 Go 的分配模式
 ```
-
+:::
 这种选择体现了 Go 的哲学：**选择足够好的简单方案，而不是复杂的完美方案**。
 
 ## 实际应用建议
 
 ### Web 服务的内存优化
 
+::: details 示例：HTTP 服务器的内存优化模式
 ```go
 // HTTP 服务器的内存优化模式
 func optimizedHandler(w http.ResponseWriter, r *http.Request) {
@@ -462,9 +483,10 @@ func optimizedHandler(w http.ResponseWriter, r *http.Request) {
     }
 }
 ```
-
+:::
 ### 数据处理的内存策略
 
+::: details 示例：数据处理的内存策略
 ```go
 // 大数据处理：流式 vs 批量
 func processLargeDataset(filename string) error {
@@ -499,11 +521,12 @@ func processLargeDataset(filename string) error {
     return scanner.Err()
 }
 ```
-
+:::
 ## 调试内存问题
 
 ### 内存剖析
 
+::: details 示例：内存剖析
 ```go
 import (
     _ "net/http/pprof"
@@ -524,9 +547,10 @@ func main() {
 // go tool pprof http://localhost:6060/debug/pprof/heap
 // go tool pprof http://localhost:6060/debug/pprof/allocs
 ```
-
+:::
 ### 基准测试中的内存分析
 
+::: details 示例：基准测试中的内存分析
 ```go
 func BenchmarkMemoryAllocation(b *testing.B) {
     b.ResetTimer()
@@ -547,7 +571,7 @@ func BenchmarkWithPool(b *testing.B) {
 // 运行：go test -bench=. -benchmem
 // 输出会显示每次操作的内存分配次数和大小
 ```
-
+:::
 ## 内存管理的未来
 
 ### Go 的演进方向

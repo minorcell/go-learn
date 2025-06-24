@@ -13,6 +13,7 @@ Go 的创造者们面对这个困境，做出了一个激进的选择：**不是
 
 考虑这样一个问题：为什么大型软件项目总是难以维护？
 
+::: details 示例：复杂的实现
 ```go
 // 其他语言中可能的复杂实现
 // class DataProcessor<T> extends BaseProcessor<T> 
@@ -40,7 +41,7 @@ func (dp *DataProcessor) Process() error {
     return nil
 }
 ```
-
+:::
 复杂性的成本不仅体现在编写代码上，更体现在：
 - **认知负荷**：理解代码需要更多脑力
 - **维护成本**：修改代码需要考虑更多因素
@@ -55,6 +56,7 @@ Go 选择为这些成本买单，换取的是长期的简单性。
 
 Go 的设计过程不是在问"我们还能添加什么"，而是在问"我们能移除什么"。每个特性的加入都需要通过严格的审查：
 
+::: details 示例：特性选择的艺术
 ```go
 // Go 没有三元运算符，因为 if-else 已经足够清晰
 var result string
@@ -67,13 +69,14 @@ if condition {
 // 而不是：result = condition ? "yes" : "no"
 // 后者虽然短，但降低了可读性
 ```
-
+:::
 这种选择背后的哲学是：**每增加一个语言特性，就增加了所有Go程序员的认知负担**。
 
 ### 统一性的威力
 
 Go 偏爱用少数几个概念解决大部分问题：
 
+::: details 示例：统一性的威力
 ```go
 // 只有一种循环：for
 // 但它能表达所有循环需求
@@ -106,7 +109,7 @@ for index, value := range collection {
     fmt.Printf("%d: %v\n", index, value)
 }
 ```
-
+:::
 这种统一性的价值在于：
 - **学习曲线平缓**：掌握一个概念就能应对多种场景
 - **代码风格一致**：不同人写的代码看起来相似
@@ -118,6 +121,7 @@ for index, value := range collection {
 
 人类的大脑在处理**显式信息**时比处理**隐式信息**更高效。Go 的设计充分利用了这一点：
 
+::: details 示例：错误处理的显式性
 ```go
 // 错误处理的显式性
 func readConfig(filename string) (*Config, error) {
@@ -147,9 +151,10 @@ func main() {
     startServer(config)
 }
 ```
-
+:::
 与异常机制对比：
 
+::: details 示例：隐式的异常传播
 ```go
 // 隐式的异常传播（伪代码）
 // func readConfig(filename string) *Config {
@@ -163,7 +168,7 @@ func main() {
 //     startServer(config)               // 程序可能已经崩溃了
 // }
 ```
-
+:::
 显式错误处理的价值：
 - **错误路径清晰**：一眼就能看出哪里可能出错
 - **处理决策显式**：必须明确决定如何应对错误
@@ -171,6 +176,7 @@ func main() {
 
 ### 依赖关系的透明化
 
+::: details 示例：依赖关系的透明化
 ```go
 package main
 
@@ -212,7 +218,7 @@ func (s *Server) Start(ctx context.Context, addr string) error {
     return server.ListenAndServe()
 }
 ```
-
+:::
 这种显式性确保了：
 - **依赖关系一目了然**：不需要猜测或查找文档
 - **测试容易编写**：依赖可以轻松模拟
@@ -224,6 +230,7 @@ func (s *Server) Start(ctx context.Context, addr string) error {
 
 面向对象编程的继承机制虽然强大，但也带来了问题：
 
+::: details 示例：传统继承的问题
 ```go
 // 传统继承的问题（伪代码）
 // class Animal {
@@ -241,9 +248,10 @@ func (s *Server) Start(ctx context.Context, addr string) error {
 //     }
 // }
 ```
-
+:::
 Go 通过组合提供了更灵活的解决方案：
 
+::: details 示例：组合的智慧
 ```go
 // 定义能力，而不是类型层次
 type Eater interface {
@@ -308,7 +316,7 @@ func flyingShow(flyers []Flyer) {
     }
 }
 ```
-
+:::
 组合模式的优势：
 - **能力导向**：根据实际能力而不是类型层次组织代码
 - **灵活性高**：可以任意组合不同的能力
@@ -319,6 +327,7 @@ func flyingShow(flyers []Flyer) {
 
 Go 的接口设计体现了"鸭子类型"的哲学：
 
+::: details 示例：接口的隐式实现
 ```go
 // 接口定义行为契约
 type Writer interface {
@@ -364,7 +373,7 @@ func main() {
     logMessage(conn, "网络日志")  // net.Conn 实现了 Writer
 }
 ```
-
+:::
 这种设计的深层价值：
 - **解耦合**：接口使用者不依赖具体实现
 - **可扩展**：新类型可以无侵入地实现现有接口
@@ -377,6 +386,7 @@ func main() {
 
 程序员每天需要做无数小决策，Go 通过约定减少了这种负担：
 
+::: details 示例：约定优于配置
 ```go
 // 包名约定：简短、小写、单词
 package json  // 而不是 JSONProcessor 或 json_utils
@@ -406,11 +416,12 @@ import (
     "myapp/database"
 )
 ```
-
+:::
 ### 工具链的统一
 
 Go 的约定不仅体现在语言层面，更体现在整个工具链：
 
+::: details 示例：工具链的统一
 ```bash
 # 代码格式化：只有一种正确的格式
 go fmt ./...
@@ -427,7 +438,7 @@ go mod tidy
 # 文档生成：从代码注释自动生成
 go doc package.Function
 ```
-
+:::
 这种统一性的价值：
 - **学习成本低**：掌握一套约定就能适应所有 Go 项目
 - **协作效率高**：团队成员之间的代码风格一致
@@ -439,6 +450,7 @@ go doc package.Function
 
 Go 在设计时面临许多权衡，但始终以实用性为导向：
 
+::: details 示例：性能与可读性的权衡
 ```go
 // Go 选择了 GC 而不是手动内存管理
 func processLargeDataset(data [][]byte) []Result {
@@ -452,7 +464,7 @@ func processLargeDataset(data [][]byte) []Result {
     return results  // GC 会自动清理不需要的内存
 }
 ```
-
+:::
 这个选择牺牲了一些性能换取了：
 - **内存安全**：避免内存泄漏和悬空指针
 - **开发效率**：程序员无需手动管理内存
@@ -460,6 +472,7 @@ func processLargeDataset(data [][]byte) []Result {
 
 ### 简单性与表达力的平衡
 
+::: details 示例：简单性与表达力的平衡
 ```go
 // Go 的错误处理虽然冗长，但表达力强
 func divideWithValidation(a, b float64) (float64, error) {
@@ -491,7 +504,7 @@ func calculate() {
     fmt.Printf("结果: %.2f\n", result)
 }
 ```
-
+:::
 这种设计虽然代码行数更多，但带来了：
 - **错误处理完整性**：不会遗漏任何错误情况
 - **调试友好性**：错误信息清晰，调用栈明确
@@ -503,6 +516,7 @@ func calculate() {
 
 Go 的演进策略体现了保守而明智的创新：
 
+::: details 示例：保守的创新
 ```go
 // Go 1.18 引入泛型，但保持了语法的简洁
 func Map[T, U any](slice []T, fn func(T) U) []U {
@@ -522,7 +536,7 @@ strings := []string{"hello", "world"}
 lengths := Map(strings, func(s string) int { return len(s) })
 // lengths: [5, 5]
 ```
-
+:::
 Go 对泛型的处理体现了其哲学：
 - **谨慎引入**：等到确实需要时才添加
 - **保持简单**：避免复杂的类型理论
@@ -533,6 +547,7 @@ Go 对泛型的处理体现了其哲学：
 
 Go 的设计考虑的是 10 年、20 年后的软件维护：
 
+::: details 示例：长期思维
 ```go
 // 2009 年写的 Go 代码在 2024 年仍然可以编译运行
 package main
@@ -543,7 +558,7 @@ func main() {
     fmt.Println("Hello, Go!")  // 这行代码 15 年不变
 }
 ```
-
+:::
 这种稳定性的价值：
 - **投资保护**：学会的知识长期有效
 - **生态稳定**：库和工具不会频繁破坏性更新
@@ -555,6 +570,7 @@ func main() {
 
 当您在设计 Go 程序时，可以用这些问题指导决策：
 
+::: details 示例：设计决策的指导原则
 ```go
 // 1. 这是最简单的解决方案吗？
 // ❌ 复杂的继承层次
@@ -579,7 +595,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     // 处理请求...
 }
 ```
+:::
 
+::: details 示例：设计决策的指导原则
 ```go
 // 2. 错误处理是否显式？
 // ❌ 隐藏错误
@@ -598,7 +616,9 @@ func processData(data []byte) (string, error) {
     return result.String(), nil
 }
 ```
+:::
 
+::: details 示例：设计决策的指导原则
 ```go
 // 3. 接口是否足够小而专注？
 // ❌ 大而全的接口
@@ -628,11 +648,10 @@ type Storage interface {
     Delete(key string) error
 }
 ```
-
+:::
 ### 代码审查的哲学视角
 
 在进行代码审查时，除了功能正确性，还要考虑：
-
 1. **简单性检查**
    - 是否使用了最简单的方法解决问题？
    - 是否有过度设计的迹象？

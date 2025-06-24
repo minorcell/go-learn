@@ -10,6 +10,7 @@
 
 许多开发者将编译器视为一个黑盒工具，输入源代码，输出可执行文件。但 Go 编译器更像是一个**理解您意图的智能助手**：
 
+::: details 示例：编译器作为智能伙伴
 ```go
 // 您写的代码表达意图
 func findMax(numbers []int) int {
@@ -32,7 +33,7 @@ func findMax(numbers []int) int {
 // 3. 函数可能被内联
 // 4. 内存访问模式可能被优化
 ```
-
+:::
 编译器不仅执行您明确指定的操作，还会：
 - **推断您的意图**：分析代码模式，理解算法目标
 - **优化性能**：重排指令，减少内存访问，利用 CPU 特性
@@ -43,6 +44,7 @@ func findMax(numbers []int) int {
 
 Go 编译器的一个显著特点是**编译速度极快**，这不是偶然的设计选择：
 
+::: details 示例：Go 的设计让编译器能够快速处理
 ```go
 // Go 的设计让编译器能够快速处理
 package main
@@ -62,7 +64,7 @@ func main() {
     fmt.Println(result)
 }
 ```
-
+:::
 快速编译的价值不仅在于节省时间，更在于：
 - **促进实验**：快速的编译-运行-修改循环
 - **降低心理负担**：不用担心编译时间而避免重构
@@ -75,6 +77,7 @@ func main() {
 
 Go 编译器的前端负责将源代码转换为抽象语法树（AST）：
 
+::: details 示例：这行代码在编译器前端的处理过程
 ```go
 // 这行代码在编译器前端的处理过程
 x := a + b * c
@@ -96,7 +99,7 @@ x := a + b * c
 // - 验证类型兼容性
 // - 计算表达式类型
 ```
-
+:::
 Go 语法的简洁性让这个过程变得高效：
 - **关键字少**：只有 25 个关键字，解析速度快
 - **语法明确**：没有歧义的语法结构
@@ -106,6 +109,7 @@ Go 语法的简洁性让这个过程变得高效：
 
 编译器的中端执行各种优化，这是编译器智慧的核心体现：
 
+::: details 示例：编译器可能进行的优化
 ```go
 // 原始代码
 func calculate(x, y int) int {
@@ -136,11 +140,12 @@ func calculate(x, y int) int {
 // 4. 逃逸分析
 // 确定变量应该分配在栈上还是堆上
 ```
-
+:::
 ### 后端：机器码生成的艺术
 
 后端将中间表示转换为目标平台的机器码：
 
+::: details 示例：Go 代码
 ```go
 // Go 代码
 func add(a, b int) int {
@@ -163,13 +168,14 @@ func add(a, b int) int {
 //     MOVD R0, ret+24(FP) // 将结果存储到返回值位置
 //     RET                 // 返回
 ```
-
+:::
 ## 逃逸分析：内存分配的智慧
 
 逃逸分析是 Go 编译器的重要特性，它决定变量应该分配在栈上还是堆上：
 
 ### 逃逸分析的基本原理
 
+::: details 示例：栈分配：变量不逃逸
 ```go
 // 栈分配：变量不逃逸
 func stackAllocation() {
@@ -192,9 +198,10 @@ func sliceAllocation() {
     _ = large
 }
 ```
-
+:::
 ### 逃逸分析的优化策略
 
+::: details 示例：逃逸分析的优化策略
 ```go
 // 接口调用导致逃逸
 func interfaceEscape() {
@@ -226,9 +233,10 @@ func localUsage() {
     process(x)  // x 不会逃逸
 }
 ```
-
+:::
 ### 使用逃逸分析工具
 
+::: details 示例：使用逃逸分析工具
 ```bash
 # 查看逃逸分析结果
 go build -gcflags="-m" main.go
@@ -239,20 +247,21 @@ go build -gcflags="-m -m" main.go
 # 查看内联决策
 go build -gcflags="-m -l" main.go
 ```
-
+:::
 输出示例：
 ```
 ./main.go:8:13: inlining call to fmt.Println
 ./main.go:8:13: x escapes to heap
 ./main.go:8:13: main.go:8:13: parameter x escapes to heap
 ```
-
+:::
 ## 内联优化：函数调用的消除
 
 内联是编译器的重要优化技术，它用函数体替换函数调用：
 
 ### 内联的收益与成本
 
+::: details 示例：内联的收益与成本
 ```go
 // 适合内联的函数：小而简单
 func square(x int) int {
@@ -268,7 +277,7 @@ func calculateArea(width, height int) int {
     return (width * width) * (height * height)
 }
 ```
-
+:::
 内联的优势：
 - **消除调用开销**：无需保存/恢复寄存器
 - **启用其他优化**：常数传播、死代码消除等
@@ -281,6 +290,7 @@ func calculateArea(width, height int) int {
 
 ### 控制内联行为
 
+::: details 示例：控制内联行为
 ```go
 // 禁用内联
 //go:noinline
@@ -303,9 +313,10 @@ func processData(input string) string {
     return strings.ToUpper(input)
 }
 ```
-
+:::
 ### 内联与性能的关系
 
+::: details 示例：内联与性能的关系
 ```go
 // 热路径函数：适合激进内联
 func hotPath() {
@@ -323,11 +334,12 @@ func errorHandling(err error) {
     }
 }
 ```
-
+:::
 ## 编译器与并发的协作
 
 ### Goroutine 的编译时优化
 
+::: details 示例：Goroutine 的编译时优化
 ```go
 // 编译器对 goroutine 的优化
 func launchGoroutines() {
@@ -354,9 +366,10 @@ func processValue(v int) {
     // 这对长时间运行的循环特别重要
 }
 ```
-
+:::
 ### Channel 操作的优化
 
+::: details 示例：Channel 操作的优化
 ```go
 // 编译器对 channel 的优化
 func channelOptimizations() {
@@ -379,13 +392,14 @@ func channelOptimizations() {
     }
 }
 ```
-
+:::
 ## 与编译器协作的编程模式
 
 ### 编写编译器友好的代码
 
 1. **利用类型信息**
 
+::: details 示例：编写编译器友好的代码
 ```go
 // ✅ 类型明确，编译器易于优化
 func processNumbers(numbers []int) int {
@@ -407,9 +421,10 @@ func processInterface(items []interface{}) interface{} {
     return result
 }
 ```
-
+:::
 2. **减少分配压力**
 
+::: details 示例：减少分配压力
 ```go
 // ✅ 复用切片，减少分配
 func efficientProcessing(data []string) []string {
@@ -434,9 +449,10 @@ func inefficientProcessing(data []string) []string {
     return results
 }
 ```
-
+:::
 3. **利用局部性原理**
 
+::: details 示例：利用局部性原理
 ```go
 // ✅ 良好的内存访问模式
 func efficientMatrixMultiply(a, b [][]int) [][]int {
@@ -471,9 +487,10 @@ func inefficientMatrixAccess(matrix [][]int) int {
     return sum
 }
 ```
-
+:::
 ### 性能敏感代码的优化技巧
 
+::: details 示例：性能敏感代码的优化技巧
 ```go
 // 分支预测优化
 func optimizedBranching(data []int) int {
@@ -512,11 +529,12 @@ func unrolledLoop(data []int) int {
     return sum
 }
 ```
-
+:::
 ## 编译时计算与常量折叠
 
 ### 常量表达式的威力
 
+::: details 示例：常量表达式的威力
 ```go
 const (
     // 编译时计算
@@ -538,9 +556,10 @@ func useConstants() {
     _ = items
 }
 ```
-
+:::
 ### 编译时字符串操作
 
+::: details 示例：编译时字符串操作
 ```go
 const (
     Prefix = "app_"
@@ -559,11 +578,12 @@ func buildPath() string {
     return basePath + "/" + appName  // 可能被优化为 "/usr/local/bin/myapp"
 }
 ```
-
+:::
 ## 调试编译器行为
 
 ### 使用编译器标志
 
+::: details 示例：使用编译器标志
 ```bash
 # 查看编译器优化决策
 go build -gcflags="-m" program.go
@@ -577,9 +597,10 @@ go build -gcflags="-S" program.go
 # 查看 SSA 中间表示
 go build -gcflags="-d=ssa/check/on" program.go
 ```
-
+:::
 ### 性能分析工具
 
+::: details 示例：性能分析工具
 ```go
 // 使用 pprof 分析编译器生成的代码性能
 import _ "net/http/pprof"
@@ -592,7 +613,7 @@ func main() {
     // 应用代码...
 }
 ```
-
+:::
 ```bash
 # CPU 性能分析
 go tool pprof http://localhost:6060/debug/pprof/profile
@@ -603,11 +624,12 @@ go tool pprof http://localhost:6060/debug/pprof/heap
 # 查看热点函数的汇编代码
 go tool pprof -http=:8080 profile.pb.gz
 ```
-
+:::
 ## 跨平台编译的智慧
 
 ### 条件编译
 
+::: details 示例：条件编译
 ```go
 // 平台特定的代码
 // +build linux darwin
@@ -622,7 +644,9 @@ func platformSpecific() {
     syscall.Sync()
 }
 ```
+:::
 
+::: details 示例：条件编译
 ```go
 // +build windows
 // file_windows.go
@@ -636,9 +660,10 @@ func platformSpecific() {
     syscall.FlushFileBuffers(syscall.Handle(1))
 }
 ```
-
+:::
 ### 架构优化
 
+::: details 示例：架构优化
 ```go
 // 利用不同架构的特性
 func optimizedCopy(dst, src []byte) {
@@ -657,13 +682,14 @@ func fastMath(x float64) float64 {
     return x * x
 }
 ```
-
+:::
 ## 编译器的未来演进
 
 ### 新优化技术
 
 Go 编译器持续演进，引入新的优化技术：
 
+::: details 示例：新优化技术
 ```go
 // 未来可能的优化方向
 
@@ -693,9 +719,10 @@ func futureInlining() {
     coldFunction() // 不频繁调用，避免内联
 }
 ```
-
+:::
 ### 编译器与运行时的协作
 
+::: details 示例：编译器与运行时的协作
 ```go
 // 编译器和运行时的深度集成
 func futureCollaboration() {
@@ -709,13 +736,14 @@ func futureCollaboration() {
     // 编译器可能在这里插入提示，告诉 GC 可以回收 data
 }
 ```
-
+:::
 ## 编译器哲学的反思
 
 ### 透明性与控制的平衡
 
 Go 编译器体现了**透明性与控制**的微妙平衡：
 
+::: details 示例：透明性与控制
 ```go
 // 透明性：编译器自动优化
 func transparentOptimization(data []int) int {
@@ -732,11 +760,12 @@ func controlledBehavior(x int) int {
     return x * x  // 明确禁止内联
 }
 ```
-
+:::
 ### 性能与可维护性的统一
 
 优秀的 Go 代码往往既有良好的性能，又易于维护：
 
+::: details 示例：性能与可维护性的统一
 ```go
 // 清晰的代码往往也是高效的代码
 func clearAndEfficient(users []User) []User {
@@ -753,11 +782,12 @@ func clearAndEfficient(users []User) []User {
     return active
 }
 ```
-
+:::
 ### 信任与验证
 
 Go 鼓励**信任编译器**，但也提供验证工具：
 
+::: details 示例：信任与验证
 ```go
 // 信任编译器的默认行为
 func trustCompiler(data []byte) []byte {
@@ -773,7 +803,7 @@ func verifyAndOptimize(data []byte) []byte {
     return result
 }
 ```
-
+:::
 ## 下一步：探索运行时
 
 现在您已经理解了 Go 编译器的设计哲学和工作原理，让我们深入探索[运行时系统](/learn/concepts/runtime)，了解 Go 运行时如何支撑语言的各种特性，以及如何与运行时系统协作编写高效的程序。

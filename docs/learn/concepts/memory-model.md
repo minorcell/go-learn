@@ -34,13 +34,13 @@ func main() {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 这段代码看起来合理：writer 先写数据，再设置标志；reader 等待标志，然后读取数据。但在实际执行中，由于编译器优化、CPU 乱序执行、缓存一致性等因素，reader 可能看到 `ready = true` 但 `data` 仍然是 0。
 
 这不是 bug，而是**现代计算机系统的基本特性**。内存模型的作用就是在这种混沌中建立秩序。
 
 ### 可见性与原子性的困境
-
+::: details 示例：可见性与原子性的困境
 并发编程的核心挑战可以归结为两个问题：
 
 1. **可见性问题**：一个 goroutine 的修改什么时候对其他 goroutine 可见？
@@ -65,7 +65,7 @@ func demonstrateVisibilityProblem() {
     // 实际结果通常小于 2000
 }
 ```
-
+:::
 `counter++` 实际上包含三个步骤：
 1. 读取 `counter` 的值
 2. 将值加 1
@@ -74,7 +74,7 @@ func demonstrateVisibilityProblem() {
 在并发环境中，这三个步骤可能被交错执行，导致数据竞争。
 
 ## Go 内存模型的设计哲学
-
+::: details 示例：Go 内存模型的设计哲学
 ### 为程序员提供简单而强大的保证
 
 Go 的内存模型设计围绕一个核心思想：**提供最小但充分的保证，让程序员能够编写正确的并发程序，而不需要理解底层硬件的复杂性**。
@@ -97,13 +97,13 @@ func main() {
     // 就一定能看到消息的正确值
 }
 ```
-
+:::
 这种保证基于 Go 内存模型的核心概念：**happens-before 关系**。
 
 ### Happens-Before：建立因果秩序
-
 Happens-before 关系定义了程序中事件的偏序关系，它不是时间上的先后，而是**逻辑上的因果关系**：
 
+::: details 示例：Happens-Before：建立因果秩序
 ```go
 func demonstrateHappensBefore() {
     var a, b int
@@ -116,7 +116,7 @@ func demonstrateHappensBefore() {
     // 它一定也能看到 a = 1
 }
 ```
-
+:::
 在单个 goroutine 内，程序的顺序执行建立了 happens-before 关系。但跨 goroutine 的 happens-before 关系需要同步机制来建立。
 
 ## 同步机制的深层逻辑
@@ -125,6 +125,7 @@ func demonstrateHappensBefore() {
 
 Go 的 channel 不仅仅是数据传输的管道，更是**建立 happens-before 关系的同步原语**：
 
+::: details 示例：Channel：通信即同步
 ```go
 // Channel 发送和接收建立 happens-before 关系
 func channelSynchronization() {
@@ -143,6 +144,7 @@ func channelSynchronization() {
     // 所以我们一定能看到 shared = 42
 }
 ```
+:::
 
 这种设计体现了 Go 的核心理念：**"Don't communicate by sharing memory; share memory by communicating"**（不要通过共享内存来通信，而要通过通信来共享内存）。
 
@@ -150,6 +152,7 @@ func channelSynchronization() {
 
 缓冲和非缓冲 channel 在同步语义上有重要差异：
 
+::: details 示例：缓冲 Channel 的微妙差异
 ```go
 func unbufferedChannelSync() {
     ch := make(chan int)  // 无缓冲 channel
@@ -186,7 +189,7 @@ func bufferedChannelSync() {
     // 只有接收和后续发送之间才有关系
 }
 ```
-
+:::
 这种差异反映了不同同步模式的需求：
 - **无缓冲 channel**：强同步，适合严格的握手协议
 - **有缓冲 channel**：弱同步，适合异步通信
@@ -195,6 +198,7 @@ func bufferedChannelSync() {
 
 虽然 Go 推荐使用 channel，但 mutex 在某些场景下仍然是合适的选择：
 
+::: details 示例：Mutex：互斥访问的经典模式
 ```go
 type SafeCounter struct {
     mu    sync.Mutex
@@ -213,13 +217,14 @@ func (c *SafeCounter) Value() int {
     return c.value      // 临界区操作
 }
 ```
-
+:::
 Mutex 建立的 happens-before 关系是：**每个 Unlock 操作 happens-before 后续的 Lock 操作**。这保证了临界区的互斥访问。
 
 ### RWMutex：读写分离的优化
 
 当读操作远多于写操作时，RWMutex 提供了更细粒度的控制：
 
+::: details 示例：RWMutex：读写分离的优化
 ```go
 type SafeMap struct {
     mu   sync.RWMutex
@@ -242,7 +247,7 @@ func (sm *SafeMap) Set(key string, value int) {
     sm.data[key] = value
 }
 ```
-
+:::
 RWMutex 的 happens-before 关系更复杂：
 - 写锁的 Unlock happens-before 后续的读锁或写锁的 Lock
 - 读锁的 Lock 可以并发，但 Unlock happens-before 后续写锁的 Lock
@@ -253,6 +258,7 @@ RWMutex 的 happens-before 关系更复杂：
 
 在并发程序中，延迟初始化是一个常见需求，但也是一个容易出错的地方：
 
+::: details 示例：Once：初始化的艺术
 ```go
 var (
     instance *Singleton
@@ -286,7 +292,7 @@ func demonstrateOnce() {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 `sync.Once` 保证：
 - 传递给 `Do` 的函数只会被执行一次
 - 函数的执行 happens-before 所有后续的 `Do` 调用返回
@@ -294,9 +300,9 @@ func demonstrateOnce() {
 这种保证让延迟初始化变得安全而高效。
 
 ### Once 的内部实现洞察
-
 `sync.Once` 的实现展示了精妙的内存模型应用：
 
+::: details 示例：Once 的内部实现洞察
 ```go
 // 简化的 Once 实现逻辑
 type Once struct {
@@ -323,7 +329,7 @@ func (o *Once) doSlow(f func()) {
     }
 }
 ```
-
+:::
 这种实现模式体现了性能优化与正确性的平衡：
 - 使用原子操作进行快速检查
 - 使用 mutex 保证初始化函数只执行一次
@@ -335,6 +341,7 @@ func (o *Once) doSlow(f func()) {
 
 原子操作提供了最基本的同步保证：**操作要么完全发生，要么完全不发生，不会被其他 goroutine 观察到中间状态**：
 
+::: details 示例：原子操作的本质
 ```go
 func demonstrateAtomicOperations() {
     var counter int64
@@ -351,11 +358,12 @@ func demonstrateAtomicOperations() {
     fmt.Printf("最终计数: %d\n", finalValue)  // 总是 1000
 }
 ```
-
+:::
 ### 原子操作的适用场景
 
 原子操作适合简单的共享状态：
 
+::: details 示例：原子操作的适用场景
 ```go
 type AtomicFlag struct {
     flag int32
@@ -385,6 +393,7 @@ func (af *AtomicFlag) SpinUnlock() {
     atomic.StoreInt32(&af.flag, 0)
 }
 ```
+:::
 
 原子操作的优势：
 - **性能高**：无需系统调用，直接使用 CPU 指令
@@ -402,6 +411,7 @@ func (af *AtomicFlag) SpinUnlock() {
 
 1. **生产者-消费者模式**
 
+::: details 示例：生产者-消费者模式
 ```go
 func producerConsumerPattern() {
     jobs := make(chan int, 100)
@@ -436,9 +446,10 @@ func producerConsumerPattern() {
     }
 }
 ```
+:::
 
 2. **扇出-扇入模式**
-
+::: details 示例：扇出-扇入模式
 ```go
 func fanOutFanInPattern() {
     input := make(chan int)
@@ -471,9 +482,10 @@ func fanOutFanInPattern() {
     time.Sleep(time.Second)
 }
 ```
+:::
 
 3. **流水线模式**
-
+::: details 示例：流水线模式
 ```go
 func pipelinePattern() {
     // 阶段1：生成数字
@@ -523,11 +535,11 @@ func pipelinePattern() {
     }
 }
 ```
-
+:::
 ### 避免常见的并发陷阱
 
 1. **数据竞争**
-
+::: details 示例：数据竞争
 ```go
 // ❌ 错误的做法：数据竞争
 type UnsafeCounter struct {
@@ -574,9 +586,9 @@ func (cc *ChannelCounter) Increment() {
     cc.ch <- 1
 }
 ```
-
+:::
 2. **死锁**
-
+::: details 示例：死锁
 ```go
 // ❌ 容易死锁的代码
 func deadlockExample() {
@@ -621,9 +633,9 @@ func avoidDeadlock() {
     }()
 }
 ```
-
+:::
 3. **Goroutine 泄漏**
-
+::: details 示例：Goroutine 泄漏
 ```go
 // ❌ 容易泄漏的代码
 func goroutineLeakExample() {
@@ -667,13 +679,14 @@ func avoidGoroutineLeak() {
     }
 }
 ```
-
+:::
 ## 性能考量与优化
 
 ### 选择合适的同步原语
 
 不同的同步原语有不同的性能特征：
 
+::: details 示例：性能考量与优化
 ```go
 func benchmarkSynchronization() {
     const iterations = 1000000
@@ -705,7 +718,7 @@ func benchmarkSynchronization() {
     fmt.Printf("Atomic 耗时: %v\n", time.Since(start))
 }
 ```
-
+:::
 一般性能排序（从快到慢）：
 1. 原子操作：最快，但功能有限
 2. Mutex：中等，适合保护临界区
@@ -713,6 +726,7 @@ func benchmarkSynchronization() {
 
 ### 减少锁竞争
 
+::: details 示例：减少锁竞争
 ```go
 // ❌ 粗粒度锁：竞争激烈
 type CoarseGrainedMap struct {
@@ -748,11 +762,12 @@ func (fgm *FineGrainedMap) Get(key string) (int, bool) {
     return value, exists
 }
 ```
-
+:::
 ### Lock-Free 数据结构
 
 在某些高性能场景下，可以使用 lock-free 数据结构：
 
+::: details 示例：Lock-Free 数据结构
 ```go
 // 简单的 lock-free 栈
 type LockFreeStack struct {
@@ -795,7 +810,7 @@ func (lfs *LockFreeStack) Pop() (interface{}, bool) {
     }
 }
 ```
-
+:::
 Lock-free 数据结构的优势：
 - **高性能**：无锁竞争
 - **无阻塞**：不会导致 goroutine 休眠
@@ -812,6 +827,7 @@ Lock-free 数据结构的优势：
 
 Go 提供了强大的竞争检测器：
 
+::: details 示例：使用 Race Detector
 ```bash
 # 启用竞争检测
 go run -race main.go
@@ -820,9 +836,10 @@ go test -race
 # 构建启用竞争检测的二进制文件
 go build -race
 ```
-
+:::
 竞争检测器能发现绝大多数数据竞争：
 
+::: details 示例：使用 Race Detector
 ```go
 // 这段代码会被 race detector 检测到
 func racyCode() {
@@ -839,9 +856,10 @@ func racyCode() {
     time.Sleep(time.Second)
 }
 ```
-
+:::
 ### 使用 pprof 分析锁竞争
 
+::: details 示例：使用 pprof 分析锁竞争
 ```go
 import _ "net/http/pprof"
 
@@ -856,7 +874,7 @@ func main() {
     // 应用代码...
 }
 ```
-
+:::
 然后使用 pprof 分析：
 
 ```bash
@@ -873,6 +891,7 @@ go tool pprof http://localhost:6060/debug/pprof/block
 
 Go 的内存模型体现了语言设计的核心哲学：**为大多数用例提供简单而直观的模型，同时保留高性能优化的可能性**。
 
+::: details 示例：内存模型的哲学反思
 ```go
 // 大多数情况下，channel 就足够了
 func simpleApproach(data []int) []int {
@@ -909,11 +928,12 @@ func optimizedApproach(data []int) []int {
     return results
 }
 ```
-
+:::
 ### 正确性优于性能
 
 Go 的内存模型设计强调：**首先保证正确性，然后优化性能**。
 
+::: details 示例：正确性优于性能
 ```go
 // ✅ 正确但可能较慢的代码
 func correctButSlow() {
@@ -940,7 +960,7 @@ func fastButWrong() {
     }
 }
 ```
-
+:::
 ### 渐进式优化
 
 Go 鼓励渐进式的性能优化：
@@ -950,6 +970,7 @@ Go 鼓励渐进式的性能优化：
 3. **优化关键路径**
 4. **重新测量验证**
 
+::: details 示例：渐进式优化
 ```go
 // 阶段1：简单正确的实现
 func stage1_simple(data []string) []string {
@@ -1003,7 +1024,7 @@ func stage3_preallocated(data []string) []string {
     return results
 }
 ```
-
+:::
 ## 下一步：理解编译器
 
 现在您已经掌握了 Go 内存模型的核心概念，让我们探索[编译器](/learn/concepts/compiler)，了解 Go 编译器如何将高级的并发抽象转换为高效的机器代码，以及如何与编译器协作编写性能优异的程序。

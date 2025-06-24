@@ -6,6 +6,7 @@
 
 大多数编程语言将并发视为一种"附加功能"——在单线程程序的基础上小心翼翼地添加线程支持。这种方式带来的问题显而易见：
 
+::: details 示例：传统线程模型的痛点
 ```go
 // 传统线程模型的痛点
 type Counter struct {
@@ -24,7 +25,7 @@ func (c *Counter) Increment() {
 // - 锁的粒度难以把握：太粗影响性能，太细容易死锁
 // - 代码充满了同步原语，业务逻辑被掩盖
 ```
-
+:::
 Go 提出了一个根本性的转变：**不要通过共享内存来通信，而要通过通信来共享内存**。这听起来抽象，但它背后的洞察是深刻的——与其让多个执行单元争夺共享资源，不如让它们通过明确的消息传递来协调工作。
 
 ## Goroutine：重新想象执行单元
@@ -35,6 +36,7 @@ Go 提出了一个根本性的转变：**不要通过共享内存来通信，而
 
 传统线程是稀缺资源——每个线程占用数MB内存，创建成本高昂。这迫使我们精心设计线程池，复用线程，将多个任务塞进同一个线程。结果是复杂的任务调度逻辑和紧耦合的代码。
 
+::: details 示例：传统做法：有限的线程池
 ```go
 func handleRequests() {
     // 传统做法：有限的线程池
@@ -58,9 +60,10 @@ func handleRequests() {
     }
 }
 ```
-
+:::
 Goroutine 将执行单元从稀缺资源变为丰富资源。一个 goroutine 只需要 2KB 的初始栈空间，您可以轻松创建数十万个：
 
+::: details 示例：Goroutine 的栈是分段的，从2KB开始，根据需要动态增长
 ```go
 func handleRequestsWithGoroutines() {
     for {
@@ -76,13 +79,14 @@ func processRequest(request Request) {
     sendResponse(result)
 }
 ```
-
+:::
 这种转变的意义远超性能提升——它让并发编程重新变得**直观**。每个独立的任务可以有自己的执行流，代码结构更接近问题本身的结构。
 
 ### 栈的智慧：按需增长
 
 传统线程使用固定大小的栈（通常8MB），这既浪费内存又限制了并发数量。Goroutine 的栈是分段的，从2KB开始，根据需要动态增长：
 
+::: details 示例：Goroutine 的栈是分段的，从2KB开始，根据需要动态增长
 ```go
 func demonstrateStackGrowth() {
     // 这个函数会递归调用很多次
@@ -104,7 +108,7 @@ func deepRecursion(current, max int) {
     deepRecursion(current+1, max)
 }
 ```
-
+:::
 这种设计让您不再需要担心栈大小的权衡——小任务不会浪费内存，大任务也不会因栈不足而失败。
 
 ## Channel：沟通的艺术
@@ -115,6 +119,7 @@ func deepRecursion(current, max int) {
 
 在传统模型中，同步意味着"等待"——等待锁、等待条件变量、等待信号量。Channel 将同步重新定义为"协调"：
 
+::: details 示例：Channel 将同步重新定义为"协调"
 ```go
 func coordinatedWork() {
     // 准备阶段：所有 worker 都就绪后才开始
@@ -142,13 +147,14 @@ func coordinatedWork() {
     close(start)  // 广播给所有等待的 goroutine
 }
 ```
-
+:::
 这种模式比使用 `sync.WaitGroup` 更直观——代码的流程清晰地表达了协调的逻辑。
 
 ### 类型安全的通信
 
 Channel 不仅提供了同步机制，还提供了类型安全的数据传递：
 
+::: details 示例：Channel 不仅提供了同步机制，还提供了类型安全的数据传递
 ```go
 // 不同类型的数据有不同的 channel
 type ProcessingPipeline struct {
@@ -173,13 +179,14 @@ func (p *ProcessingPipeline) parseStage() {
     close(p.parsed)  // 数据处理完毕的信号
 }
 ```
-
+:::
 编译器确保您不会意外地将错误类型的数据发送到错误的阶段，这种安全性是运行时锁无法提供的。
 
 ### 有缓冲 vs 无缓冲：表达不同的语义
 
 Channel 的缓冲大小不仅影响性能，更重要的是表达了不同的并发语义：
 
+::: details 示例：Channel 的缓冲大小不仅影响性能，更重要的是表达了不同的并发语义
 ```go
 func demonstrateChannelSemantics() {
     // 无缓冲 channel：同步交接
@@ -209,7 +216,7 @@ func demonstrateChannelSemantics() {
     }
 }
 ```
-
+:::
 这种语义差异让您能在代码层面表达设计意图：需要确认交接的用无缓冲 channel，允许异步处理的用有缓冲 channel。
 
 ## Select：多路协调的优雅
@@ -218,6 +225,7 @@ func demonstrateChannelSemantics() {
 
 ### 非阻塞操作的自然表达
 
+::: details 示例：非阻塞操作的自然表达
 ```go
 func tryProcessBatch(dataChan <-chan Data, resultChan chan<- Result) {
     var batch []Data
@@ -254,11 +262,12 @@ func tryProcessBatch(dataChan <-chan Data, resultChan chan<- Result) {
     }
 }
 ```
-
+:::
 这种模式在传统多线程程序中需要复杂的条件变量和超时机制，在 Go 中却是自然的表达。
 
 ### 优雅关闭的艺术
 
+::: details 示例：优雅关闭的艺术
 ```go
 type Server struct {
     requests  chan Request
@@ -300,7 +309,7 @@ func (w *Worker) Start(requests <-chan Request, shutdown <-chan struct{}) {
     }
 }
 ```
-
+:::
 通过 `select`，关闭逻辑成为程序结构的自然组成部分，而不是事后添加的"异常处理"。
 
 ## 并发模式：问题驱动的设计
@@ -311,6 +320,7 @@ Go 的并发特性不是为了技术炫耀，而是为了解决实际问题。�
 
 当单个处理器成为瓶颈时，Fan-out 模式让您能将工作分发给多个处理器：
 
+::: details 示例：Fan-out/Fan-in：处理负载分发
 ```go
 func distributeWork(input <-chan Work) <-chan Result {
     // Fan-out：将工作分发给多个 worker
@@ -358,13 +368,14 @@ func mergeResults(inputs ...<-chan Result) <-chan Result {
     return output
 }
 ```
-
+:::
 这种模式的价值不在于代码简洁，而在于它**清晰地表达了数据流的结构**。
 
 ### Pipeline：流式处理的自然建模
 
 对于需要多阶段处理的数据，Pipeline 模式让每个阶段都能独立优化：
 
+::: details 示例：Pipeline：流式处理的自然建模
 ```go
 func createProcessingPipeline() (<-chan RawData, chan<- ProcessedData) {
     input := make(chan RawData)
@@ -398,13 +409,14 @@ func validateStage(input <-chan RawData) <-chan ValidData {
     return output
 }
 ```
-
+:::
 每个阶段都是独立的 goroutine，可以根据需要调整并发度、添加缓冲、实施背压控制。最重要的是，这种结构与问题域的概念模型完全对应。
 
 ### Worker Pool：控制并发度
 
 虽然 goroutine 很轻量，但有时您仍需要控制并发度——不是因为 goroutine 的成本，而是因为外部资源的限制：
 
+::: details 示例：Worker Pool：控制并发度
 ```go
 type WorkerPool struct {
     tasks    chan Task
@@ -461,7 +473,7 @@ func processDatabaseTasks() {
     }
 }
 ```
-
+:::
 这里的关键洞察是：并发度的限制通常来自外部系统（数据库、文件系统、网络），而不是 Go 程序本身。
 
 ## Context：跨边界的协调
@@ -472,6 +484,7 @@ func processDatabaseTasks() {
 
 在 Web 服务中，每个请求都有自己的生命周期。当客户端断开连接时，服务器应该停止为该请求工作：
 
+::: details 示例：请求生命周期的建模
 ```go
 func handleAPIRequest(w http.ResponseWriter, r *http.Request) {
     // 从 HTTP 请求创建 context
@@ -561,6 +574,7 @@ func fetchFromService(ctx context.Context, url string) <-chan FetchResult {
     return resultChan
 }
 ```
+:::
 
 这种模式让复杂的超时和降级逻辑变得清晰易懂。
 
@@ -574,6 +588,7 @@ Go 并发模型的性能优势不仅来自技术实现，更来自设计理念�
 
 Go 转向结构优化——让程序的并发结构直接反映问题的结构：
 
+::: details 示例：从资源优化到结构优化
 ```go
 // 传统方式：优化资源使用
 type ResourceOptimizedServer struct {
@@ -613,13 +628,14 @@ func (s *StructureOptimizedServer) processRequest(req Request) Result {
     return computeResult(userData, req.Data)
 }
 ```
-
+:::
 结构清晰的程序更容易理解、维护和调试，这种"可维护性收益"往往比原始性能数字更重要。
 
 ### 延迟 vs 吞吐量的平衡
 
 Go 的调度器优化了延迟（响应时间）而不仅仅是吞吐量：
 
+::: details 示例：延迟 vs 吞吐量的平衡
 ```go
 func demonstrateLatencyOptimization() {
     // 高吞吐量但高延迟的批处理方式
@@ -648,7 +664,7 @@ func demonstrateLatencyOptimization() {
     }()
 }
 ```
-
+:::
 在现代应用中，用户体验往往比极限吞吐量更重要。Go 的设计选择反映了这种价值判断。
 
 ## 调试和监控：可观察性的内建支持
@@ -657,6 +673,7 @@ Go 运行时为并发程序提供了丰富的调试和监控工具：
 
 ### 运行时洞察
 
+::: details 示例：运行时洞察
 ```go
 func monitorGoroutines() {
     ticker := time.NewTicker(5 * time.Second)
@@ -680,11 +697,12 @@ func monitorGoroutines() {
     }
 }
 ```
-
+:::
 ### 死锁检测
 
 Go 运行时能自动检测某些类型的死锁：
 
+::: details 示例：死锁检测
 ```go
 func demonstrateDeadlockDetection() {
     ch1 := make(chan int)
@@ -705,7 +723,7 @@ func demonstrateDeadlockDetection() {
     time.Sleep(1 * time.Second)
 }
 ```
-
+:::
 这种内建支持让并发程序的调试变得更加可行。
 
 ## 最佳实践的背后逻辑
@@ -714,6 +732,7 @@ Go 并发的最佳实践不是任意的规则，而是基于深层次的设计�
 
 ### 通信胜过共享
 
+::: details 示例：共享状态：复杂的同步逻辑
 ```go
 // 共享状态：复杂的同步逻辑
 type SharedCounter struct {
@@ -765,11 +784,12 @@ func (c *CounterService) Run() {
     }
 }
 ```
-
+:::
 通信方式的价值在于**状态变化是显式的**——所有修改都通过消息进行，便于理解和调试。
 
 ### 关闭 Channel 的语义
 
+::: details 示例：关闭 Channel 的语义
 ```go
 func demonstrateChannelClosing() {
     work := make(chan Task)
@@ -796,6 +816,7 @@ func demonstrateChannelClosing() {
     <-done  // 等待工作完成
 }
 ```
+:::
 
 关闭 channel 不是"清理资源"，而是"传递信息"——告诉接收者数据流已经结束。
 

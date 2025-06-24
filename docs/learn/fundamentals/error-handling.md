@@ -13,7 +13,7 @@
 ### 隐式的控制流
 
 考虑这段传统的异常处理代码：
-
+::: details 示例：传统的异常处理代码
 ```java
 // Java 风格：隐藏的控制流
 public User getUserById(String id) {
@@ -21,11 +21,12 @@ public User getUserById(String id) {
     return processUser(user);  // 这里可能抛出多种异常
 }
 ```
-
+:::
 问题是什么？调用者无法从函数签名看出可能的失败模式。这些信息隐藏在实现中，或者散布在文档里。
 
 ### 远距离的错误处理
 
+::: details 示例：远距离的错误处理
 ```java
 try {
     User user = getUserById("123");
@@ -38,13 +39,14 @@ try {
     // 这个也是
 }
 ```
-
+:::
 异常可能在调用栈的任何层级被抛出，让错误处理变得**远离错误发生的上下文**。
 
 ### 忽略的诱惑
 
 最危险的是，异常机制让忽略错误变得容易：
 
+::: details 示例：忽略的诱惑
 ```java
 try {
     riskyOperation();
@@ -52,11 +54,12 @@ try {
     // 悄悄吞掉所有错误
 }
 ```
-
+:::
 ## Go 的错误哲学：错误即数据
 
 Go 将错误重新概念化为**普通的返回值**。这个简单的改变带来了深远的影响：
 
+::: details 示例：Go 的错误哲学：错误即数据
 ```go
 func getUserById(id string) (User, error) {
     user, err := database.FindUser(id)
@@ -72,7 +75,7 @@ func getUserById(id string) (User, error) {
     return processedUser, nil
 }
 ```
-
+:::
 ### 这种设计的深层优势
 
 **1. 明确性**：函数签名清楚地告诉您"这个操作可能失败"
@@ -98,6 +101,8 @@ Go 的思维：
 ### 错误处理的基本模式
 
 **立即检查与决策**：
+
+::: details 示例：传统思维
 ```go
 data, err := readFile("config.json")
 if err != nil {
@@ -106,8 +111,11 @@ if err != nil {
     data = getDefaultConfig()
 }
 ```
+:::
 
 **错误传播与上下文增强**：
+
+::: details 示例：立即检查与决策
 ```go
 func processUserData(userID string) error {
     user, err := getUserById(userID)
@@ -120,8 +128,9 @@ func processUserData(userID string) error {
     return nil
 }
 ```
-
+:::
 **错误恢复与降级**：
+::: details 示例：错误恢复与降级
 ```go
 func getRecommendations(userID string) []Recommendation {
     recs, err := aiService.GetPersonalizedRecs(userID)
@@ -133,19 +142,21 @@ func getRecommendations(userID string) []Recommendation {
     return recs
 }
 ```
-
+:::
 ## 自定义错误：携带语义信息
 
 Go 的 `error` 接口极其简单：
 
+::: details 示例：自定义错误：携带语义信息
 ```go
 type error interface {
     Error() string
 }
 ```
-
+:::
 这种简单性是有意的——它鼓励您根据需要创建富含信息的错误类型：
 
+::: details 示例：自定义错误：携带语义信息
 ```go
 type ValidationError struct {
     Field   string
@@ -182,9 +193,10 @@ func validateEmail(email string) error {
     return nil
 }
 ```
-
+:::
 ### 错误类型检查：精确的错误处理
 
+::: details 示例：错误类型检查：精确的错误处理
 ```go
 func handleUserRegistration(user User) error {
     err := validateUser(user)
@@ -203,11 +215,12 @@ func handleUserRegistration(user User) error {
     return nil
 }
 ```
-
+:::
 ## 错误包装与追踪
 
-Go 1.13 引入的错误包装功能让错误链变得清晰可追踪：
 
+Go 1.13 引入的错误包装功能让错误链变得清晰可追踪：
+::: details 示例：错误包装与追踪
 ```go
 func processOrderFlow(orderID string) error {
     // 层层包装错误，保留完整的上下文链
@@ -245,11 +258,12 @@ func handleOrder(orderID string) {
     }
 }
 ```
-
+:::
 ## panic 与 recover：最后的安全网
 
 虽然 Go 推荐使用错误值，但它也提供了 `panic` 和 `recover` 处理真正的程序异常：
 
+::: details 示例：panic 与 recover：最后的安全网
 ```go
 func mustParseConfig(configData []byte) Config {
     config, err := parseConfig(configData)
@@ -273,7 +287,7 @@ func safeProcessRequest(w http.ResponseWriter, r *http.Request) {
     processRequest(w, r)
 }
 ```
-
+:::
 ### panic 的使用原则
 
 - **真正的程序错误**：如数组越界、空指针访问
@@ -284,6 +298,7 @@ func safeProcessRequest(w http.ResponseWriter, r *http.Request) {
 
 ### 提供有用的错误信息
 
+::: details 示例：提供有用的错误信息
 ```go
 // ❌ 无用的错误信息
 if err != nil {
@@ -296,11 +311,12 @@ if err != nil {
         host, port, database, err)
 }
 ```
-
+:::
 ### 错误处理策略的选择
 
 不同层级应该有不同的错误处理策略：
 
+::: details 示例：错误处理策略的选择
 ```go
 // 基础层：收集和传播错误
 func (db *Database) findUser(id string) (User, error) {
@@ -347,7 +363,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(user)
 }
 ```
-
+:::
 ## 思维方式的根本转变
 
 ### 从"避免错误"到"管理错误"
@@ -362,6 +378,7 @@ func (h *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 Go 让您将错误处理看作**正常的条件分支**：
 
+::: details 示例：从"异常中断"到"条件分支"
 ```go
 func performCriticalOperation() Result {
     result1, err := step1()
@@ -380,7 +397,7 @@ func performCriticalOperation() Result {
     return combineResults(result1, result2)
 }
 ```
-
+:::
 ## 价值观的体现
 
 Go 的错误处理体现了几个核心价值观：

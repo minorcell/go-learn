@@ -10,6 +10,7 @@
 
 考虑这样一个问题：什么样的代码最容易理解？答案可能不是注释最详细的代码，而是**意图最明确的代码**：
 
+::: details 示例：类型即文档的哲学
 ```go
 // 类型传达的信息比注释更可靠
 type UserID int64        // 这不只是数字，是用户的唯一标识
@@ -37,13 +38,14 @@ func main() {
     // order, err := CreateOrder(price, userID, timestamp, "prod-123")
 }
 ```
-
+:::
 这种设计的深层价值在于：**类型承载了语义，而不仅仅是内存布局**。
 
 ### 编译时安全的智慧
 
 动态类型语言的支持者常说："我们不需要类型，它们只是束缚。"但这忽略了一个重要事实：**程序员的注意力是有限资源**。
 
+::: details 示例：类型即文档的哲学
 ```go
 // 在动态语言中，这些错误只能在运行时发现：
 // calculateTotal(user, "invalid_price", null, undefined)
@@ -63,7 +65,7 @@ func calculateTotal(items []Item, discount float64) float64 {
     return total * (1.0 - discount)
 }
 ```
-
+:::
 类型安全的价值不仅在于防止崩溃，更在于**让程序员能够专注于业务逻辑，而不是防御性编程**。
 
 ## 基础类型的设计智慧
@@ -72,6 +74,7 @@ func calculateTotal(items []Item, discount float64) float64 {
 
 Go 的数值类型设计体现了工程思维：
 
+::: details 示例：数值类型：精确性与实用性的平衡
 ```go
 // 精确控制：当您需要跨平台一致性时
 var fileSize int64    // 64位，无论在什么平台
@@ -90,13 +93,14 @@ var rawPtr unsafe.Pointer  // 原始指针，跨越类型边界
 var temperature float32   // 单精度，适合大量数据
 var coordinate float64    // 双精度，适合科学计算
 ```
-
+:::
 这种设计让程序员在**精确控制**和**简单易用**之间自由选择。
 
 ### 字符串：不可变性的深层考量
 
 Go 选择字符串不可变，这不是偶然：
 
+::: details 示例：字符串：不可变性的深层考量
 ```go
 func demonstrateStringImmutability() {
     // 字符串不可变带来的好处
@@ -121,13 +125,14 @@ func demonstrateStringImmutability() {
     fmt.Println(newText)  // "Hello, Go! World"
 }
 ```
-
+:::
 不可变性的代价是性能，但带来的是**程序的可预测性和安全性**。
 
 ### 布尔类型：纯粹性的价值
 
 Go 的布尔类型体现了类型系统的严格性：
 
+::: details 示例：布尔类型：纯粹性的价值
 ```go
 func demonstrateBooleanPurity() {
     var valid bool = true
@@ -150,7 +155,7 @@ func demonstrateBooleanPurity() {
     }
 }
 ```
-
+:::
 这种"不便"实际上是**语义清晰性**的体现。
 
 ## 复合类型的组合艺术
@@ -159,6 +164,7 @@ func demonstrateBooleanPurity() {
 
 数组在现代编程中似乎很少用，但 Go 保留它们有深层原因：
 
+::: details 示例：数组：固定性的承诺
 ```go
 // 数组的大小是类型的一部分
 var buffer [1024]byte     // 正好 1024 字节，编译时确定
@@ -189,13 +195,14 @@ func safeArrayAccess() {
     backup := data  // 完整拷贝，修改 backup 不影响 data
 }
 ```
-
+:::
 数组的设计哲学：**当您知道大小时，为什么不利用这个信息呢？**
 
 ### 切片：抽象的艺术
 
 切片是 Go 类型系统中的杰作，它在数组基础上提供了优雅的抽象：
 
+::: details 示例：切片：抽象的艺术
 ```go
 // 切片的三元组设计：指针、长度、容量
 func exploreSliceDesign() {
@@ -235,13 +242,14 @@ func sliceMemoryPhilosophy() {
     fmt.Printf("长度: %d, 容量: %d\n", len(data), cap(data))
 }
 ```
-
+:::
 切片的设计体现了 Go 的核心思想：**给程序员足够的控制权，但不强制微管理**。
 
 ### 映射：类型安全的关联数组
 
 映射是另一个类型安全的典型例子：
 
+::: details 示例：映射：类型安全的关联数组
 ```go
 // 映射的类型参数提供编译时保证
 func demonstrateMapSafety() {
@@ -284,7 +292,7 @@ func mapAsSet() {
     }
 }
 ```
-
+:::
 映射的设计哲学：**常见操作应该简单，安全检查应该内置**。
 
 ## 结构体：现实世界的数字化映射
@@ -293,6 +301,7 @@ func mapAsSet() {
 
 Go 没有传统的继承，但有更强大的组合：
 
+::: details 示例：结构体：现实世界的数字化映射
 ```go
 // 基础组件：每个组件都有明确的职责
 type Identifiable struct {
@@ -348,7 +357,7 @@ func demonstrateComposition() {
     fmt.Printf("创建时间: %v\n", user.CreatedAt)
 }
 ```
-
+:::
 组合模式的哲学优势：
 - **职责清晰**：每个组件都有单一职责
 - **复用性高**：组件可以在不同实体间共享
@@ -359,6 +368,7 @@ func demonstrateComposition() {
 
 Go 的方法设计体现了深度思考：
 
+::: details 示例：方法的接收者设计
 ```go
 type BankAccount struct {
     balance float64
@@ -414,7 +424,7 @@ func demonstrateReceiverSemantics() {
     fmt.Printf("最终余额: %.2f\n", account.GetBalance())
 }
 ```
-
+:::
 接收者类型的选择不仅是技术考虑，更是**语义表达**：
 - 值接收者传达"这个操作不会改变对象"
 - 指针接收者传达"这个操作可能改变对象"
@@ -425,6 +435,7 @@ func demonstrateReceiverSemantics() {
 
 Go 的接口隐式实现是类型系统的核心创新：
 
+::: details 示例：接口的隐式实现
 ```go
 // 接口定义能力，而不是类型层次
 type Writer interface {
@@ -499,7 +510,7 @@ func demonstratePolymorphism() {
     logMessage(os.Stdout, message)
 }
 ```
-
+:::
 隐式实现的哲学价值：
 - **解耦合**：使用者不依赖具体实现
 - **可扩展**：新类型可以无侵入地集成
@@ -510,6 +521,7 @@ func demonstratePolymorphism() {
 
 Go 偏爱小接口，这不是偶然：
 
+::: details 示例：接口的粒度设计
 ```go
 // ❌ 大而全的接口（反模式）
 type DataProcessor interface {
@@ -556,7 +568,7 @@ type DataManager interface {
     Processor
 }
 ```
-
+:::
 小接口的优势：
 - **灵活性高**：可以只实现需要的部分
 - **测试友好**：模拟成本低
@@ -567,6 +579,7 @@ type DataManager interface {
 
 `interface{}` 是 Go 中的特殊存在：
 
+::: details 示例：空接口的哲学思考
 ```go
 // 空接口：类型安全的逃生舱
 func demonstrateEmptyInterface() {
@@ -622,13 +635,14 @@ func jsonProcessing() {
     }
 }
 ```
-
+:::
 空接口体现了 Go 的实用主义：**提供灵活性，但保持类型安全的检查**。
 
 ## 泛型：谨慎的演进
 
 Go 1.18 引入泛型，但保持了语言的简洁性：
 
+::: details 示例：泛型：谨慎的演进
 ```go
 // 泛型让代码复用更安全
 func Map[T, U any](slice []T, fn func(T) U) []U {
@@ -688,7 +702,7 @@ func demonstrateGenerics() {
     fmt.Printf("浮点总和: %.1f\n", totalFloat)
 }
 ```
-
+:::
 Go 泛型的设计哲学：
 - **渐进采用**：现有代码不受影响
 - **简单语法**：避免复杂的类型理论
@@ -701,6 +715,7 @@ Go 泛型的设计哲学：
 
 Go 的类型系统在语言光谱中的独特位置：
 
+::: details 示例：与其他语言的比较
 ```go
 // 比 C 更安全：
 // C: char* str = malloc(100); // 可能忘记释放，类型不清晰
@@ -718,11 +733,12 @@ Go 的类型系统在语言光谱中的独特位置：
 // Haskell: 复杂的类型类和 monad
 // Go: 简单的接口和错误值
 ```
-
+:::
 ### 未来的方向
 
 Go 类型系统的演进体现了保守创新：
 
+::: details 示例：未来的方向
 ```go
 // 可能的未来改进方向：
 // 1. 更好的类型推导
@@ -748,7 +764,7 @@ func getName(user *User) string {
 // func getName(user *User?) string // ? 表示可能为 nil
 // func getName(user *User) string  // 保证非 nil
 ```
-
+:::
 但任何演进都会遵循 Go 的核心原则：**简单性、实用性、向后兼容性**。
 
 ## 实践指导：设计优雅的类型
@@ -757,6 +773,7 @@ func getName(user *User) string {
 
 1. **语义优先**：类型应该表达业务意图，不只是数据结构
 
+::: details 示例：类型设计的原则
 ```go
 // ❌ 技术导向的设计
 type UserData struct {
@@ -785,9 +802,11 @@ const (
     UserStatusBanned
 )
 ```
+:::
 
 2. **组合优于继承**：通过嵌入和接口实现代码复用
 
+::: details 示例：组合优于继承
 ```go
 // ❌ 尝试模拟继承
 type BaseEntity struct {
@@ -819,9 +838,10 @@ type User struct {
     Email string
 }
 ```
+:::
 
 3. **接口要小而专注**：遵循单一职责原则
-
+::: details 示例：接口要小而专注
 ```go
 // ❌ 大而全的接口
 type Service interface {
@@ -860,9 +880,10 @@ type Repository interface {
     Deleter
 }
 ```
+:::
 
 ### 错误处理的类型设计
-
+::: details 示例：错误处理的类型设计
 ```go
 // 设计表达性强的错误类型
 type ValidationError struct {
@@ -897,7 +918,7 @@ func handleError(err error) {
     }
 }
 ```
-
+:::
 ## 类型系统的哲学反思
 
 Go 的类型系统体现了几个深层的设计哲学：
@@ -906,6 +927,7 @@ Go 的类型系统体现了几个深层的设计哲学：
 
 类型不是约束，而是表达工具：
 
+::: details 示例：类型作为文档
 ```go
 // 类型作为文档
 type Temperature float64
@@ -927,9 +949,10 @@ func NewPositiveInt(value int) (PositiveInt, error) {
     return PositiveInt(value), nil
 }
 ```
+:::
 
 ### 实用胜过纯粹
-
+::: details 示例：实用胜过纯粹
 Go 的类型系统选择实用性而不是理论纯粹性：
 
 ```go
@@ -946,11 +969,12 @@ if str, ok := anything.(string); ok {
     fmt.Println(str)
 }
 ```
+:::
 
 ### 演进胜过完美
-
 Go 的类型系统在演进中保持稳定：
 
+::: details 示例：演进胜过完美
 ```go
 // Go 1.0 的代码在今天仍然有效
 type Handler struct {
@@ -970,7 +994,7 @@ func ProcessSlice[T any](slice []T, fn func(T) T) []T {
     return result
 }
 ```
-
+:::
 ## 下一步：理解内存模型
 
 现在您已经理解了 Go 类型系统的设计哲学，让我们深入探索[内存模型](/learn/concepts/memory-model)，了解在并发环境中，类型和值是如何在内存中交互的。

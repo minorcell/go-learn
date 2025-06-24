@@ -16,6 +16,7 @@ Go 的设计者们提出了一个激进的问题：**如果我们只保留最本
 
 ### 可预测性的价值
 
+::: details 示例：数组的声明和使用
 ```go
 // 数组的声明和使用
 var buffer [1024]byte        // 编译时确定大小
@@ -29,11 +30,12 @@ func processBuffer(data [1024]byte) {
     // 可以进行激进的优化
 }
 ```
-
+:::
 这种设计的哲学是：**在某些场景下，约束就是力量**。
 
 ### 值语义的安全性
 
+::: details 示例：值语义的安全性
 ```go
 original := [3]int{1, 2, 3}
 copy := original        // 完整复制，而不是共享引用
@@ -42,13 +44,14 @@ copy[0] = 100
 fmt.Println(original)   // [1 2 3] - 原数组未受影响
 fmt.Println(copy)       // [100 2 3]
 ```
-
+:::
 这种值语义让并发编程变得更安全——您不需要担心数据竞争，因为每个数组都是独立的。
 
 ### 何时选择数组
 
 数组的适用场景反映了Go的实用主义：
 
+::: details 示例：何时选择数组
 ```go
 // 网络编程中的固定缓冲区
 type Packet struct {
@@ -63,7 +66,7 @@ type Transform [4][4]float64
 // 密码学中的固定长度
 type SHA256Hash [32]byte
 ```
-
+:::
 在这些场景中，固定大小不是限制，而是**语义的表达**——它告诉读者"这个大小是有意义的"。
 
 ## 切片：动态性的艺术
@@ -74,6 +77,7 @@ type SHA256Hash [32]byte
 
 切片不是数组，而是对数组的一个**视图**：
 
+::: details 示例：理解切片的本质
 ```go
 // 切片的概念模型
 type SliceHeader struct {
@@ -82,9 +86,10 @@ type SliceHeader struct {
     Cap  int      // 容量
 }
 ```
-
+:::
 这个设计让切片同时拥有**效率**和**灵活性**：
 
+::: details 示例：切片操作的语义美学
 ```go
 data := make([]int, 5, 10)  // 长度5，容量10
 fmt.Printf("长度: %d, 容量: %d\n", len(data), cap(data))
@@ -94,11 +99,12 @@ data = append(data, 6, 7, 8)
 fmt.Printf("长度: %d, 容量: %d\n", len(data), cap(data))
 // 输出: 长度: 8, 容量: 10
 ```
-
+:::
 ### 切片操作的语义美学
 
 Go 的切片语法简洁而强大：
 
+::: details 示例：切片操作的语义美学
 ```go
 numbers := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 
@@ -111,13 +117,14 @@ copy := numbers[:]          // 完整切片
 // 三参数切片：[start:end:cap]
 limited := numbers[2:5:6]   // [2 3 4] with cap 4
 ```
-
+:::
 这种语法的美妙之处在于**一致性**——无论是字符串、数组还是切片，都使用相同的语法。
 
 ### append：自动增长的智慧
 
 `append` 函数体现了Go对性能和易用性的平衡：
 
+::: details 示例：append：自动增长的智慧
 ```go
 var nums []int
 for i := 0; i < 100; i++ {
@@ -125,11 +132,12 @@ for i := 0; i < 100; i++ {
     // Go 自动管理内存增长策略
 }
 ```
-
+:::
 **为什么 append 返回新切片？**
 
 这个设计决策体现了Go的安全哲学：
 
+::: details 示例：为什么 append 返回新切片？
 ```go
 original := []int{1, 2, 3}
 extended := append(original, 4, 5, 6)
@@ -138,11 +146,12 @@ extended := append(original, 4, 5, 6)
 // original 和 extended 可能指向不同的底层数组
 // 返回新切片确保了操作的明确性
 ```
-
+:::
 ### 切片的零值威力
 
 切片的零值设计体现了Go的"有用零值"哲学：
 
+::: details 示例：切片的零值威力
 ```go
 var items []string  // nil 切片，但立即可用
 
@@ -151,7 +160,7 @@ items = append(items, "world")
 
 fmt.Println(items)  // [hello world]
 ```
-
+:::
 这种设计让您不需要显式初始化就能开始使用，减少了样板代码。
 
 ## 映射：关联的艺术
@@ -162,6 +171,7 @@ fmt.Println(items)  // [hello world]
 
 映射不仅仅是数据结构，更是一种**思维模式**：
 
+::: details 示例：映射的哲学
 ```go
 // 建立关联关系
 userAges := map[string]int{
@@ -182,11 +192,12 @@ for _, user := range users {
     usersByID[user.ID] = user
 }
 ```
-
+:::
 ### 映射操作的语义设计
 
 Go 的映射操作体现了明确性优于简洁性的原则：
 
+::: details 示例：映射操作的语义设计
 ```go
 scores := map[string]int{
     "Alice": 95,
@@ -210,11 +221,12 @@ for name, score := range scores {
     fmt.Printf("%s: %d\n", name, score)
 }
 ```
-
+:::
 ### 映射的零值设计
 
 映射的零值是 `nil`，这个设计体现了Go的安全原则：
 
+::: details 示例：映射的零值设计
 ```go
 var m map[string]int
 
@@ -228,7 +240,7 @@ value := m["key"]  // 0，不会 panic
 m = make(map[string]int)
 m["key"] = 1  // 现在安全了
 ```
-
+:::
 这种设计迫使您明确思考映射的生命周期。
 
 ## 复合类型的选择哲学
@@ -237,6 +249,7 @@ m["key"] = 1  // 现在安全了
 
 每种复合类型都有其性能特征和语义意义：
 
+::: details 示例：性能与语义的平衡
 ```go
 // 数组：O(1) 访问，固定大小，值语义
 var fixedBuffer [1024]byte
@@ -247,13 +260,14 @@ var dynamicList []int
 // 映射：O(1) 平均访问，键值关联
 var lookup map[string]interface{}
 ```
-
+:::
 选择的关键不是性能数字，而是**语义适配性**。
 
 ### 组合的力量
 
 Go 的复合类型设计遵循组合原则：
 
+::: details 示例：组合的力量
 ```go
 // 用切片构建复杂数据结构
 type Graph struct {
@@ -270,11 +284,12 @@ type Cache struct {
 // 用数组优化内存布局
 type Matrix4x4 [16]float32  // 连续内存，缓存友好
 ```
-
+:::
 ### 零值的统一哲学
 
 所有复合类型都遵循"有用零值"的设计：
 
+::: details 示例：零值的统一哲学
 ```go
 var arr [5]int     // [0 0 0 0 0] - 立即可用
 var slice []int    // nil，但可以 append
@@ -282,31 +297,34 @@ var m map[string]int // nil，可以读取但不能写入
 
 // 这种一致性减少了认知负担
 ```
-
+:::
 ## 实际应用中的选择策略
 
 ### 根据使用模式选择
 
 **顺序访问 + 已知大小** → 数组：
+::: details 示例：根据使用模式选择
 ```go
 type IPv4Address [4]byte
 type RGB [3]uint8
 ```
-
+:::
 **顺序访问 + 动态大小** → 切片：
+::: details 示例：根据使用模式选择
 ```go
 type EventLog []Event
 type UserList []User
 ```
-
+:::
 **随机访问 + 键值关联** → 映射：
+::: details 示例：根据使用模式选择
 ```go
 type UserDatabase map[string]User
 type Configuration map[string]interface{}
 ```
-
+:::
 ### 性能考量的实际应用
-
+::: details 示例：性能考量的实际应用
 ```go
 // 预分配切片容量，避免多次扩容
 items := make([]Item, 0, expectedSize)
@@ -318,9 +336,9 @@ cache := make(map[string][]byte, 1000)
 var buffer [4096]byte
 n, err := reader.Read(buffer[:])
 ```
-
+:::
 ### 并发安全的考虑
-
+::: details 示例：并发安全的考虑
 ```go
 // 数组：值语义，天然并发安全
 func processArray(data [1000]int) {
@@ -337,9 +355,9 @@ func safeRead(key string) int {
     return sharedMap[key]
 }
 ```
-
+:::
 ## 设计哲学的体现
-
+::: details 示例：设计哲学的体现
 ### 简单性胜过完整性
 
 Go 没有提供集合（Set）、双端队列（Deque）、优先队列等数据结构，但您可以用基础类型组合实现：
@@ -373,11 +391,12 @@ func (s *Stack) Pop() int {
     return item
 }
 ```
-
+:::
 ### 一致性胜过特殊性
 
 所有复合类型都遵循相似的模式：
 
+::: details 示例：一致性胜过特殊性
 ```go
 // 长度获取
 len(array)
@@ -394,7 +413,7 @@ for i, v := range array { }
 for i, v := range slice { }
 for k, v := range map { }
 ```
-
+:::
 ## 下一步的思考
 
 Go 的复合类型设计体现了一种价值观：**通过限制选择来获得表达力**。当您不需要在数十种数据结构之间做选择时，您的精力就能专注于真正重要的事情——解决问题。

@@ -21,6 +21,7 @@ Go 选择了不同的路径：**组合优于继承，契约优于实现**。
 
 大多数语言要求您显式初始化对象。Go 的零值设计体现了不同的哲学：**有用的默认状态胜过强制的初始化仪式**。
 
+::: details 示例：从零值开始的设计思考
 ```go
 type Server struct {
     Port    int
@@ -42,13 +43,14 @@ if server.Port == 0 {
     server.Port = 8080
 }
 ```
-
+:::
 这不是偶然的便利，而是深思熟虑的设计：**让默认行为是合理的，而不是有害的**。
 
 ### 结构体字面量：表达意图的多种方式
 
 Go 提供了多种创建结构体的方式，每种都表达不同的意图：
 
+::: details 示例：结构体字面量：表达意图的多种方式
 ```go
 type Person struct {
     Name  string
@@ -75,7 +77,7 @@ profile := &Person{
     Age:  30,
 }
 ```
-
+:::
 每种方式都传达了不同的信息：零值表示"使用默认"，字段名表示"重点关注这些"，位置参数表示"按照约定顺序"。
 
 ## 方法：为数据注入生命
@@ -86,6 +88,7 @@ Go 的方法系统将数据从被动的存储转变为主动的实体。
 
 传统 OOP 将对象视为数据和方法的封装。Go 的视角更加直接：**为特定类型的数据定义专门的行为**。
 
+::: details 示例：重新思考"面向对象"
 ```go
 type BankAccount struct {
     balance float64
@@ -128,13 +131,14 @@ func (a BankAccount) IsActive() bool {
     return !a.frozen
 }
 ```
-
+:::
 这种设计的美妙之处在于**概念的完整性**——`BankAccount` 不仅存储数据，还知道如何正确地操作这些数据。
 
 ### 接收者类型的语义选择
 
 选择值接收者还是指针接收者，是一个关于**语义意图**的决定：
 
+::: details 示例：接收者类型的语义选择
 ```go
 type Point struct {
     X, Y float64
@@ -175,13 +179,14 @@ distance := p1.Distance(p2)
 p1.MoveTo(0, 0)
 p1.Translate(1, 1)
 ```
-
+:::
 这种区分让代码的读者能立即理解方法的**副作用特性**。
 
 ### 为任意类型添加行为
 
 Go 独特地允许为任何类型定义方法，这打开了表达力的新维度：
 
+::: details 示例：为任意类型添加行为
 ```go
 // 为基础类型添加领域意义
 type UserID int64
@@ -229,7 +234,7 @@ temp := Temperature(22.5)
 fmt.Printf("温度: %.1f°C (%.1f°F) - %s\n", 
     temp.Celsius(), temp.Fahrenheit(), temp.Describe())
 ```
-
+:::
 这种能力让您能将**领域概念直接编码到类型系统中**。
 
 ## 结构体组合：构建复杂性的艺术
@@ -240,6 +245,7 @@ Go 通过组合而非继承来构建复杂类型，这体现了"优选组合胜�
 
 结构体嵌入提供了优雅的组合机制：
 
+::: details 示例：结构体组合：构建复杂性的艺术
 ```go
 type Address struct {
     Street  string
@@ -288,13 +294,14 @@ fmt.Println(person.Street)        // 来自 Address
 fmt.Println(person.FullAddress()) // 来自 Address 的方法
 fmt.Println(person.HasEmail())    // 来自 ContactInfo 的方法
 ```
-
+:::
 这种方式的优势是**透明性**——使用者不需要知道内部的组合结构，就能访问所有功能。
 
 ### 组合的灵活性
 
 组合比继承更灵活，因为它允许**运行时的行为变化**：
 
+::: details 示例：组合的灵活性
 ```go
 type Logger interface {
     Log(message string)
@@ -336,7 +343,7 @@ service2 := &UserService{
     users:  make(map[string]User),
 }
 ```
-
+:::
 这种设计让您能在**不修改主要逻辑的情况下改变行为**。
 
 ## 接口：行为的契约
@@ -347,6 +354,7 @@ Go 的接口是其最优雅的特性——它们定义了**可以做什么**，�
 
 Go 的接口是隐式实现的，这创造了强大的解耦效果：
 
+::: details 示例：隐式实现：鸭子类型的力量
 ```go
 // 定义行为契约
 type Writer interface {
@@ -389,13 +397,14 @@ func main() {
     saveData(NetworkWriter{"192.168.1.1:8080"}, data)
 }
 ```
-
+:::
 这种设计的美妙之处在于**自然的多态性**——类型不需要知道接口的存在，但它们可以完美协作。
 
 ### 接口组合：构建复杂契约
 
 接口可以组合，创建更复杂的行为契约：
 
+::: details 示例：接口组合：构建复杂契约
 ```go
 type Reader interface {
     Read([]byte) (int, error)
@@ -436,11 +445,12 @@ func processStream(rw ReadWriter) error {
     return err
 }
 ```
-
+:::
 ### 空接口：通用容器的设计
 
 `interface{}` 代表任何类型，但使用时需要类型断言：
 
+::: details 示例：空接口：通用容器的设计
 ```go
 func printValue(value interface{}) {
     switch v := value.(type) {
@@ -462,13 +472,14 @@ printValue("Hello")        // 字符串处理
 printValue(42)             // 整数处理
 printValue([]int{1, 2, 3}) // 切片处理
 ```
-
+:::
 ## 接口设计的哲学
 
 ### 小接口的威力
 
 Go 偏爱小接口，通常只有一个方法：
 
+::: details 示例：小接口的威力
 ```go
 // ✅ 专注的小接口
 type Validator interface {
@@ -500,13 +511,14 @@ type UserManager interface {
     // 太多职责了...
 }
 ```
-
+:::
 小接口的优势是**高内聚、低耦合**——每个接口专注于一个明确的责任。
 
 ### 消费者端定义接口
 
 接口应该由使用它的代码定义，而不是提供它的代码：
 
+::: details 示例：消费者端定义接口
 ```go
 // ✅ 在使用接口的包中定义
 package processor
@@ -529,13 +541,14 @@ func ProcessData(source DataSource) (Result, error) {
 // 这样任何实现了 GetData 的类型都可以使用，
 // 无需修改原始类型定义
 ```
-
+:::
 这种方式创造了**自然的解耦**——数据提供者不需要知道消费者的存在。
 
 ## 实战模式：设计良好的抽象
 
 ### 策略模式：行为的参数化
 
+::: details 示例：策略模式：行为的参数化
 ```go
 type SortStrategy interface {
     Sort([]int) []int
@@ -578,9 +591,10 @@ func main() {
     result2 := processor.Process(data)
 }
 ```
-
+:::
 ### 装饰器模式：功能的增强
 
+::: details 示例：装饰器模式：功能的增强
 ```go
 type Coffee interface {
     Cost() float64
@@ -622,7 +636,7 @@ fmt.Printf("%s: $%.2f\n",
     withMilkAndSugar.Cost())
 // 输出: 简单咖啡 + 牛奶 + 糖: $2.70
 ```
-
+:::
 ## 抽象的价值思考
 
 Go 的结构体和接口系统体现了一种设计哲学：**简单的构建块可以创造复杂的系统**。

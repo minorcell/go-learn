@@ -10,15 +10,17 @@
 
 考虑这样一个问题：当一个变量被编译成机器码后，它还"知道"自己是什么类型吗？
 
+::: details 示例：类型信息的存在主义
 ```go
 var x interface{} = 42
 // 在运行时，x 不仅包含值 42
 // 还包含类型信息 "int"
 // 这就是反射存在的基础
 ```
-
+:::
 在没有反射的世界里，类型信息在编译后就消失了。而 Go 选择保留这些信息，是因为某些问题无法在编译时解决：
 
+::: details 示例：JSON 反序列化的困境
 ```go
 // JSON 反序列化的困境
 func unmarshal(data []byte, v interface{}) error {
@@ -27,13 +29,14 @@ func unmarshal(data []byte, v interface{}) error {
     // 这就是反射的价值所在
 }
 ```
-
+:::
 ## 重新理解类型
 
 在反射的世界里，我们需要重新理解"类型"这个概念。它不再是编译时的约束，而成为运行时可以查询和操作的实体。
 
 ### Type：类型的身份证
 
+::: details 示例：Type：类型的身份证
 ```go
 import "reflect"
 
@@ -49,9 +52,10 @@ func exploreType() {
     fmt.Println("我可以与什么比较？", t.Comparable()) // true
 }
 ```
-
+:::
 ### Value：值的镜像
 
+::: details 示例：Value：值的镜像
 ```go
 func exploreValue() {
     var x float64 = 3.4
@@ -64,9 +68,10 @@ func exploreValue() {
     fmt.Println("我的类型是什么？", v.Type())     // float64
 }
 ```
-
+:::
 ### Kind：本质的抽象
 
+::: details 示例：Kind：本质的抽象
 ```go
 type Temperature float64
 
@@ -85,13 +90,14 @@ func understandKind() {
     // 3. 进行通用的类型处理
 }
 ```
-
+:::
 ## 可修改性的哲学
 
 反射中最深刻的概念之一是**可修改性**（Addressability）。它揭示了一个根本问题：什么样的值可以被改变？
 
 ### 值 vs 地址的本质区别
 
+::: details 示例：可修改性的哲学
 ```go
 func modifiabilityPhilosophy() {
     x := 42
@@ -109,9 +115,10 @@ func modifiabilityPhilosophy() {
     // 修改意味着什么？
 }
 ```
-
+:::
 ### 修改的权限系统
 
+::: details 示例：修改的权限系统
 ```go
 type Person struct {
     Name    string  // 可导出：有修改权限
@@ -132,13 +139,14 @@ func accessControl() {
     // 可见性不仅是约定，更是原则
 }
 ```
-
+:::
 ## 结构体：数据的建筑学
 
 在反射的视角下，结构体不再是简单的数据容器，而是可以被解构和重建的建筑。
 
 ### 字段的考古学
 
+::: details 示例：结构体：数据的建筑学
 ```go
 type User struct {
     Name    string `json:"name" validate:"required"`
@@ -194,13 +202,14 @@ func main() {
     structArchaeology(user)
 }
 ```
-
+:::
 ## 方法：行为的反射
 
 反射不仅能观察数据，还能观察和调用行为——方法。
 
 ### 方法的动态调用
 
+::: details 示例：方法的动态调用
 ```go
 type Calculator struct {
     history []string
@@ -253,13 +262,14 @@ func methodIntrospection() {
     fmt.Printf("计算历史：%v\n", history)
 }
 ```
-
+:::
 ## 类型的创造：从无到有
 
 反射的终极体现是类型的动态创建——从抽象的类型描述中创造出具体的值。
 
 ### 值的创世纪
 
+::: details 示例：类型的创造：从无到有
 ```go
 func typeCreation() {
     // 创建基本类型
@@ -288,9 +298,10 @@ func typeCreation() {
     fmt.Printf("创造了一个映射：%v\n", mapValue.Interface())
 }
 ```
-
+:::
 ### 结构体的动态构建
 
+::: details 示例：结构体的动态构建
 ```go
 func dynamicStructCreation() {
     // 定义字段
@@ -327,11 +338,12 @@ func dynamicStructCreation() {
     fmt.Printf("类型名：%s\n", structType.String())
 }
 ```
-
+:::
 ## 实际应用：JSON 的启示
 
 让我们通过实现一个简化的 JSON 序列化器来理解反射的实际价值：
 
+::: details 示例：实际应用：JSON 的启示
 ```go
 import (
     "fmt"
@@ -476,13 +488,14 @@ func demonstrateJSONSerialization() {
     fmt.Printf("序列化结果：%s\n", result)
 }
 ```
-
+:::
 ## 反射的代价：权力与责任
 
 ### 性能的哲学思考
 
 反射的美妙在于其通用性，但通用性往往以性能为代价：
 
+::: details 示例：反射的代价：权力与责任
 ```go
 import (
     "reflect"
@@ -529,9 +542,10 @@ func costOfFlexibility() {
     fmt.Printf("灵活性的代价：%.2fx\n", float64(reflectTime)/float64(directTime))
 }
 ```
-
+:::
 ### 类型安全的妥协
 
+::: details 示例：类型安全的妥协
 ```go
 func typeSafetyTrade() {
     var data interface{} = "hello"
@@ -552,11 +566,12 @@ func typeSafetyTrade() {
     fmt.Printf("不会执行到这里：%d\n", intValue)
 }
 ```
-
+:::
 ## 智慧的使用：何时选择反射
 
 ### 反射的适用场景
 
+::: details 示例：反射的适用场景
 ```go
 // ✅ 优秀的反射使用：通用库
 func DeepEqual(a, b interface{}) bool {
@@ -591,9 +606,10 @@ func PrintAnyValue(v interface{}) {
     fmt.Println(rv.Interface())
 }
 ```
-
+:::
 ### 缓存：智慧与性能的平衡
 
+::: details 示例：缓存：智慧与性能的平衡
 ```go
 var structInfoCache = make(map[reflect.Type]*StructInfo)
 var cacheMutex sync.RWMutex
@@ -642,9 +658,10 @@ func getStructInfo(t reflect.Type) *StructInfo {
     return info
 }
 ```
-
+:::
 ## 错误处理：反射中的防御性编程
 
+::: details 示例：错误处理：反射中的防御性编程
 ```go
 func safeReflectOperation(obj interface{}, fieldName string) (interface{}, error) {
     if obj == nil {
@@ -704,13 +721,14 @@ func demonstrateSafeReflection() {
     }
 }
 ```
-
+:::
 ## 与泛型的对话：新时代的选择
 
 Go 1.18 引入泛型后，很多原本需要反射的场景有了更好的解决方案：
 
 ### 泛型 vs 反射的哲学对比
 
+::: details 示例：泛型 vs 反射的哲学对比
 ```go
 // 反射方式：运行时的灵活性
 func CloneReflect(src interface{}) interface{} {
@@ -745,7 +763,7 @@ func compareApproaches() {
     fmt.Printf("泛型结果：%+v\n", result2)
 }
 ```
-
+:::
 ## 反射的未来思考
 
 反射代表了一种编程哲学的选择：**运行时的灵活性 vs 编译时的确定性**。在 Go 的语境中，反射更像是一种"逃生舱"——当类型系统无法表达您的需求时，反射提供了一条出路。
