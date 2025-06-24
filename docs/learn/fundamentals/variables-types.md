@@ -15,8 +15,8 @@ func calculateRetirement(age int) int {
 }
 
 // 编译时就会报错，无法传入字符串
-// calculateRetirement("thirty") // ❌ 编译错误
-calculateRetirement(30)         // ✅ 正确
+// calculateRetirement("thirty") // 编译错误
+calculateRetirement(30)         // 正确
 ```
 :::
 ## 声明变量：明确与简洁的平衡
@@ -183,7 +183,7 @@ var f float64 = float64(i)  // 必须显式转换
 var b byte = byte(i)        // 必须显式转换
 
 // 这样会编译错误：
-// var f float64 = i  // ❌ 编译错误
+// var f float64 = i  // 编译错误
 ```
 :::
 **为什么这样设计？**
@@ -202,12 +202,12 @@ var small int32 = int32(large)  // 可能溢出，但您必须明确表达这个
 
 ::: details 示例：实践建议
 ```go
-// ✅ 好的实践
+// 好的实践
 func processUsers(userCount int) { ... }        // 用户数量用 int
 func calculatePrice(price float64) { ... }      // 价格用 float64
 func getUserID(id string) { ... }               // ID 用 string
 
-// ❌ 避免的做法
+// 避免的做法
 func processUsers(userCount interface{}) { ... } // 过于宽泛
 func calculatePrice(price interface{}) { ... }   // 丢失了类型安全
 ```

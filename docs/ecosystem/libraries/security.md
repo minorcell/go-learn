@@ -1,1090 +1,281 @@
-# 安全库：构建可信的Go应用程序
+# Go安全库：威胁建模与防御实践
 
-> 安全不是功能，而是质量属性。本文从威胁建模角度深入分析Go安全生态，通过真实漏洞案例和合规实践，帮你构建安全防线完整的应用程序。
+> 在Go应用开发中，安全不是一个可选项，而是贯穿整个生命周期的核心原则。本文将采用威胁建模的视角，为你剖析常见的Web安全漏洞，并提供基于Go标准库和社区工具的实用防御代码。
 
-在数据泄露成本平均达到424万美元的今天，安全已经从"可选项"变成"必选项"。Go的安全库生态虽然相对年轻，但已经涵盖了从密码学到身份认证的各个关键领域。
-
----
-
-## 🛡️ 威胁模型与防护策略
-
-### 常见威胁场景分析
-
-在Go应用中，我们面临的主要威胁包括：
-
-| 威胁类型 | 影响程度 | 常见场景 | 防护优先级 |
-|----------|----------|----------|------------|
-| **密码泄露** | 🔴 极高 | 数据库泄露、日志记录 | P0 |
-| **会话劫持** | 🟠 高 | 中间人攻击、XSS | P0 |
-| **注入攻击** | 🟠 高 | SQL注入、命令注入 | P0 |
-| **权限绕过** | 🟡 中 | JWT伪造、权限提升 | P1 |
-| **敏感信息泄露** | 🟡 中 | 配置文件、错误消息 | P1 |
-
-### 安全架构原则
-
-**纵深防御（Defense in Depth）**：
-- 输入验证 → 身份认证 → 授权控制 → 数据加密 → 审计日志
-
-**最小权限原则（Principle of Least Privilege）**：
-- 服务账户最小权限
-- API访问最小范围
-- 数据访问最小集合
+构建安全的应用，意味着要像攻击者一样思考。我们不应该仅仅是堆砌安全库，而应该理解每种攻击的原理，并从根源上进行防御。本文将围绕OWASP Top 10中的核心风险，展示如何在Go中构建坚固的安全防线。
 
 ---
 
-## 🔐 密码学与加密
+## 核心威胁与防御策略
 
-### 密码哈希：抵御彩虹表攻击
+我们将探讨几种在Web应用中最高频的威胁，并给出具体的Go实现来应对它们。
 
-**错误示例**（易受攻击）：
-::: details ❌ 危险：使用MD5或SHA1存储密码
-```go
-// ❌ 危险：使用MD5或SHA1存储密码
-func badPasswordHash(password string) string {
-    h := md5.Sum([]byte(password))
-    return hex.EncodeToString(h[:])
-}
-```
-:::
-**正确实现**：
-
-::: details bcrypt：工业级密码哈希
-```go
-package security
-
-import (
-    "crypto/rand"
-    "crypto/subtle"
-    "encoding/base64"
-    "fmt"
-    "golang.org/x/crypto/bcrypt"
-    "golang.org/x/crypto/scrypt"
-    "time"
-)
-
-// bcrypt密码哈希（推荐）
-type PasswordHasher struct {
-    cost int // bcrypt成本参数
-}
-
-func NewPasswordHasher() *PasswordHasher {
-    return &PasswordHasher{
-        cost: 12, // 平衡安全性和性能，大约250ms
-    }
-}
-
-func (ph *PasswordHasher) HashPassword(password string) (string, error) {
-    // bcrypt自动处理salt生成
-    hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), ph.cost)
-    if err != nil {
-        return "", fmt.Errorf("failed to hash password: %w", err)
-    }
-    
-    return string(hashedBytes), nil
-}
-
-func (ph *PasswordHasher) VerifyPassword(hashedPassword, password string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-    return err == nil
-}
-
-// 定时检查成本参数是否需要调整
-func (ph *PasswordHasher) BenchmarkCost() {
-    start := time.Now()
-    ph.HashPassword("test-password")
-    duration := time.Since(start)
-    
-    if duration < 100*time.Millisecond {
-        log.Printf("Warning: bcrypt cost too low (took %v), consider increasing", duration)
-    }
-    if duration > 500*time.Millisecond {
-        log.Printf("Warning: bcrypt cost too high (took %v), consider decreasing", duration)
-    }
-}
-
-// scrypt实现（更灵活的参数控制）
-type ScryptHasher struct {
-    n      int // CPU/内存成本参数
-    r      int // 块大小参数
-    p      int // 并行参数
-    keyLen int // 输出密钥长度
-}
-
-func NewScryptHasher() *ScryptHasher {
-    return &ScryptHasher{
-        n:      32768,  // 2^15
-        r:      8,
-        p:      1,
-        keyLen: 32,
-    }
-}
-
-func (sh *ScryptHasher) HashPassword(password string) (string, error) {
-    // 生成随机salt
-    salt := make([]byte, 16)
-    if _, err := rand.Read(salt); err != nil {
-        return "", fmt.Errorf("failed to generate salt: %w", err)
-    }
-    
-    // 使用scrypt派生密钥
-    dk, err := scrypt.Key([]byte(password), salt, sh.n, sh.r, sh.p, sh.keyLen)
-    if err != nil {
-        return "", fmt.Errorf("failed to derive key: %w", err)
-    }
-    
-    // 组合salt和hash
-    combined := append(salt, dk...)
-    return base64.StdEncoding.EncodeToString(combined), nil
-}
-
-func (sh *ScryptHasher) VerifyPassword(hashedPassword, password string) bool {
-    // 解码存储的哈希
-    combined, err := base64.StdEncoding.DecodeString(hashedPassword)
-    if err != nil || len(combined) < 16 {
-        return false
-    }
-    
-    salt := combined[:16]
-    storedHash := combined[16:]
-    
-    // 重新计算哈希
-    dk, err := scrypt.Key([]byte(password), salt, sh.n, sh.r, sh.p, sh.keyLen)
-    if err != nil {
-        return false
-    }
-    
-    // 使用constant-time比较防止时序攻击
-    return subtle.ConstantTimeCompare(storedHash, dk) == 1
-}
-
-// 密码强度检查
-func CheckPasswordStrength(password string) []string {
-    var issues []string
-    
-    if len(password) < 8 {
-        issues = append(issues, "密码长度至少8位")
-    }
-    
-    var hasUpper, hasLower, hasDigit, hasSpecial bool
-    for _, char := range password {
-        switch {
-        case char >= 'A' && char <= 'Z':
-            hasUpper = true
-        case char >= 'a' && char <= 'z':
-            hasLower = true
-        case char >= '0' && char <= '9':
-            hasDigit = true
-        case strings.ContainsRune("!@#$%^&*()_+-=[]{}|;:,.<>?", char):
-            hasSpecial = true
-        }
-    }
-    
-    if !hasUpper { issues = append(issues, "缺少大写字母") }
-    if !hasLower { issues = append(issues, "缺少小写字母") }
-    if !hasDigit { issues = append(issues, "缺少数字") }
-    if !hasSpecial { issues = append(issues, "缺少特殊字符") }
-    
-    return issues
-}
-```
-:::
-
-### 对称加密：数据保护
-
-::: details ❌ 危险：使用AES-GCM加密
-```go
-package encryption
-
-import (
-    "crypto/aes"
-    "crypto/cipher"
-    "crypto/rand"
-    "encoding/base64"
-    "fmt"
-    "io"
-)
-
-type AESGCMEncryptor struct {
-    key []byte
-}
-
-func NewAESGCMEncryptor(key []byte) (*AESGCMEncryptor, error) {
-    if len(key) != 16 && len(key) != 24 && len(key) != 32 {
-        return nil, fmt.Errorf("invalid key size: must be 16, 24, or 32 bytes")
-    }
-    
-    return &AESGCMEncryptor{key: key}, nil
-}
-
-func (e *AESGCMEncryptor) Encrypt(plaintext []byte) (string, error) {
-    // 创建AES cipher
-    block, err := aes.NewCipher(e.key)
-    if err != nil {
-        return "", fmt.Errorf("failed to create cipher: %w", err)
-    }
-    
-    // 创建GCM模式
-    gcm, err := cipher.NewGCM(block)
-    if err != nil {
-        return "", fmt.Errorf("failed to create GCM: %w", err)
-    }
-    
-    // 生成随机nonce
-    nonce := make([]byte, gcm.NonceSize())
-    if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-        return "", fmt.Errorf("failed to generate nonce: %w", err)
-    }
-    
-    // 加密数据
-    ciphertext := gcm.Seal(nonce, nonce, plaintext, nil)
-    
-    // Base64编码便于存储
-    return base64.StdEncoding.EncodeToString(ciphertext), nil
-}
-
-func (e *AESGCMEncryptor) Decrypt(ciphertext string) ([]byte, error) {
-    // 解码Base64
-    data, err := base64.StdEncoding.DecodeString(ciphertext)
-    if err != nil {
-        return nil, fmt.Errorf("failed to decode base64: %w", err)
-    }
-    
-    // 创建AES cipher
-    block, err := aes.NewCipher(e.key)
-    if err != nil {
-        return nil, fmt.Errorf("failed to create cipher: %w", err)
-    }
-    
-    // 创建GCM模式
-    gcm, err := cipher.NewGCM(block)
-    if err != nil {
-        return nil, fmt.Errorf("failed to create GCM: %w", err)
-    }
-    
-    // 验证数据长度
-    nonceSize := gcm.NonceSize()
-    if len(data) < nonceSize {
-        return nil, fmt.Errorf("ciphertext too short")
-    }
-    
-    // 分离nonce和密文
-    nonce, ciphertext := data[:nonceSize], data[nonceSize:]
-    
-    // 解密数据
-    plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-    if err != nil {
-        return nil, fmt.Errorf("failed to decrypt: %w", err)
-    }
-    
-    return plaintext, nil
-}
-
-// 密钥派生函数（从密码生成密钥）
-func DeriveKeyFromPassword(password, salt string) []byte {
-    return pbkdf2.Key([]byte(password), []byte(salt), 100000, 32, sha256.New)
-}
-
-// 安全的随机密钥生成
-func GenerateRandomKey(size int) ([]byte, error) {
-    key := make([]byte, size)
-    if _, err := rand.Read(key); err != nil {
-        return nil, fmt.Errorf("failed to generate random key: %w", err)
-    }
-    return key, nil
-}
-
-// 密钥轮换支持
-type RotatingEncryptor struct {
-    currentKey []byte
-    oldKeys    [][]byte
-    encryptor  *AESGCMEncryptor
-}
-
-func (re *RotatingEncryptor) Decrypt(ciphertext string) ([]byte, error) {
-    // 先尝试当前密钥
-    if plaintext, err := re.encryptor.Decrypt(ciphertext); err == nil {
-        return plaintext, nil
-    }
-    
-    // 尝试旧密钥
-    for _, oldKey := range re.oldKeys {
-        if oldEncryptor, err := NewAESGCMEncryptor(oldKey); err == nil {
-            if plaintext, err := oldEncryptor.Decrypt(ciphertext); err == nil {
-                // 成功解密，考虑重新加密使用新密钥
-                log.Printf("Decrypted with old key, consider re-encryption")
-                return plaintext, nil
-            }
-        }
-    }
-    
-    return nil, fmt.Errorf("failed to decrypt with any available key")
-}
-```
-:::
+| 威胁类别 (OWASP) | 风险描述 | Go防御策略 |
+| :--- | :--- | :--- |
+| **注入 (Injection)** | 攻击者通过输入将恶意代码（如SQL）注入到后端执行。 | **参数化查询** (`database/sql`) |
+| **身份验证损坏** | 密码、密钥或会话令牌被破解或管理不当。 | **安全哈希** (`bcrypt`)、**安全的会话管理** |
+| **访问控制损坏** | 用户越权访问不属于他们的资源或功能。 | **中间件鉴权** (Role-Based Access Control) |
+| **跨站脚本 (XSS)** | 攻击者在你的网站上注入恶意脚本，在其他用户浏览器中执行。 | **上下文感知的HTML模板** (`html/template`) |
+| **安全配置错误** | 依赖不安全的默认配置、暴露敏感错误信息等。 | **配置安全响应头** (Security Headers) |
+| **使用含已知漏洞的组件**| 项目依赖的第三方库存在已知的安全漏洞。| **依赖项漏洞扫描** (`govulncheck`) |
 
 ---
 
-## 🎫 身份认证与授权
+## 防御实践：代码实现
 
-### JWT：无状态认证的安全实现
+### 威胁一：SQL注入 (SQL Injection)
 
-::: details ❌ 危险：使用JWT进行身份认证
+这是最古老也最具破坏性的攻击之一。攻击者利用字符串拼接构造恶意的SQL查询，从而窃取、篡改或删除数据。
+
+**错误示例：字符串拼接**
+::: details 代码示例
 ```go
-package auth
-
-import (
-    "crypto/rand"
-    "crypto/rsa"
-    "crypto/x509"
-    "encoding/pem"
-    "fmt"
-    "time"
-    
-    "github.com/golang-jwt/jwt/v4"
-)
-
-type JWTManager struct {
-    privateKey     *rsa.PrivateKey
-    publicKey      *rsa.PublicKey
-    issuer         string
-    tokenDuration  time.Duration
-    refreshDuration time.Duration
-}
-
-type Claims struct {
-    UserID   string   `json:"user_id"`
-    Username string   `json:"username"`
-    Roles    []string `json:"roles"`
-    jwt.RegisteredClaims
-}
-
-func NewJWTManager(issuer string) (*JWTManager, error) {
-    // 生成RSA密钥对（生产环境应从安全存储加载）
-    privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-    if err != nil {
-        return nil, fmt.Errorf("failed to generate RSA key: %w", err)
-    }
-    
-    return &JWTManager{
-        privateKey:      privateKey,
-        publicKey:       &privateKey.PublicKey,
-        issuer:          issuer,
-        tokenDuration:   15 * time.Minute,  // 访问令牌短期有效
-        refreshDuration: 7 * 24 * time.Hour, // 刷新令牌长期有效
-    }, nil
-}
-
-func (jm *JWTManager) GenerateTokenPair(userID, username string, roles []string) (accessToken, refreshToken string, err error) {
-    now := time.Now()
-    
-    // 访问令牌
-    accessClaims := &Claims{
-        UserID:   userID,
-        Username: username,
-        Roles:    roles,
-        RegisteredClaims: jwt.RegisteredClaims{
-            Issuer:    jm.issuer,
-            Subject:   userID,
-            Audience:  []string{"api"},
-            ExpiresAt: jwt.NewNumericDate(now.Add(jm.tokenDuration)),
-            NotBefore: jwt.NewNumericDate(now),
-            IssuedAt:  jwt.NewNumericDate(now),
-            ID:        generateJTI(), // 唯一标识符
-        },
-    }
-    
-    accessToken, err = jm.signToken(accessClaims)
-    if err != nil {
-        return "", "", fmt.Errorf("failed to sign access token: %w", err)
-    }
-    
-    // 刷新令牌（只包含基本信息）
-    refreshClaims := &Claims{
-        UserID: userID,
-        RegisteredClaims: jwt.RegisteredClaims{
-            Issuer:    jm.issuer,
-            Subject:   userID,
-            Audience:  []string{"refresh"},
-            ExpiresAt: jwt.NewNumericDate(now.Add(jm.refreshDuration)),
-            NotBefore: jwt.NewNumericDate(now),
-            IssuedAt:  jwt.NewNumericDate(now),
-            ID:        generateJTI(),
-        },
-    }
-    
-    refreshToken, err = jm.signToken(refreshClaims)
-    if err != nil {
-        return "", "", fmt.Errorf("failed to sign refresh token: %w", err)
-    }
-    
-    return accessToken, refreshToken, nil
-}
-
-func (jm *JWTManager) signToken(claims *Claims) (string, error) {
-    token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-    
-    // 添加额外的头部信息
-    token.Header["kid"] = "key-1" // 密钥ID，支持密钥轮换
-    
-    return token.SignedString(jm.privateKey)
-}
-
-func (jm *JWTManager) VerifyToken(tokenString string) (*Claims, error) {
-    token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-        // 验证签名算法
-        if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-            return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-        }
-        
-        // 验证密钥ID（支持密钥轮换）
-        kid, ok := token.Header["kid"].(string)
-        if !ok || kid != "key-1" {
-            return nil, fmt.Errorf("invalid key ID")
-        }
-        
-        return jm.publicKey, nil
-    })
-    
-    if err != nil {
-        return nil, fmt.Errorf("failed to parse token: %w", err)
-    }
-    
-    if !token.Valid {
-        return nil, fmt.Errorf("invalid token")
-    }
-    
-    claims, ok := token.Claims.(*Claims)
-    if !ok {
-        return nil, fmt.Errorf("invalid claims")
-    }
-    
-    // 额外验证
-    if err := jm.validateClaims(claims); err != nil {
-        return nil, fmt.Errorf("claims validation failed: %w", err)
-    }
-    
-    return claims, nil
-}
-
-func (jm *JWTManager) validateClaims(claims *Claims) error {
-    // 验证issuer
-    if claims.Issuer != jm.issuer {
-        return fmt.Errorf("invalid issuer")
-    }
-    
-    // 验证用户ID格式
-    if claims.UserID == "" {
-        return fmt.Errorf("missing user ID")
-    }
-    
-    // 验证角色（可选）
-    validRoles := map[string]bool{
-        "user": true, "admin": true, "moderator": true,
-    }
-    for _, role := range claims.Roles {
-        if !validRoles[role] {
-            return fmt.Errorf("invalid role: %s", role)
-        }
-    }
-    
-    return nil
-}
-
-// 中间件：验证JWT并提取用户信息
-func (jm *JWTManager) AuthMiddleware() func(http.Handler) http.Handler {
-    return func(next http.Handler) http.Handler {
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            // 从Authorization头或Cookie提取token
-            token := jm.extractToken(r)
-            if token == "" {
-                http.Error(w, "Missing authorization token", http.StatusUnauthorized)
-                return
-            }
-            
-            // 验证token
-            claims, err := jm.VerifyToken(token)
-            if err != nil {
-                http.Error(w, "Invalid token", http.StatusUnauthorized)
-                return
-            }
-            
-            // 将用户信息添加到context
-            ctx := context.WithValue(r.Context(), "user", claims)
-            next.ServeHTTP(w, r.WithContext(ctx))
-        })
-    }
-}
-
-func (jm *JWTManager) extractToken(r *http.Request) string {
-    // 优先从Authorization头提取
-    auth := r.Header.Get("Authorization")
-    if strings.HasPrefix(auth, "Bearer ") {
-        return strings.TrimPrefix(auth, "Bearer ")
-    }
-    
-    // 从Cookie提取（适用于SPA）
-    if cookie, err := r.Cookie("access_token"); err == nil {
-        return cookie.Value
-    }
-    
-    return ""
-}
-
-// JWT黑名单支持（登出、密钥泄露等场景）
-type TokenBlacklist struct {
-    redis *redis.Client
-}
-
-func (tb *TokenBlacklist) BlacklistToken(jti string, exp time.Time) error {
-    ttl := time.Until(exp)
-    if ttl <= 0 {
-        return nil // 已过期的token无需加入黑名单
-    }
-    
-    return tb.redis.Set(context.Background(), "blacklist:"+jti, "1", ttl).Err()
-}
-
-func (tb *TokenBlacklist) IsBlacklisted(jti string) (bool, error) {
-    exists, err := tb.redis.Exists(context.Background(), "blacklist:"+jti).Result()
-    return exists > 0, err
-}
+// 绝对禁止！这是一个典型的SQL注入漏洞
+db.Query("SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'")
 ```
 :::
 
-### RBAC：基于角色的访问控制
+#### 防御策略：使用参数化查询
 
-::: details 权限控制系统实现
+Go的`database/sql`标准库原生支持参数化查询。数据库驱动会负责对你的输入进行安全的处理，从根本上杜绝SQL注入。
+
+::: details 代码示例
 ```go
-package rbac
+package main
 
 import (
-    "fmt"
-    "strings"
-    "sync"
+	"database/sql"
+	"fmt"
+	_ "github.com/mattn/go-sqlite3" // 以SQLite为例
 )
-
-type Permission struct {
-    Resource string // 资源类型，如 "user", "order"
-    Action   string // 操作类型，如 "read", "write", "delete"
-}
-
-type Role struct {
-    Name        string
-    Permissions []Permission
-}
 
 type User struct {
-    ID    string
-    Roles []string
+	ID       int
+	Username string
+	Email    string
 }
 
-type RBAC struct {
-    roles      map[string]*Role
-    roleCache  map[string][]Permission // 角色权限缓存
-    mu         sync.RWMutex
-}
+func GetUserByUsername(db *sql.DB, username string) (*User, error) {
+	// 使用 '?'作为参数占位符。不同的数据库驱动可能使用不同的占位符，例如PostgreSQL使用 '$1', '$2'
+	query := "SELECT id, username, email FROM users WHERE username = ?;"
+	
+	row := db.QueryRow(query, username)
 
-func NewRBAC() *RBAC {
-    return &RBAC{
-        roles:     make(map[string]*Role),
-        roleCache: make(map[string][]Permission),
-    }
-}
+	var user User
+	err := row.Scan(&user.ID, &user.Username, &user.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, err
+	}
 
-func (rbac *RBAC) AddRole(role *Role) {
-    rbac.mu.Lock()
-    defer rbac.mu.Unlock()
-    
-    rbac.roles[role.Name] = role
-    rbac.roleCache[role.Name] = role.Permissions
-}
-
-func (rbac *RBAC) CheckPermission(userRoles []string, resource, action string) bool {
-    rbac.mu.RLock()
-    defer rbac.mu.RUnlock()
-    
-    requiredPerm := Permission{Resource: resource, Action: action}
-    
-    for _, roleName := range userRoles {
-        permissions, exists := rbac.roleCache[roleName]
-        if !exists {
-            continue
-        }
-        
-        for _, perm := range permissions {
-            if rbac.matchPermission(perm, requiredPerm) {
-                return true
-            }
-        }
-    }
-    
-    return false
-}
-
-func (rbac *RBAC) matchPermission(granted, required Permission) bool {
-    // 支持通配符匹配
-    resourceMatch := granted.Resource == "*" || granted.Resource == required.Resource
-    actionMatch := granted.Action == "*" || granted.Action == required.Action
-    
-    return resourceMatch && actionMatch
-}
-
-// 权限中间件
-func (rbac *RBAC) RequirePermission(resource, action string) func(http.Handler) http.Handler {
-    return func(next http.Handler) http.Handler {
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            // 从context获取用户信息
-            user, ok := r.Context().Value("user").(*Claims)
-            if !ok {
-                http.Error(w, "Unauthorized", http.StatusUnauthorized)
-                return
-            }
-            
-            // 检查权限
-            if !rbac.CheckPermission(user.Roles, resource, action) {
-                http.Error(w, "Forbidden", http.StatusForbidden)
-                return
-            }
-            
-            next.ServeHTTP(w, r)
-        })
-    }
-}
-
-// 动态权限检查（基于资源所有权）
-func (rbac *RBAC) CheckResourceOwnership(userID, resourceOwnerID string, userRoles []string, resource, action string) bool {
-    // 如果是资源所有者，允许特定操作
-    if userID == resourceOwnerID {
-        ownerActions := []string{"read", "update"}
-        for _, allowedAction := range ownerActions {
-            if action == allowedAction {
-                return true
-            }
-        }
-    }
-    
-    // 否则检查角色权限
-    return rbac.CheckPermission(userRoles, resource, action)
-}
-
-// 预定义角色系统
-func (rbac *RBAC) SetupDefaultRoles() {
-    // 超级管理员
-    rbac.AddRole(&Role{
-        Name: "super_admin",
-        Permissions: []Permission{
-            {Resource: "*", Action: "*"},
-        },
-    })
-    
-    // 普通管理员
-    rbac.AddRole(&Role{
-        Name: "admin",
-        Permissions: []Permission{
-            {Resource: "user", Action: "*"},
-            {Resource: "order", Action: "*"},
-            {Resource: "product", Action: "read"},
-            {Resource: "product", Action: "update"},
-        },
-    })
-    
-    // 普通用户
-    rbac.AddRole(&Role{
-        Name: "user",
-        Permissions: []Permission{
-            {Resource: "profile", Action: "read"},
-            {Resource: "profile", Action: "update"},
-            {Resource: "order", Action: "read"},
-            {Resource: "product", Action: "read"},
-        },
-    })
-    
-    // 只读用户
-    rbac.AddRole(&Role{
-        Name: "readonly",
-        Permissions: []Permission{
-            {Resource: "*", Action: "read"},
-        },
-    })
+	return &user, nil
 }
 ```
+**核心原则**：永远不要相信用户的输入，永远不要手动拼接SQL查询。始终使用数据库驱动提供的参数化查询功能。
 :::
 
 ---
 
-## 🔒 输入验证与防护
+### 威胁二：密码存储与身份验证损坏
 
-### SQL注入防护
+以明文或弱哈希（如MD5, SHA1）存储用户密码是极其危险的。一旦数据库泄露，所有用户账户将瞬间暴露。
 
-::: details 安全的数据库操作
+#### 防御策略：使用`bcrypt`进行强哈希
+
+Go的`golang.org/x/crypto/bcrypt`包提供了目前最安全和推荐的密码哈希算法。它内置了`salt`（盐），并使用足够慢的计算过程来抵御暴力破解。
+
+::: details 代码示例
 ```go
-package database
+package main
 
 import (
-    "database/sql"
-    "fmt"
-    "regexp"
-    "strings"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// 参数化查询（推荐）
-type UserRepository struct {
-    db *sql.DB
+// HashPassword 使用bcrypt对密码进行哈希
+func HashPassword(password string) (string, error) {
+	// bcrypt.DefaultCost是哈希的计算成本，默认是10。数值越高越安全，但耗时也越长。
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
 }
 
-func (ur *UserRepository) GetUserByID(userID string) (*User, error) {
-    // ✅ 使用参数化查询防止SQL注入
-    query := "SELECT id, username, email FROM users WHERE id = ?"
-    
-    var user User
-    err := ur.db.QueryRow(query, userID).Scan(&user.ID, &user.Username, &user.Email)
-    if err != nil {
-        return nil, fmt.Errorf("failed to query user: %w", err)
-    }
-    
-    return &user, nil
+// CheckPasswordHash 检查密码和哈希是否匹配
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil // err为nil表示匹配成功
 }
 
-func (ur *UserRepository) SearchUsers(keyword string) ([]*User, error) {
-    // 输入验证：防止恶意输入
-    if err := validateSearchKeyword(keyword); err != nil {
-        return nil, fmt.Errorf("invalid search keyword: %w", err)
-    }
-    
-    // 使用LIKE查询时的安全处理
-    query := "SELECT id, username, email FROM users WHERE username LIKE ? ESCAPE '\\' LIMIT 100"
-    safeKeyword := escapeLikePattern(keyword)
-    
-    rows, err := ur.db.Query(query, "%"+safeKeyword+"%")
-    if err != nil {
-        return nil, fmt.Errorf("failed to search users: %w", err)
-    }
-    defer rows.Close()
-    
-    var users []*User
-    for rows.Next() {
-        var user User
-        if err := rows.Scan(&user.ID, &user.Username, &user.Email); err != nil {
-            return nil, fmt.Errorf("failed to scan user: %w", err)
-        }
-        users = append(users, &user)
-    }
-    
-    return users, nil
-}
+func main() {
+	password := "my-s3cr3t-p@ssw0rd"
+	hash, _ := HashPassword(password)
 
-// 输入验证函数
-func validateSearchKeyword(keyword string) error {
-    if len(keyword) == 0 {
-        return fmt.Errorf("keyword cannot be empty")
-    }
-    
-    if len(keyword) > 50 {
-        return fmt.Errorf("keyword too long")
-    }
-    
-    // 检查是否包含可疑字符
-    suspiciousPatterns := []string{
-        "--", "/*", "*/", "xp_", "sp_", "UNION", "SELECT", "INSERT", "UPDATE", "DELETE",
-    }
-    
-    upperKeyword := strings.ToUpper(keyword)
-    for _, pattern := range suspiciousPatterns {
-        if strings.Contains(upperKeyword, pattern) {
-            return fmt.Errorf("keyword contains suspicious pattern: %s", pattern)
-        }
-    }
-    
-    return nil
-}
+	fmt.Println("Password:", password)
+	fmt.Println("BCrypt Hash:", hash)
 
-// LIKE模式转义
-func escapeLikePattern(pattern string) string {
-    // 转义LIKE特殊字符
-    pattern = strings.ReplaceAll(pattern, "\\", "\\\\")
-    pattern = strings.ReplaceAll(pattern, "%", "\\%")
-    pattern = strings.ReplaceAll(pattern, "_", "\\_")
-    return pattern
-}
-
-// 白名单验证（用于表名、列名等不能参数化的场景）
-func validateTableName(tableName string) error {
-    // 只允许字母、数字和下划线
-    validTableName := regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9_]*$`)
-    if !validTableName.MatchString(tableName) {
-        return fmt.Errorf("invalid table name")
-    }
-    
-    // 白名单检查
-    allowedTables := map[string]bool{
-        "users": true, "orders": true, "products": true,
-    }
-    
-    if !allowedTables[tableName] {
-        return fmt.Errorf("table not allowed: %s", tableName)
-    }
-    
-    return nil
+	match := CheckPasswordHash(password, hash)
+	fmt.Println("Match:", match)
+	
+	wrongMatch := CheckPasswordHash("wrong-password", hash)
+	fmt.Println("Wrong Match:", wrongMatch)
 }
 ```
-:::
-
-### XSS防护与内容安全
-
-::: details 输出编码和内容安全策略
-```go
-package security
-
-import (
-    "html"
-    "html/template"
-    "net/url"
-    "regexp"
-    "strings"
-)
-
-// HTML输出编码
-type SafeRenderer struct {
-    templates *template.Template
-}
-
-func NewSafeRenderer() *SafeRenderer {
-    // 创建带有安全函数的模板
-    funcMap := template.FuncMap{
-        "safeHTML": func(s string) template.HTML {
-            // 只有明确标记为安全的内容才使用此函数
-            return template.HTML(sanitizeHTML(s))
-        },
-        "safeURL": func(s string) template.URL {
-            return template.URL(sanitizeURL(s))
-        },
-        "safeJS": func(s string) template.JS {
-            return template.JS(sanitizeJS(s))
-        },
-    }
-    
-    tmpl := template.New("").Funcs(funcMap)
-    
-    return &SafeRenderer{templates: tmpl}
-}
-
-// HTML内容净化
-func sanitizeHTML(input string) string {
-    // 简单的HTML标签白名单
-    allowedTags := map[string]bool{
-        "p": true, "br": true, "strong": true, "em": true,
-    }
-    
-    // 移除所有不在白名单中的标签
-    tagRegex := regexp.MustCompile(`</?([a-zA-Z]+)[^>]*>`)
-    return tagRegex.ReplaceAllStringFunc(input, func(tag string) string {
-        tagNameRegex := regexp.MustCompile(`</?([a-zA-Z]+)`)
-        matches := tagNameRegex.FindStringSubmatch(tag)
-        if len(matches) > 1 && allowedTags[strings.ToLower(matches[1])] {
-            return tag
-        }
-        return "" // 移除不允许的标签
-    })
-}
-
-// URL净化
-func sanitizeURL(input string) string {
-    // 只允许HTTP和HTTPS协议
-    u, err := url.Parse(input)
-    if err != nil {
-        return ""
-    }
-    
-    if u.Scheme != "http" && u.Scheme != "https" && u.Scheme != "" {
-        return ""
-    }
-    
-    return u.String()
-}
-
-// JavaScript净化（基础版）
-func sanitizeJS(input string) string {
-    // 移除潜在危险的JavaScript代码
-    dangerousPatterns := []string{
-        "eval(", "Function(", "setTimeout(", "setInterval(",
-        "document.cookie", "document.write", "innerHTML",
-    }
-    
-    for _, pattern := range dangerousPatterns {
-        input = strings.ReplaceAll(input, pattern, "")
-    }
-    
-    return input
-}
-
-// 内容安全策略(CSP)中间件
-func CSPMiddleware() func(http.Handler) http.Handler {
-    return func(next http.Handler) http.Handler {
-        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            // 设置严格的CSP策略
-            csp := strings.Join([]string{
-                "default-src 'self'",
-                "script-src 'self' 'unsafe-inline'", // 生产环境应避免unsafe-inline
-                "style-src 'self' 'unsafe-inline'",
-                "img-src 'self' data: https:",
-                "font-src 'self'",
-                "connect-src 'self'",
-                "media-src 'none'",
-                "object-src 'none'",
-                "child-src 'none'",
-                "frame-ancestors 'none'",
-                "base-uri 'self'",
-                "form-action 'self'",
-            }, "; ")
-            
-            w.Header().Set("Content-Security-Policy", csp)
-            
-            // 其他安全头
-            w.Header().Set("X-Content-Type-Options", "nosniff")
-            w.Header().Set("X-Frame-Options", "DENY")
-            w.Header().Set("X-XSS-Protection", "1; mode=block")
-            w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-            
-            next.ServeHTTP(w, r)
-        })
-    }
-}
-
-// API输入验证
-type InputValidator struct {
-    maxFieldLength int
-    allowedFields  map[string]bool
-}
-
-func NewInputValidator() *InputValidator {
-    return &InputValidator{
-        maxFieldLength: 1000,
-        allowedFields: map[string]bool{
-            "username": true, "email": true, "password": true,
-        },
-    }
-}
-
-func (iv *InputValidator) ValidateUserInput(input map[string]string) error {
-    for field, value := range input {
-        // 检查字段是否允许
-        if !iv.allowedFields[field] {
-            return fmt.Errorf("field not allowed: %s", field)
-        }
-        
-        // 检查长度
-        if len(value) > iv.maxFieldLength {
-            return fmt.Errorf("field %s too long", field)
-        }
-        
-        // 字段特定验证
-        if err := iv.validateField(field, value); err != nil {
-            return fmt.Errorf("validation failed for %s: %w", field, err)
-        }
-    }
-    
-    return nil
-}
-
-func (iv *InputValidator) validateField(field, value string) error {
-    switch field {
-    case "email":
-        emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-        if !emailRegex.MatchString(value) {
-            return fmt.Errorf("invalid email format")
-        }
-    case "username":
-        usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9_]{3,20}$`)
-        if !usernameRegex.MatchString(value) {
-            return fmt.Errorf("invalid username format")
-        }
-    }
-    
-    return nil
-}
-```
+**核心原则**：存储密码时，只存储其`bcrypt`哈希值。用户登录时，将输入的密码与存储的哈希值进行比较。
 :::
 
 ---
 
-## 📋 安全合规检查清单
+### 威胁三：访问控制损坏
 
-### OWASP Top 10 防护状况
+确保用户只能访问他们被授权的资源。例如，普通用户不应能访问管理员面板，用户A不应能查看用户B的私密信息。
 
-✅ **A01 - 权限控制失效**：
-- [ ] 实现基于角色的访问控制(RBAC)
-- [ ] 验证用户权限在每个请求
-- [ ] 最小权限原则
-- [ ] 定期审计权限分配
+#### 防御策略：使用中间件进行角色验证
 
-✅ **A02 - 加密机制失效**：
-- [ ] 使用强加密算法(AES-256, RSA-2048+)
-- [ ] 实现正确的密钥管理
-- [ ] 敏感数据传输加密(TLS 1.3)
-- [ ] 密码使用bcrypt或scrypt哈希
+在Web框架（如Gin, Echo或标准库`net/http`）中，中间件是实现访问控制的理想场所。
 
-✅ **A03 - 注入攻击**：
-- [ ] 使用参数化查询
-- [ ] 输入验证和净化
-- [ ] 使用ORM框架
-- [ ] 定期代码审计
-
-✅ **A04 - 不安全设计**：
-- [ ] 实施威胁建模
-- [ ] 安全架构评审
-- [ ] 纵深防御策略
-- [ ] 安全测试集成到CI/CD
-
-### 安全监控指标
-
-```yaml
-安全监控指标:
-  认证失败率: < 5%
-  异常登录地理位置: 监控并告警
-  权限提升尝试: 零容忍
-  SQL注入尝试: 自动阻止
-  XSS攻击尝试: 自动阻止
-  暴力破解: 自动限流
-  
-日志记录要求:
-  认证事件: 必须记录
-  授权决策: 必须记录
-  敏感操作: 必须记录
-  错误信息: 脱敏记录
-```
-
-### 应急响应流程
-
-::: details 安全事件响应
+::: details 代码示例
 ```go
-// 安全事件响应
-type SecurityIncident struct {
-    ID          string
-    Type        string    // 事件类型
-    Severity    string    // 严重程度
-    UserID      string    // 涉及用户
-    Description string    // 事件描述
-    Timestamp   time.Time
-    Status      string    // 处理状态
+package main
+
+import (
+	"fmt"
+	"net/http"
+)
+
+// 模拟一个从会话或Token中获取用户角色的函数
+func GetUserRole(r *http.Request) string {
+	// 在真实应用中，你会从JWT、session cookie或数据库中解析出用户角色
+	// 为了演示，我们从header中获取
+	role := r.Header.Get("X-User-Role")
+	if role == "" {
+		return "guest"
+	}
+	return role
 }
 
-func (si *SecurityIncident) HandleDataBreach() {
-    // 1. 立即隔离受影响系统
-    si.isolateAffectedSystems()
-    
-    // 2. 通知安全团队
-    si.notifySecurityTeam()
-    
-    // 3. 收集证据
-    si.collectEvidence()
-    
-    // 4. 通知受影响用户（72小时内）
-    si.notifyAffectedUsers()
-    
-    // 5. 监管报告（GDPR等要求）
-    si.reportToRegulators()
+// RoleAuthMiddleware 创建一个只允许特定角色访问的中间件
+func RoleAuthMiddleware(requiredRole string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			userRole := GetUserRole(r)
+			if userRole != requiredRole {
+				http.Error(w, "Forbidden: insufficient permissions", http.StatusForbidden)
+				return // 关键：提前终止请求处理
+			}
+			// 权限验证通过，继续处理请求
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func AdminPanelHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Welcome to the Admin Panel!")
+}
+
+func main() {
+	adminOnlyHandler := RoleAuthMiddleware("admin")(http.HandlerFunc(AdminPanelHandler))
+
+	http.Handle("/admin", adminOnlyHandler)
+	
+	// 使用方法:
+	// curl -H "X-User-Role: admin" http://localhost:8080/admin -> Welcome...
+	// curl http://localhost:8080/admin -> Forbidden...
+	http.ListenAndServe(":8080", nil)
 }
 ```
+> **进阶**：对于更复杂的授权逻辑（如RBAC, ABAC），可以考虑使用`casbin`等成熟的授权库。
 :::
 
-安全是一个持续的过程，而不是一次性的任务。定期进行安全评估、漏洞扫描和渗透测试，保持对新威胁的敏感度，是构建安全应用的关键。记住：**安全的成本总是小于数据泄露的代价**。
+---
+
+### 威胁四：跨站脚本 (XSS)
+
+当应用将未经验证的用户输入直接呈现在HTML中时，攻击者可以注入恶意的JavaScript脚本，窃取用户信息（如cookies）或执行非预期操作。
+
+#### 防御策略：使用`html/template`进行上下文感知转义
+
+Go的`html/template`标准库是防御XSS的强大武器。它不是简单地转义所有HTML标签，而是能理解HTML结构，并根据上下文（在HTML标签内、属性内、URL内等）进行正确的、安全的转义。
+
+::: details 代码示例
+```go
+package main
+
+import (
+	"html/template"
+	"net/http"
+)
+
+type PageData struct {
+	Title       string
+	UnsafeInput string // 包含潜在恶意脚本的用户输入
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	// 模板定义
+	const tmpl = `
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{.Title}}</title>
+	</head>
+	<body>
+		<h1>{{.Title}}</h1>
+		<p>用户评论：{{.UnsafeInput}}</p>
+	</body>
+</html>`
+
+	t, err := template.New("webpage").Parse(tmpl)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := PageData{
+		Title: "XSS Demo",
+		// 模拟恶意输入
+		UnsafeInput: `<script>alert('You have been hacked!');</script>`,
+	}
+
+	// 执行模板渲染。html/template会自动转义UnsafeInput
+	// 最终输出到HTML的将是 &lt;script&gt;alert(...)&lt;/script&gt;
+	err = t.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func main() {
+	http.HandleFunc("/", handler)
+	http.ListenAndServe(":8080", nil)
+}
+```
+**核心原则**：当需要向HTML页面插入动态内容时，**始终**使用`html/template`而不是`text/template`或简单的字符串拼接。
+:::
+
+---
+
+### 其他关键防御措施
+
+- **配置安全HTTP响应头**: 在中间件中添加`Content-Security-Policy`、`Strict-Transport-Security`和`X-Content-Type-Options: nosniff`等头部，可以极大地增强客户端安全。
+- **依赖项漏洞扫描**: 定期使用Go官方工具`govulncheck`来扫描你的项目依赖，及时发现并修复已知的安全漏洞。
+  ```bash
+  go install golang.org/x/vuln/cmd/govulncheck@latest
+  govulncheck ./...
+  ```
+
+---
+
+## 安全开发检查清单
+
+在部署你的Go应用前，请对照以下清单进行检查：
+
+- [ ] **数据库**：所有数据库查询都使用参数化了吗？
+- [ ] **密码**：用户密码是否使用`bcrypt`进行哈希处理？
+- [ ] **访问控制**：是否为需要授权的API端点配置了权限检查中间件？
+- [ ] **模板渲染**：所有面向用户的HTML页面是否都通过`html/template`进行渲染？
+- [ ] **依赖安全**：你是否运行过`govulncheck`并处理了其中的高危漏洞？
+- [ ] **HTTPS**：生产环境是否强制使用HTTPS？
+
+安全是一个持续的过程，将这些实践内化为开发习惯，将为你的Go应用打下坚实的基础。

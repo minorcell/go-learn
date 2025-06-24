@@ -59,13 +59,13 @@ export default defineConfig({
             // 学习模块侧边栏
             '/learn/': [
                 {
-                    text: '📚 学习模块',
+                    text: '学习模块',
                     items: [
                         { text: '学习首页', link: '/learn/' }
                     ]
                 },
                 {
-                    text: '🔰 基础语法',
+                    text: '基础语法',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/fundamentals/' },
@@ -78,7 +78,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🚀 进阶特性',
+                    text: '进阶特性',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/advanced/' },
@@ -90,7 +90,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '💡 核心概念',
+                    text: '核心概念',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/learn/concepts/' },
@@ -106,13 +106,13 @@ export default defineConfig({
             // 工程实践模块侧边栏
             '/practice/': [
                 {
-                    text: '⚡ 工程实践模块',
+                    text: '工程实践模块',
                     items: [
                         { text: '实践首页', link: '/practice/' }
                     ]
                 },
                 {
-                    text: '🛠️ 实战项目',
+                    text: '实战项目',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/projects/' },
@@ -124,7 +124,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🎨 设计模式',
+                    text: '设计模式',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/patterns/' },
@@ -136,7 +136,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🔧 工具链',
+                    text: '工具链',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/tools/' },
@@ -148,7 +148,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '🚀 部署运维',
+                    text: '部署运维',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/practice/deployment/' },
@@ -164,13 +164,13 @@ export default defineConfig({
             // 生态模块侧边栏
             '/ecosystem/': [
                 {
-                    text: '🌍 生态模块',
+                    text: '生态模块',
                     items: [
                         { text: '生态首页', link: '/ecosystem/' }
                     ]
                 },
                 {
-                    text: '🏗️ 框架生态',
+                    text: '框架生态',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/frameworks/' },
@@ -182,7 +182,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '📦 常用库',
+                    text: '常用库',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/libraries/' },
@@ -194,7 +194,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '👥 社区资源',
+                    text: '社区资源',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/community/' },
@@ -206,7 +206,7 @@ export default defineConfig({
                     ]
                 },
                 {
-                    text: '📈 技术趋势',
+                    text: '技术趋势',
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/trends/' },
