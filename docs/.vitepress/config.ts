@@ -5,7 +5,7 @@ export default defineConfig({
     description: '全栈式Go语言学习路径，从语言基础到工程实践，从生态认知到职业成长',
 
     lang: 'zh-CN',
-    base: '/',
+    base: '/go-learn/',
     cleanUrls: true,
 
     head: [
