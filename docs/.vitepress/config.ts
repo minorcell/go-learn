@@ -210,11 +210,11 @@ export default defineConfig({
                     collapsed: false,
                     items: [
                         { text: '概览', link: '/ecosystem/trends/' },
-                        { text: '版本演进', link: '/ecosystem/trends/version-history' },
-                        { text: '编译器优化', link: '/ecosystem/trends/compiler-improvements' },
-                        { text: '云原生趋势', link: '/ecosystem/trends/cloud-native' },
-                        { text: '新兴应用领域', link: '/ecosystem/trends/emerging-areas' },
-                        { text: '未来发展路线', link: '/ecosystem/trends/future-roadmap' }
+                        { text: 'Go与云原生', link: '/ecosystem/trends/cloud-native' },
+                        { text: '编译器与性能', link: '/ecosystem/trends/compiler-improvements' },
+                        { text: '版本历史与演进', link: '/ecosystem/trends/version-history' },
+                        { text: '泛型演进史', link: '/ecosystem/trends/generics-evolution' },
+                        { text: 'AI与Go', link: '/ecosystem/trends/ai-integration' }
                     ]
                 }
             ]
