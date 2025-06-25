@@ -41,7 +41,6 @@ layout: doc
   display: inline-block;
   margin-left: 8px;
   padding: 2px 8px;
-  border-radius: 4px;
   background-color: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
   font-size: 12px;
